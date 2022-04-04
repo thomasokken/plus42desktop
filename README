@@ -22,7 +22,7 @@ Building on Raspbian 10
 
 # apt install libgtk-3-dev
 # apt install libasound2-dev
-$ git clone https://github.com/thomasokken/plus42.git
+$ git clone https://github.com/thomasokken/plus42desktop.git
 $ cd plus42/gtk
 $ make BCD_MATH=1 AUDIO_ALSA=1
 
