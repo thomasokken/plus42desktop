@@ -1,0 +1,37 @@
+#!/bin/sh -e
+
+PKGNAME=Plus42`uname -s`
+
+if [ -f /usr/include/alsa/asoundlib.h ]; then
+  ALSA='AUDIO_ALSA=1'
+else
+  ALSA=
+fi
+
+if [ -z $MK ]; then
+  if which gmake > /dev/null; then
+    MK=gmake
+  else
+    MK=make
+  fi
+fi
+export MK
+
+unset BCD_MATH
+cd gtk
+$MK cleaner
+$MK $ALSA
+$MK clean
+$MK BCD_MATH=1 $ALSA
+cd ..
+
+rm -rf $PKGNAME
+mkdir $PKGNAME
+cp gtk/README $PKGNAME
+cp gtk/plus42bin $PKGNAME
+cp gtk/plus42dec $PKGNAME
+strip $PKGNAME/plus42bin
+strip $PKGNAME/plus42dec
+mkdir -p packages
+tar cvfz packages/$PKGNAME.tgz $PKGNAME
+rm -rf $PKGNAME

@@ -1,0 +1,10 @@
+#!/bin/sh -e
+
+# "Upstream" source package for Linux.
+# It has all non-applicable versions removed.
+
+mkdir -p packages
+
+cd upstream
+sh ./build-upstream
+cd ..

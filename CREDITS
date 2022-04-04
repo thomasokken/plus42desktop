@@ -1,0 +1,34 @@
+Free42 is (C) 2004-2022 by Thomas Okken, except:
+
+Decimal math: Intel Decimal Floating-Point Math Library 2.0u1.
+INTEG: Romberg integration implementation based on code by Hugh Steers.
+LU Decomposition and back-substitution code, and Ridders' root-refinement
+   algorithm, based on sample code from "Numerical Recipes in C".
+Skins designed by, or based on original work of: Erik Ehrling and
+   Sébastien Carlier.
+Lowercase letters in the menu font taken from the WP-34S manual by Walter Bonin
+   and Paul Dale.
+
+The iPhone version's embedded HTTP server uses Minizip 1.01h, a zlib-based zip
+creation and extraction package. Minizip is (C) by Gilles Vollant.
+
+Testing: Vini Matangrano, Dave Johnson, Walter Bonin, Andrés Rodriguez,
+   Jeff O., Miguel Toro, Les Wright, Werner Huysegoms, and many others.
+
+Free42 has benefited tremendously from, and probably wouldn't even exist today
+if it weren't for, these excellent pieces of Free Software: PRC-Tools by
+D. Jeff Dionne, with multi-segment debugging support by Ton van Overbeek; Peal
+by Greg Parker; Vim by Bram Moolenaar; DDD by Dorothea Lütkehaus and Andreas
+Zeller; NetPBM by Jef Poskanzer and others; gcc/g++ by Richard Stallman and
+others; gdb, binutils, and too many other fine tools to name, by the Free
+Software Foundation and its contributors; and the Linux kernel by Linus
+Torvalds and others.
+
+Many thanks to all concerned for the help and advice I received from many
+contributors to several Usenet newsgroups and various mailing lists.
+
+And of course, kudos to the inspiration for it all, the excellent HP-42S
+calculator by Hewlett-Packard.
+
+A big and continuing Thank You to all the many people whose names I did not
+record, who have sent me bug reports, words of encouragement, and donations.

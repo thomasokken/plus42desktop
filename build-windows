@@ -1,0 +1,18 @@
+#!/bin/sh -e
+
+# This script builds and packages the Windows version,
+# It should be run in a Cygwin bash shell (under MS Windows, obviously).
+
+mkdir -p packages
+
+cd windows
+sh ./build-intel-lib.sh
+cmd /c build-all.bat
+cd ..
+rm -rf Plus42Windows
+mkdir Plus42Windows
+cp windows/README.txt Plus42Windows
+cp windows/Plus42Binary.exe Plus42Windows
+cp windows/Plus42Decimal.exe Plus42Windows
+zip -r packages/Plus42Windows.zip Plus42Windows
+rm -rf Plus42Windows

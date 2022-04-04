@@ -1,0 +1,14 @@
+I keep all the common files in the 'common' directory. In order to build the
+Windows version, you must first create copies of these files in the 'windows'
+directory using the copy-files.bat script.
+
+Note: the Plus42 workspace contains four projects: Plus42Binary, Plus42Decimal,
+keymap2cpp, and skin2cpp. Before building Plus42Binary and Plus42Decimal, you
+must build keymap2cpp and skin2cpp and run them; this creates the keymap.cpp
+and skins.cpp files, which contain the default keymap and the skins to be
+compiled into the Plus42 executable.
+
+Starting with version 1.5.9, the Windows build of Plus42 builds the Intel
+Floating-Point library from source. Run build-intel-lib.sh to build the
+library; if successful, this will create a file named cl111libbid.lib,
+containing x86 objects.

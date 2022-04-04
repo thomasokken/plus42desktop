@@ -1,0 +1,17 @@
+#!/bin/sh
+rm -rf temp
+mkdir temp
+cd temp
+git clone --local ../.. plus42
+for i in `cat ../files/remove`
+do
+    rm -rf plus42/$i
+done
+( cd ../files/replace ; tar cf - . ) | ( cd plus42 ; tar xf - )
+rm -rf plus42/.git
+mkdir -p ../../packages
+PKGNAME=plus42-upstream-`cat ../../gtk/VERSION`
+mv plus42 $PKGNAME
+tar cvfz ../../packages/$PKGNAME.tgz $PKGNAME
+cd ..
+rm -rf temp
