@@ -1,0 +1,25 @@
+WHY IS THERE NO SOURCE CODE FOR THE ANDROID AND IOS VERSIONS HERE?
+ISN'T PLUS42 OPEN SOURCE?
+
+While I do want Plus42 to be open source, I am keeping the Android- and
+iOS-specific parts of the source code closed for now. I am planning to open
+those parts back up again eventually, probably a year after the first official
+release.
+
+I'm keeping the Android and iOS parts closed at first, in order to give my
+builds a chance to establish themselves, without competition from others who
+might take my source code, build executables, and sell them for less. One might
+hope that no one would want to do something like that, without even adding any
+value, but I've seen it happen before. So, bluntly put, I would like to reap
+the rewards, for the countless hours I've spent developing Plus42, without
+competition, for a while.
+
+Once I re-open the Android- and iOS-specific parts of the Plus42 source code,
+the 'plus42desktop' repository will be removed, and the 'plus42' repository,
+containing all versions, not to mention all revisions, all the way back to the
+fork from Free42, and the oldest Free42 commits from 2005, will be restored.
+
+Thank you for understanding!
+
+Thomas Okken
+April 4, 2022
