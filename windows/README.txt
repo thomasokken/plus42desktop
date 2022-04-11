@@ -151,9 +151,8 @@ mappings override any other mappings that may be defined for those keys.
 
 What's the deal with the "Decimal" and "Binary"?
 
-Starting with release 1.4, Plus42 comes in decimal and binary versions. The two
-look and behave identically; the only difference is the way they represent
-numbers internally.
+Plus42 comes in decimal and binary versions. The two look and behave
+identically; the only difference is the way they represent numbers internally.
 Plus42 Decimal uses the Intel Decimal Floating-Point Math Library;
 it uses IEEE-754-2008 quadruple precision decimal floating point, which
 consumes 16 bytes per number, and gives 34 decimal digits of precision, with
