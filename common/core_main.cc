@@ -1255,8 +1255,7 @@ int4 core_program_size(int prgm_index) {
     int cmd;
     arg_struct arg;
     pgm_index saved_prgm = current_prgm;
-    unsigned char code_flags, code_std_1, code_std_2;
-    //unsigned char code_name;
+    unsigned char code_flags, code_name, code_std_1, code_std_2;
     int4 size = 0;
 
     current_prgm.set(cwd->id, prgm_index);
@@ -1264,7 +1263,7 @@ int4 core_program_size(int prgm_index) {
         const char *orig_num;
         get_next_command(&pc, &cmd, &arg, 0, &orig_num);
         code_flags = (cmd_array[cmd].flags & (FLAG_SPECIAL | FLAG_ILLEGAL)) >> 5;
-        //code_name = cmd_array[cmd].scode;
+        code_name = cmd_array[cmd].scode;
         code_std_1 = cmd_array[cmd].code1;
         code_std_2 = cmd_array[cmd].code2;
         switch (code_flags) {
@@ -1370,6 +1369,8 @@ int4 core_program_size(int prgm_index) {
             normal:
                 if (arg.type == ARGTYPE_STR || arg.type == ARGTYPE_IND_STR) {
                     size += arg.length + 2;
+                    if ((code_name & 0x80) == 0)
+                        size += 1;
                 } else {
                     size += code_std_1 == 0 ? 1 : 2;
                     if (arg.type != ARGTYPE_NONE)
