@@ -1370,15 +1370,16 @@ int4 core_program_size(int prgm_index) {
                 if (arg.type == ARGTYPE_STR || arg.type == ARGTYPE_IND_STR) {
                     size += arg.length + 2;
                     if ((code_name & 0x80) == 0)
+                        /* Extra extension */
                         size += 1;
                 } else {
                     size += code_std_1 == 0 ? 1 : 2;
                     if (arg.type != ARGTYPE_NONE)
                         size += 1;
+                    if (code_std_1 == 0xf2 && (code_std_2 & 0x80) == 0)
+                        /* Extra extension */
+                        size += 1;
                 }
-                if (code_std_1 == 0xf2 && (code_std_2 & 0x80) == 0)
-                    /* Extra extension */
-                    size += 1;
                 break;
             case 2:
             default:
