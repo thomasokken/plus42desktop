@@ -4699,7 +4699,7 @@ Evaluator *Parser::parseThing() {
                 return new Item(tpos, t, ev1, ev2);
         } else {
             pushback(t2, t2pos);
-            if (t == "PI" || lex->compatMode && t == "\7")
+            if (t == "PI" || t == "\7")
                 return new RecallFunction(tpos, CMD_PI);
             else if (t == "RAN#")
                 return new RecallFunction(tpos, CMD_RAN);
