@@ -2381,7 +2381,7 @@ static int keydown_list(int key, bool shift, int *repeat) {
             } else {
                 vartype_equation *eq = (vartype_equation *) v;
                 equation_data *eqd = eq->data;
-                if (eqd->compatMode == (bool) flags.f.eqn_compat)
+                if (eqd->compatModeEmbedded || eqd->compatMode == (bool) flags.f.eqn_compat)
                     goto no_need_to_reparse;
                 text = eqd->text;
                 len = eqd->length;

@@ -99,11 +99,11 @@ class Parser {
     int context;
     std::vector<For *> forStack;
 
-    static Evaluator *parse2(std::string expr, bool *compatMode, int *errpos);
+    static Evaluator *parse2(std::string expr, bool *compatMode, bool *compatModeOverridden, int *errpos);
 
     public:
 
-    static Evaluator *parse(std::string expr, bool *compatMode, int *errpos);
+    static Evaluator *parse(std::string expr, bool *compatMode, bool *compatModeOverridden, int *errpos);
     static void generateCode(Evaluator *ev, prgm_struct *prgm, CodeMap *map);
 
     private:

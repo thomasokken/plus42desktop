@@ -3583,16 +3583,16 @@ class Lexer {
 #define CTX_BOOLEAN 2
 #define CTX_ARRAY 3
 
-/* static */ Evaluator *Parser::parse(std::string expr, bool *compatMode, int *errpos) {
+/* static */ Evaluator *Parser::parse(std::string expr, bool *compatMode, bool *compatModeOverridden, int *errpos) {
     try {
-        return parse2(expr, compatMode, errpos);
+        return parse2(expr, compatMode, compatModeOverridden, errpos);
     } catch (std::bad_alloc &) {
         *errpos = -1;
         return NULL;
     }
 }
 
-/* static */ Evaluator *Parser::parse2(std::string expr, bool *compatMode, int *errpos) {
+/* static */ Evaluator *Parser::parse2(std::string expr, bool *compatMode, bool *compatModeOverridden, int *errpos) {
     std::string t, t2, eqnName;
     std::vector<std::string> *paramNames = NULL;
     int tpos;
@@ -3666,6 +3666,7 @@ class Lexer {
         if (eqnName != "")
             ev = new NameTag(0, eqnName, paramNames, ev);
         *compatMode = lex->compatMode;
+        *compatModeOverridden = lex->compatModeOverridden;
         return ev;
     } else {
         // Trailing garbage

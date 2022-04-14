@@ -40,6 +40,7 @@ class equation_data {
     Evaluator *ev;
     CodeMap *map;
     bool compatMode;
+    bool compatModeEmbedded;
     int eqn_index;
 };
 
