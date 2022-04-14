@@ -209,7 +209,7 @@ vartype *new_equation(const char *text, int4 len, bool compat_mode, int *errpos)
         return NULL;
     }
     memcpy(eqd->text, text, len);
-    eqd->ev = Parser::parse(std::string(text, len), compat_mode, errpos);
+    eqd->ev = Parser::parse(std::string(text, len), &compat_mode, errpos);
     if (eqd->ev == NULL) {
         delete eqd;
         return NULL;

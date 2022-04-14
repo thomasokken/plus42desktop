@@ -1664,7 +1664,8 @@ bool unpersist_vartype(vartype **v) {
                 goto eq_fail;
             if (eqd->length > 0) {
                 int errpos;
-                eqd->ev = Parser::parse(std::string(eqd->text, eqd->length), eqd->compatMode, &errpos);
+                bool compatMode = eqd->compatMode;
+                eqd->ev = Parser::parse(std::string(eqd->text, eqd->length), &compatMode, &errpos);
                 if (eqd->ev == NULL) {
                     // Parse error while everything else looked OK; this is
                     // probably an equation that was valid at some point but

@@ -3346,10 +3346,22 @@ class Lexer {
     public:
 
     bool compatMode;
+    bool compatModeOverridden;
 
     Lexer(std::string text, bool compatMode) {
         this->text = text;
         this->compatMode = compatMode;
+        compatModeOverridden = false;
+        pos = 0;
+        prevpos = 0;
+
+        std::string t;
+        int tpos;
+        if (nextToken(&t, &tpos) && t == ":") {
+            checkCompatToken();
+            if (compatModeOverridden)
+                return;
+        }
         pos = 0;
         prevpos = 0;
     }
@@ -3357,6 +3369,22 @@ class Lexer {
     void reset() {
         pos = 0;
         prevpos = 0;
+    }
+
+    void checkCompatToken() {
+        int s_pos = pos, s_prevpos = prevpos;
+        std::string t;
+        int tpos;
+        if (nextToken(&t, &tpos) && (t == "STD" || t == "COMP")) {
+            bool cm = t == "COMP";
+            if (nextToken(&t, &tpos) && t == ":") {
+                compatMode = cm;
+                compatModeOverridden = true;
+                return;
+            }
+        }
+        pos = s_pos;
+        prevpos = s_prevpos;
     }
 
     int lpos() {
@@ -3555,7 +3583,7 @@ class Lexer {
 #define CTX_BOOLEAN 2
 #define CTX_ARRAY 3
 
-/* static */ Evaluator *Parser::parse(std::string expr, bool compatMode, int *errpos) {
+/* static */ Evaluator *Parser::parse(std::string expr, bool *compatMode, int *errpos) {
     try {
         return parse2(expr, compatMode, errpos);
     } catch (std::bad_alloc &) {
@@ -3564,13 +3592,17 @@ class Lexer {
     }
 }
 
-/* static */ Evaluator *Parser::parse2(std::string expr, bool compatMode, int *errpos) {
+/* static */ Evaluator *Parser::parse2(std::string expr, bool *compatMode, int *errpos) {
     std::string t, t2, eqnName;
-    std::vector<std::string> *paramNames = new std::vector<std::string>;
+    std::vector<std::string> *paramNames = NULL;
     int tpos;
 
     // Look for equation name
-    Lexer *lex = new Lexer(expr, compatMode);
+    Lexer *lex = new Lexer(expr, *compatMode);
+    if (lex->compatModeOverridden)
+        goto name_done;
+    lex->compatMode = true;
+    paramNames = new std::vector<std::string>;
     if (!lex->nextToken(&t, &tpos))
         goto no_name;
     if (!lex->isIdentifier(t))
@@ -3606,10 +3638,14 @@ class Lexer {
         delete paramNames;
         paramNames = NULL;
     }
+    lex->compatMode = *compatMode;
+    lex->checkCompatToken();
     eqnName = t;
     goto name_done;
+
     no_name:
     lex->reset();
+    lex->compatMode = *compatMode;
     delete paramNames;
     paramNames = NULL;
     name_done:
@@ -3629,6 +3665,7 @@ class Lexer {
         // Text consumed completely; this is the good scenario
         if (eqnName != "")
             ev = new NameTag(0, eqnName, paramNames, ev);
+        *compatMode = lex->compatMode;
         return ev;
     } else {
         // Trailing garbage
