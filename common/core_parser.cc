@@ -3651,7 +3651,7 @@ class Lexer {
     name_done:
 
     Parser pz(lex);
-    Evaluator *ev = pz.parseExpr(paramNames == NULL ? CTX_TOP : CTX_VALUE);
+    Evaluator *ev = pz.parseExpr(CTX_TOP);
     if (ev == NULL) {
         fail:
         *errpos = pz.lex->lpos();
