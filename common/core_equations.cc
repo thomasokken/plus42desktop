@@ -3287,7 +3287,10 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
             }
             case KEY_RDN: {
                 if (shift)
-                    insert_text("PI", 2);
+                    if (flags.f.eqn_compat)
+                        insert_text("PI", 2);
+                    else
+                        insert_text("\7", 1);
                 else
                     select_function_menu(EQMN_STACK);
                 break;

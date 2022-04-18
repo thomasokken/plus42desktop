@@ -210,7 +210,7 @@ const menu_spec menus[] = {
                         { MENU_NONE, 1, "\021" } } },
     { /* MENU_ALPHA_MATH2 */ MENU_ALPHA2, MENU_ALPHA_MATH1, MENU_ALPHA_MATH1,
                       { { MENU_NONE, 1, "\202" },
-                        { MENU_NONE, 1, " " },
+                        { MENU_NONE, 1, "\007" },
                         { MENU_NONE, 1, " " },
                         { MENU_NONE, 1, " " },
                         { MENU_NONE, 1, " " },
