@@ -184,7 +184,7 @@ static const char bigchars[133][5] =
         { 0x7f, 0x41, 0x22, 0x14, 0x08 }
     };
 
-static const char smallchars[425] =
+static const char smallchars[429] =
     {
         0x00, 0x00, 0x00,
         0x5c,
@@ -283,7 +283,7 @@ static const char smallchars[425] =
         0x78, 0x14, 0x7c, 0x54,
         0x38, 0x38, 0x38,
         0x70, 0x2c, 0x70,
-        0x58, 0x24, 0x54, 0x48,
+        0x7c, 0x7c, 0x38, 0x10,
         0x30, 0x48, 0x78,
         0x7c, 0x50, 0x70,
         0x30, 0x48, 0x48,
@@ -314,10 +314,11 @@ static const char smallchars[425] =
         0x18, 0x60, 0x18,
         0x58, 0x64, 0x04, 0x64, 0x58,
         0x7c, 0x44, 0x28, 0x10,
-        0x08, 0x78, 0x08
+        0x08, 0x78, 0x08,
+        0x20, 0x70, 0x20, 0x3c
     };
 
-static short smallchars_offset[130] =
+static short smallchars_offset[131] =
     {
           0,
           3,
@@ -448,7 +449,8 @@ static short smallchars_offset[130] =
         413,
         418,
         422,
-        425
+        425,
+        429
     };
 
 static unsigned char smallchars_map[135] =
@@ -466,7 +468,7 @@ static unsigned char smallchars_map[135] =
         /*  10 */  77,
         /*  11 */  78,
         /*  12 */  79,
-        /*  13 */   0,
+        /*  13 */ 129,
         /*  14 */  80,
         /*  15 */  81,
         /*  16 */  82,
