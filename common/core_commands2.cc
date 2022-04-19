@@ -482,38 +482,8 @@ int docmd_view(arg_struct *arg) {
     return view_helper(arg, 1);
 }
 
-static void aview_helper() {
-    int *line_start = (int *) malloc(disp_r * sizeof(int));
-    int *line_length = (int *) malloc(disp_r * sizeof(int));
-    freer f1(line_start);
-    freer f2(line_length);
-    int line = 0;
-    int i;
-    line_start[0] = 0;
-    for (i = 0; i < reg_alpha_length; i++) {
-        if (reg_alpha[i] == 10) {
-            if (line == disp_r - 1)
-                break;
-            line_length[line] = i - line_start[line];
-            line_start[++line] = i + 1;
-        } else if (i == line_start[line] + disp_c) {
-            if (line == disp_r - 1)
-                break;
-            line_length[line] = i - line_start[line];
-            line_start[++line] = i;
-        }
-    }
-    line_length[line] = i - line_start[line];
-    for (i = 0; i <= line; i++)
-        draw_message(i, reg_alpha + line_start[i], line_length[i], false);
-    if (program_running())
-        for (int i = line + 1; i < disp_r; i++)
-            clear_row(i);
-    flush_display();
-}
-
 int docmd_aview(arg_struct *arg) {
-    aview_helper();
+    alpha_view_helper(reg_alpha, reg_alpha_length);
     if (flags.f.printer_enable || !program_running()) {
         if (flags.f.printer_exists)
             docmd_pra(arg);
@@ -551,7 +521,7 @@ int docmd_xeq(arg_struct *arg) {
 }
 
 int docmd_prompt(arg_struct *arg) {
-    aview_helper();
+    alpha_view_helper(reg_alpha, reg_alpha_length);
     if (flags.f.printer_enable && flags.f.printer_exists
             && (flags.f.trace_print || flags.f.normal_print))
         docmd_pra(arg);
@@ -1344,31 +1314,8 @@ int docmd_pra(arg_struct *arg) {
     // arg == NULL if we're called to do TRACE mode auto-print
     if (arg != NULL && !flags.f.printer_enable && program_running())
         return ERR_NONE;
-    if (!flags.f.printer_exists)
-        return ERR_PRINTING_IS_DISABLED;
-    shell_annunciators(-1, -1, 1, -1, -1, -1);
-    if (reg_alpha_length == 0)
-        print_text(NULL, 0, true);
-    else {
-        int line_start = 0;
-        int width = flags.f.double_wide_print ? 12 : 24;
-        int i;
-        for (i = 0; i < reg_alpha_length; i++) {
-            if (reg_alpha[i] == 10) {
-                print_text(reg_alpha + line_start, i - line_start, true);
-                line_start = i + 1;
-            } else if (i == line_start + width) {
-                print_text(reg_alpha + line_start, i - line_start, true);
-                line_start = i;
-            }
-        }
-        if (line_start < reg_alpha_length
-                || (line_start > 0 && reg_alpha[line_start - 1] == 10))
-            print_text(reg_alpha + line_start,
-                       reg_alpha_length - line_start, true);
-    }
-    shell_annunciators(-1, -1, 0, -1, -1, -1);
-    return ERR_NONE;
+    else
+        return alpha_print_helper(reg_alpha, reg_alpha_length);
 }
 
 int docmd_prx(arg_struct *arg) {

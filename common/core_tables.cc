@@ -63,7 +63,7 @@
 // XROM 31,00-63 (a7c0-a7ff) (Data Logger)
 
 // Retired XROMs: a7db (FUNC0), a7dc (FUNC1), a7dd (FUNC2), a7e0 (RTNERR), a7fa (CAPS), a7fb (Mixed)
-// Freed, can be used again: a719 a71b a71c a71d
+// Freed, can be used again: a71b a71c a71d
 
 const command_spec cmd_array[] =
 {
@@ -494,6 +494,7 @@ const command_spec cmd_array[] =
     { /* DUMMY */      NULL,              "",                    0x44, 0x00, 0x00, 0x00,  0, ARG_OTHER,  0, UNIM },
     { /* XASTO */      docmd_xasto,       "XASTO",               0x00, 0x01, 0xf2, 0x11,  5, ARG_VAR,    0, NA_T },
     { /* LXASTO */     docmd_lxasto,      "LXASTO",              0x00, 0x02, 0xf2, 0x12,  6, ARG_NAMED,  0, NA_T },
+    { /* XVIEW */      docmd_xview,       "XVIEW",               0x00, 0x00, 0xa7, 0x19,  5, ARG_NONE,   1, 0x10 },
     { /* APPEND */     docmd_append,      "APPEND",              0x00, 0x00, 0xa7, 0xe9,  6, ARG_NONE,   2, ALLT },
     { /* EXTEND */     docmd_extend,      "EXTEND",              0x00, 0x00, 0xa7, 0xea,  6, ARG_NONE,   2, ALLT },
     { /* SUBSTR */     docmd_substr,      "SUBSTR",              0x00, 0x00, 0xa7, 0xeb,  6, ARG_NONE,   2, FUNC },

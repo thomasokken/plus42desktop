@@ -1245,6 +1245,63 @@ void print_stack_trace() {
         docmd_prstk(NULL);
 }
 
+int alpha_print_helper(const char *text, int length) {
+    if (!flags.f.printer_exists)
+        return ERR_PRINTING_IS_DISABLED;
+    shell_annunciators(-1, -1, 1, -1, -1, -1);
+    if (length == 0)
+        print_text(NULL, 0, true);
+    else {
+        int line_start = 0;
+        int width = flags.f.double_wide_print ? 12 : 24;
+        int i;
+        for (i = 0; i < length; i++) {
+            if (text[i] == 10) {
+                print_text(text + line_start, i - line_start, true);
+                line_start = i + 1;
+            } else if (i == line_start + width) {
+                print_text(text + line_start, i - line_start, true);
+                line_start = i;
+            }
+        }
+        if (line_start < length
+                || (line_start > 0 && text[line_start - 1] == 10))
+            print_text(text + line_start, length - line_start, true);
+    }
+    shell_annunciators(-1, -1, 0, -1, -1, -1);
+    return ERR_NONE;
+}
+
+void alpha_view_helper(const char *text, int length) {
+    int *line_start = (int *) malloc(disp_r * sizeof(int));
+    int *line_length = (int *) malloc(disp_r * sizeof(int));
+    freer f1(line_start);
+    freer f2(line_length);
+    int line = 0;
+    int i;
+    line_start[0] = 0;
+    for (i = 0; i < length; i++) {
+        if (text[i] == 10) {
+            if (line == disp_r - 1)
+                break;
+            line_length[line] = i - line_start[line];
+            line_start[++line] = i + 1;
+        } else if (i == line_start[line] + disp_c) {
+            if (line == disp_r - 1)
+                break;
+            line_length[line] = i - line_start[line];
+            line_start[++line] = i;
+        }
+    }
+    line_length[line] = i - line_start[line];
+    for (i = 0; i <= line; i++)
+        draw_message(i, text + line_start[i], line_length[i], false);
+    if (program_running())
+        for (int i = line + 1; i < disp_r; i++)
+            clear_row(i);
+    flush_display();
+}
+
 void generic_r2p(phloat re, phloat im, phloat *r, phloat *phi) {
     if (im == 0) {
         if (re >= 0) {

@@ -87,6 +87,8 @@ void print_wide(const char *left, int leftlen,
 void print_command(int cmd, const arg_struct *arg);
 void print_trace();
 void print_stack_trace();
+int alpha_print_helper(const char *text, int length);
+void alpha_view_helper(const char *text, int length);
 
 void generic_r2p(phloat re, phloat im, phloat *r, phloat *phi);
 void generic_p2r(phloat r, phloat phi, phloat *re, phloat *im);

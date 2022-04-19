@@ -1530,6 +1530,17 @@ int docmd_xstr(arg_struct *arg) {
     return recall_result(v);
 }
 
+int docmd_xview(arg_struct *arg) {
+    vartype_string *s = (vartype_string *) stack[sp];
+    alpha_view_helper(s->txt(), s->length);
+    if (!flags.f.printer_enable && program_running())
+        return ERR_NONE;
+    else if (flags.f.printer_exists)
+        return alpha_print_helper(s->txt(), s->length);
+    else
+        return ERR_STOP;
+}
+
 static int concat(bool extend) {
     if (stack[sp - 1]->type == TYPE_STRING) {
         char *text;
