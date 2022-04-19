@@ -184,7 +184,7 @@ static const char bigchars[133][5] =
         { 0x7f, 0x41, 0x22, 0x14, 0x08 }
     };
 
-static const char smallchars[429] =
+static const char smallchars[434] =
     {
         0x00, 0x00, 0x00,
         0x5c,
@@ -315,10 +315,11 @@ static const char smallchars[429] =
         0x58, 0x64, 0x04, 0x64, 0x58,
         0x7c, 0x44, 0x28, 0x10,
         0x08, 0x78, 0x08,
-        0x20, 0x70, 0x20, 0x3c
+        0x20, 0x70, 0x20, 0x3c,
+        0x7c, 0x54, 0x00, 0x78, 0x48,
     };
 
-static short smallchars_offset[131] =
+static short smallchars_offset[132] =
     {
           0,
           3,
@@ -450,7 +451,8 @@ static short smallchars_offset[131] =
         418,
         422,
         425,
-        429
+        429,
+        434,
     };
 
 static unsigned char smallchars_map[135] =
@@ -482,7 +484,7 @@ static unsigned char smallchars_map[135] =
         /*  24 */  37,
         /*  25 */  94,
         /*  26 */  86,
-        /*  27 */  69,
+        /*  27 */ 130,
         /*  28 */  89,
         /*  29 */  90,
         /*  30 */  62,
@@ -589,7 +591,7 @@ static unsigned char smallchars_map[135] =
         /* 131 */ 128,
         /* 132 */  69,
         /* 133 */  74,
-        /* 134 */ 127
+        /* 134 */ 127,
     };
 
 #if defined(WINDOWS) && !defined(__GNUC__)
