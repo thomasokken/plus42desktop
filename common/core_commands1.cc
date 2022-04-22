@@ -1126,20 +1126,16 @@ static phloat rnd_multiplier;
 static phloat rnd_h;
 
 static int mappable_rnd_r(phloat x, phloat *y) {
-    if (flags.f.fix_or_all) {
-        if (flags.f.eng_or_all)
+    if (flags.f.fix_or_all && !flags.f.eng_or_all) {
+        phloat t = x;
+        int neg = t < 0;
+        if (neg)
+            t = -t;
+        if (t >= ALWAYS_INT_FROM)
             *y = x;
         else {
-            phloat t = x;
-            int neg = t < 0;
-            if (neg)
-                t = -t;
-            if (t >= ALWAYS_INT_FROM)
-                *y = x;
-            else {
-                t = floor(t * rnd_multiplier + rnd_h) / rnd_multiplier;
-                *y = neg ? -t : t;
-            }
+            t = floor(t * rnd_multiplier + rnd_h) / rnd_multiplier;
+            *y = neg ? -t : t;
         }
         return ERR_NONE;
     } else {
@@ -1198,11 +1194,16 @@ int round_easy(phloat x, phloat *y) {
 static bool rnd_helper(arg_struct *arg, bool trunc) {
     vartype *v;
     int err;
-    int digits = 0;
-    if (flags.f.digits_bit3) digits += 8;
-    if (flags.f.digits_bit2) digits += 4;
-    if (flags.f.digits_bit1) digits += 2;
-    if (flags.f.digits_bit0) digits += 1;
+    int digits;
+    if (flags.f.fix_or_all && flags.f.eng_or_all) {
+        digits = 11;
+    } else {
+        digits = 0;
+        if (flags.f.digits_bit3) digits += 8;
+        if (flags.f.digits_bit2) digits += 4;
+        if (flags.f.digits_bit1) digits += 2;
+        if (flags.f.digits_bit0) digits += 1;
+    }
     rnd_multiplier = pow(10.0, digits);
     rnd_h = trunc ? 0.0 : 0.5;
     err = map_unary(stack[sp], &v, mappable_rnd_r, mappable_rnd_c, true);
