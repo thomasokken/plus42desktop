@@ -441,6 +441,7 @@ const command_spec cmd_array[] =
     { /* BRESET */     docmd_breset,      "BR\305S\305T",        0x00, 0x00, 0xa7, 0xd8,  6, ARG_NONE,   0, NA_T },
     { /* GETKEY1 */    docmd_getkey1,     "G\305TK\305\3311",    0x00, 0x00, 0xa7, 0xd9,  7, ARG_NONE,   0, NA_T },
     { /* LASTO */      docmd_lasto,       "LASTO",               0x00, 0xf5, 0xf2, 0xc8,  5, ARG_NAMED,  0, NA_T },
+    { /* LCLV */       docmd_lclv,        "LCLV",                0x00, 0x71, 0xf2, 0x63,  4, ARG_NAMED,  0, NA_T },
 
     /* Useful X-Fcn functions missing from the 42S */
     { /* ANUM */       docmd_anum,        "ANUM",                0x00, 0x00, 0xa6, 0x42,  4, ARG_NONE,   0, NA_T },
@@ -487,11 +488,11 @@ const command_spec cmd_array[] =
     { /* SKIP */       docmd_skip,        "SKIP",                0x00, 0x00, 0xa2, 0x74,  4, ARG_NONE,   0, NA_T },
     { /* CPXMAT_T */   docmd_cpxmat_t,    "C\320\330M\301T?",    0x00, 0x00, 0xa2, 0x75,  7, ARG_NONE,   1, ALLT },
     { /* TYPE_T */     docmd_type_t,      "TYP\305?",            0x00, 0x00, 0xa2, 0x76,  5, ARG_NONE,   1, ALLT },
+    /* (Skipping 403 because of single-byte equality checks with CMD_END) */
+    { /* DUMMY */      NULL,              "",                    0x44, 0x00, 0x00, 0x00,  0, ARG_OTHER,  0, UNIM },
 
     /* String & List Functions */
     { /* XSTR */       docmd_xstr,        "XSTR",                0x20, 0x41, 0x00, 0x00,  4, ARG_XSTR,   0, NA_T },
-    /* (Skipping 403 because of single-byte equality checks with CMD_END) */
-    { /* DUMMY */      NULL,              "",                    0x44, 0x00, 0x00, 0x00,  0, ARG_OTHER,  0, UNIM },
     { /* XASTO */      docmd_xasto,       "XASTO",               0x00, 0x01, 0xf2, 0x11,  5, ARG_VAR,    0, NA_T },
     { /* LXASTO */     docmd_lxasto,      "LXASTO",              0x00, 0x02, 0xf2, 0x12,  6, ARG_NAMED,  0, NA_T },
     { /* XVIEW */      docmd_xview,       "XVIEW",               0x00, 0x00, 0xa7, 0x19,  5, ARG_NONE,   1, 0x10 },

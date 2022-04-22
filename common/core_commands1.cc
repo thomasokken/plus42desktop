@@ -714,7 +714,7 @@ int docmd_clp(arg_struct *arg) {
     return clear_prgm(arg);
 }
 
-int docmd_clv(arg_struct *arg) {
+static int clv_helper(arg_struct *arg, bool global) {
     int err;
     if (arg->type == ARGTYPE_IND_NUM
             || arg->type == ARGTYPE_IND_STK
@@ -725,11 +725,18 @@ int docmd_clv(arg_struct *arg) {
     }
     if (arg->type != ARGTYPE_STR)
         return ERR_INVALID_TYPE;
-    if (!purge_var(arg->val.text, arg->length))
-        /* Matrix used by EDITN */
+    if (!purge_var(arg->val.text, arg->length, false, global, !global))
         return ERR_RESTRICTED_OPERATION;
     remove_shadow(arg->val.text, arg->length);
     return ERR_NONE;
+}
+
+int docmd_clv(arg_struct *arg) {
+    return clv_helper(arg, true);
+}
+
+int docmd_lclv(arg_struct *arg) {
+    return clv_helper(arg, false);
 }
 
 int docmd_clst(arg_struct *arg) {

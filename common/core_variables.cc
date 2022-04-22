@@ -970,17 +970,26 @@ int store_root_var(const char *name, int namelength, vartype *value) {
     }
 }
 
-bool purge_var(const char *name, int namelength, bool force) {
+bool purge_var(const char *name, int namelength, bool force, bool global, bool local) {
     vloc varindex = lookup_var(name, namelength, false, !force);
     if (varindex.not_found())
         return true;
-    if (varindex.level() != -1) {
-        if (varindex.level() != get_rtn_level())
-            // Won't delete local var not created at this level
+    if (varindex.level() == -1) {
+        if (!global)
+            // Asked to delete a local, but found a global;
+            // not an error, but don't delete.
             return true;
-    } else {
         if (varindex.dir != cwd->id && !force)
             // Won't delete global var not in the current dir
+            return true;
+    } else {
+        if (!local)
+            // Asked to delete a global, but found a local;
+            // that's an error.
+            return false;
+        if (varindex.level() != get_rtn_level())
+            // Found a local at a lower level;
+            // not an error, but don't delete.
             return true;
     }
     if (matedit_mode == 3 && matedit_dir == varindex.dir

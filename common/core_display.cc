@@ -2498,10 +2498,10 @@ static int ext_base_cat[] = {
 };
 
 static int ext_prgm_cat[] = {
-    CMD_CPXMAT_T, CMD_ERRMSG,  CMD_ERRNO,   CMD_FUNC,   CMD_GETKEY1, CMD_LASTO,
-    CMD_LSTO,     CMD_NOP,     CMD_PGMMENU, CMD_PGMVAR, CMD_RTNERR,  CMD_RTNNO,
-    CMD_RTNYES,   CMD_SKIP,    CMD_SST_UP,  CMD_SST_RT, CMD_TYPE_T,  CMD_VARMNU1,
-    -2 /* 0? */,  -3 /* X? */, CMD_NULL,    CMD_NULL,   CMD_NULL,    CMD_NULL
+    CMD_CPXMAT_T, CMD_ERRMSG,  CMD_ERRNO,   CMD_FUNC,    CMD_GETKEY1, CMD_LSTO,
+    CMD_LASTO,    CMD_LCLV,    CMD_NOP,     CMD_PGMMENU, CMD_PGMVAR,  CMD_RTNERR,
+    CMD_RTNNO,    CMD_RTNYES,  CMD_SKIP,    CMD_SST_UP,  CMD_SST_RT,  CMD_TYPE_T,
+    CMD_VARMNU1,  -2 /* 0? */, -3 /* X? */, CMD_NULL,    CMD_NULL,    CMD_NULL
 };
 
 static int ext_str_cat[] = {
@@ -2607,6 +2607,7 @@ bool show_nonlocal_vars(int catsect) {
             && incomplete_command != CMD_HEAD
             && incomplete_command != CMD_X_SWAP
             && incomplete_command != CMD_CLV
+            && incomplete_command != CMD_LCLV
             && incomplete_command != CMD_INDEX
             && incomplete_command != CMD_EDITN
             && incomplete_command != CMD_DIM;

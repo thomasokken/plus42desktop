@@ -231,7 +231,7 @@ int store_params();
 bool ensure_var_space(int n);
 int store_var(const char *name, int namelength, vartype *value, bool local = false, bool global = false);
 int store_root_var(const char *name, int namelength, vartype *value);
-bool purge_var(const char *name, int namelength, bool force = false);
+bool purge_var(const char *name, int namelength, bool force = false, bool global = true, bool local = true);
 bool vars_exist(int section);
 bool named_eqns_exist();
 bool contains_strings(const vartype_realmatrix *rm);
