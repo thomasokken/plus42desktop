@@ -121,7 +121,7 @@ void shell_request_display_size(int rows, int cols);
  *
  * Callback to get the amount of free memory in bytes.
  */
-uint4 shell_get_mem();
+uint8 shell_get_mem();
 
 /* shell_low_battery()
  *

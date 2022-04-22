@@ -70,7 +70,7 @@ void core_cleanup();
  * accordingly, if needed.
  * The flags parameter is the value from the layout's Flags: line; it is
  * a combination of: 1 = swap FCN and DIRS; 2 = swap MEM and UNITS; and
- * 4 = replace TOP.FCN with HYP.
+ * 4 = replace TOP.FCN with TVM.
  */
 void core_repaint_display(int rows, int cols, int flags);
 

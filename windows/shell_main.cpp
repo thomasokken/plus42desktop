@@ -2247,14 +2247,10 @@ void shell_set_skin_mode(int mode) {
         InvalidateRect(hMainWnd, NULL, FALSE);
 }
 
-uint4 shell_get_mem() {
+uint8 shell_get_mem() {
     MEMORYSTATUS memstat;
     GlobalMemoryStatus(&memstat);
-#ifdef _WIN64
     return memstat.dwAvailPhys;
-#else
-    return memstat.dwAvailPhys > 0x0ffffffff ? (uint4)-1 : (uint4)memstat.dwAvailPhys;
-#endif
 }
 
 bool shell_low_battery() {
