@@ -582,7 +582,7 @@
 #define CMD_DIR_FCN     528
 #define CMD_UNITS       529
 #define CMD_UNIT_FCN    530
-#define CMD_PLOT_MENU   531
+#define CMD_PLOT_M      531
 #define CMD_TVM         532
 #define CMD_EQN         533
 #define CMD_EQN_FCN     534

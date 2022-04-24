@@ -633,7 +633,7 @@ const command_spec cmd_array[] =
     { /* DIR_FCN */    docmd_dir_fcn,     "DIR.FCN",             0x42, 0x00, 0x00, 0x00,  7, ARG_NONE,   0, NA_T },
     { /* UNITS */      docmd_units,       "UNITS",               0x42, 0x00, 0x00, 0x00,  5, ARG_NONE,   0, NA_T },
     { /* UNIT_FCN */   docmd_unit_fcn,    "UNIT.FCN",            0x42, 0x00, 0x00, 0x00,  8, ARG_NONE,   0, NA_T },
-    { /* PLOT_MENU */  docmd_plot_menu,   "PLOT.MENU",           0x42, 0x00, 0x00, 0x00,  9, ARG_NONE,   0, NA_T },
+    { /* PLOT_M */     docmd_plot_m,      "PLOT.M",              0x42, 0x00, 0x00, 0x00,  6, ARG_NONE,   0, NA_T },
     { /* TVM */        docmd_tvm,         "TVM",                 0x42, 0x00, 0x00, 0x00,  3, ARG_NONE,   0, NA_T },
     { /* EQN */        docmd_eqn,         "EQN",                 0x42, 0x00, 0x00, 0x00,  3, ARG_NONE,   0, NA_T },
     { /* EQN.FCN */    docmd_eqn_fcn,     "EQN.FCN",             0x42, 0x00, 0x00, 0x00,  7, ARG_NONE,   0, NA_T },

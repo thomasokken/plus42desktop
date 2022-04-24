@@ -21,7 +21,7 @@
 #include "free42.h"
 #include "core_globals.h"
 
-int docmd_plot_menu(arg_struct *arg);
+int docmd_plot_m(arg_struct *arg);
 int docmd_pgmplot(arg_struct *arg);
 int docmd_eqnplot(arg_struct *arg);
 int docmd_param(arg_struct *arg);

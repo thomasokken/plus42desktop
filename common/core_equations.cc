@@ -2652,7 +2652,7 @@ static int keydown_list(int key, bool shift, int *repeat) {
             redisplay();
             return 1;
         }
-        case 2048 + CMD_PLOT_MENU: {
+        case 2048 + CMD_PLOT_M: {
             /* GRAPH */
             if (selected_row == -1 || selected_row == num_eqns) {
                 no_graph:

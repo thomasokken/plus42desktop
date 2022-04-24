@@ -367,7 +367,7 @@ static int do_axes_menu(PlotData *data) {
     return ERR_NONE;
 }
 
-int docmd_plot_menu(arg_struct *arg) {
+int docmd_plot_m(arg_struct *arg) {
     set_menu(MENULEVEL_APP, MENU_GRAPH);
     if (!flags.f.prgm_mode)
         display_plot_params(-1);
