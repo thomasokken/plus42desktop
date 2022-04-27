@@ -1,13 +1,5 @@
-????-??-??: release 1.0
+2022-04-27: release 1.0
 
-* Based on Free42 3.0.9, with the addition of:
-* Equation functionality: The equation editor, accessible with the white [=]
-  soft key in the SOLVER, ∫f(x), and PGMMENU menus; the equation object type;
-  and PARSE and EVAL.
-  The equation editor and equation language were modeled after, and are
-  compatible with, the HP-17B/19B, 27S, and 35S calculators.
-* Attached Units: Units and unit conversions, modeled after the unit system
-  found on the HP-48/49/50 series calculators. The units are in the UNITS sub-
-  catalog in the first row of the CATALOG menu, and the unit-related functions
-  are in the UNIT (note: singular) sub-catalog in the fourth row of the CATALOG
-  menu.
+* Based on Free42 3.0.10, with the addition of: a larger and resizable display,
+  algebraic equations, attached units, directories, time value of money and
+  amortization schedules, and function plotting.
