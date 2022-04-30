@@ -1,11 +1,10 @@
-Free42 is (C) 2004-2022 by Thomas Okken, except:
+Plus42 is (C) 2004-2022 by Thomas Okken, except:
 
 Decimal math: Intel Decimal Floating-Point Math Library 2.0u1.
 INTEG: Romberg integration implementation based on code by Hugh Steers.
 LU Decomposition and back-substitution code, and Ridders' root-refinement
    algorithm, based on sample code from "Numerical Recipes in C".
-Skins designed by, or based on original work of: Erik Ehrling and
-   Sébastien Carlier.
+Plus42 skin based on work by Andrew Novinc and Tyge Løvset.
 Lowercase letters in the menu font taken from the WP-34S manual by Walter Bonin
    and Paul Dale.
 
