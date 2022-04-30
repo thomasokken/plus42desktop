@@ -598,6 +598,7 @@ int docmd_dim(arg_struct *arg) {
 
     vloc mi = lookup_var(arg->val.text, arg->length, false, true);
     if (mi.not_found()) {
+        make_new:
         vartype *m = new_realmatrix(to_int(y), to_int(x));
         if (m == NULL)
             return ERR_INSUFFICIENT_MEMORY;
@@ -606,6 +607,9 @@ int docmd_dim(arg_struct *arg) {
             free_vartype(m);
         return err;
     } else {
+        vartype *v = mi.value();
+        if (v->type != TYPE_REALMATRIX && v->type != TYPE_COMPLEXMATRIX)
+            goto make_new;
         bool reset_ij = false;
         if ((matedit_mode == 1 || matedit_mode == 3)
                 && matedit_dir == mi.dir
@@ -615,7 +619,7 @@ int docmd_dim(arg_struct *arg) {
             else
                 return ERR_RESTRICTED_OPERATION;
         }
-        err = dimension_array_ref(mi.value(), to_int(y), to_int(x));
+        err = dimension_array_ref(v, to_int(y), to_int(x));
         if (reset_ij && err == ERR_NONE)
             matedit_i = matedit_j = 0;
         return err;
