@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "shell_skin.h"
 #include "shell_main.h"
@@ -1085,7 +1086,7 @@ void skin_repaint_key(HDC hdc, HDC memdc, int key, int state) {
     }
 }
 
-void skin_display_blitter(HDC hdc, const char *bits, int bytesperline, int x, int y,
+void skin_display_blitter(HWND hWnd, const char *bits, int bytesperline, int x, int y,
                                      int width, int height) {
     /* In case we happen to get called at a moment when shell and core
      * are out of sync as to what size the display is...
@@ -1110,7 +1111,19 @@ void skin_display_blitter(HDC hdc, const char *bits, int bytesperline, int x, in
                 disp_bits[(v + 2) * disp_bytesperline + ((h + 2) >> 3)] &= ~(128 >> ((h + 2) & 7));
         }
     
-    skin_repaint_display(hdc);
+    RECT r;
+    SetRect(&r, (int) (display_loc.x + (x - 1) * display_scale_x),
+                (int) (display_loc.y + (y - 1) * display_scale_y),
+                (int) ceil(display_loc.x + (x + width + 1) * display_scale_x),
+                (int) ceil(display_loc.y + (y + height + 1) * display_scale_y));
+    InvalidateRect(hWnd, &r, FALSE);
+}
+
+bool need_to_paint_only_display(RECT *r) {
+    return r->left >= (int) (display_loc.x - display_scale_x)
+        && r->top >= (int) (display_loc.y - display_scale_y)
+        && r->right <= (int) ceil(display_loc.x + (disp_w + 1) * display_scale_x)
+        && r->bottom <= (int) ceil(display_loc.y + (disp_h + 1) * display_scale_y);
 }
 
 void skin_repaint_display(HDC hdc) {
@@ -1129,4 +1142,13 @@ void skin_repaint_display(HDC hdc) {
 
 void skin_display_set_enabled(bool enable) {
     display_enabled = enable;
+}
+
+void invalidate_display(HWND hWnd) {
+    RECT r;
+    SetRect(&r, (int) (display_loc.x - display_scale_x),
+                (int) (display_loc.y - display_scale_y),
+                (int) ceil(display_loc.x + (disp_w + 1) * display_scale_x),
+                (int) ceil(display_loc.y + (disp_h + 1) * display_scale_y));
+    InvalidateRect(hWnd, &r, FALSE);
 }
