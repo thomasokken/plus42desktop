@@ -2192,6 +2192,28 @@ class Newmat : public BinaryEvaluator {
     }
 };
 
+/////////////////
+/////  Not  /////
+/////////////////
+
+class Not : public UnaryEvaluator {
+
+    public:
+
+    Not(int pos, Evaluator *ev) : UnaryEvaluator(pos, ev, false) {}
+
+    Evaluator *clone(For *f) {
+        return new Not(tpos, ev->clone(f));
+    }
+
+    bool isBool() { return true; }
+
+    void generateCode(GeneratorContext *ctx) {
+        ev->generateCode(ctx);
+        ctx->addLine(tpos, CMD_GEN_NOT);
+    }
+};
+
 ////////////////
 /////  Or  /////
 ////////////////
@@ -3781,7 +3803,7 @@ Evaluator *Parser::parseNot() {
             delete ev;
             return NULL;
         } else {
-            return new UnaryFunction(tpos, ev, CMD_GEN_NOT);
+            return new Not(tpos, ev);
         }
     } else {
         pushback(t, tpos);
@@ -4251,7 +4273,8 @@ Evaluator *Parser::parseThing() {
                     || t == "INVRT" || t == "DET" || t == "TRANS"
                     || t == "UVEC" || t == "FNRM" || t == "RNRM"
                     || t == "RSUM" || t == "REAL?" || t == "CPX?"
-                    || t == "MAT?" || t == "LIST?"
+                    || t == "MAT?" || t == "LIST?" || t == "UNIT?"
+                    || t == "TYPE?"
                     || t == "FCSTX" || t == "FCSTY") {
                 min_args = max_args = 1;
                 mode = EXPR_LIST_EXPR;
@@ -4366,7 +4389,8 @@ Evaluator *Parser::parseThing() {
                     || t == "INVRT" || t == "DET" || t == "TRANS"
                     || t == "UVEC" || t == "FNRM" || t == "RNRM"
                     || t == "RSUM" || t == "REAL?" || t == "CPX?"
-                    || t == "MAT?" || t == "LIST?"
+                    || t == "MAT?" || t == "LIST?" || t == "UNIT?"
+                    || t == "TYPE?"
                     || t == "FCSTX" || t == "FCSTY") {
                 Evaluator *ev = (*evs)[0];
                 delete evs;
@@ -4472,6 +4496,10 @@ Evaluator *Parser::parseThing() {
                     return new TypeTest(tpos, ev, CMD_MAT_T);
                 else if (t == "LIST?")
                     return new TypeTest(tpos, ev, CMD_LIST_T);
+                else if (t == "UNIT?")
+                    return new TypeTest(tpos, ev, CMD_UNIT_T);
+                else if (t == "TYPE?")
+                    return new UnaryFunction(tpos, ev, CMD_TYPE_T);
                 else if (t == "FCSTX")
                     return new InvertibleUnaryFunction(tpos, ev, CMD_FCSTX, CMD_FCSTY);
                 else if (t == "FCSTY")

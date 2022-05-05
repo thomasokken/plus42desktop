@@ -190,13 +190,13 @@ const menu_spec eqn_menus[] = {
                         { 0x1000 + CMD_CPX_T,  0, "" },
                         { 0x1000 + CMD_MAT_T,  0, "" },
                         { 0x1000 + CMD_LIST_T, 0, "" },
-                        { 0x1000 + CMD_TIME,   0, "" },
-                        { 0x1000 + CMD_DATE,   0, "" } } },
+                        { 0x1000 + CMD_UNIT_T, 0, "" },
+                        { 0x1000 + CMD_TYPE_T, 0, "" } } },
     { /* EQMN_PGM_FCN4 */ MENU_NONE, EQMN_PGM_FCN1, EQMN_PGM_FCN3,
                       { { 0x0000 + CMD_SIGMAADD, 1, "\5" },
                         { 0x0000 + CMD_SIGMASUB, 1, "\3" },
-                        { 0x1000 + CMD_NULL,     0, "" },
-                        { 0x1000 + CMD_NULL,     0, "" },
+                        { 0x1000 + CMD_TIME,     0, "" },
+                        { 0x1000 + CMD_DATE,     0, "" },
                         { 0x1000 + CMD_NULL,     0, ""   },
                         { 0x1000 + CMD_NULL,     0, ""   } } },
     { /* EQMN_MATRIX1 */ MENU_NONE, EQMN_MATRIX2, EQMN_MATRIX2,
@@ -344,15 +344,16 @@ static short catalog[] = {
     CMD_RSUM,    EQCMD_SDEVX,  EQCMD_SDEVY,  CMD_SEED,     EQCMD_SEQ,      CMD_SIGN,
     CMD_SIN,     CMD_SINH,     EQCMD_SIZEC,  EQCMD_SIZES,  CMD_SLOPE,      CMD_SPFV,
     CMD_SPPV,    CMD_SQRT,     EQCMD_STACK,  CMD_TAN,      CMD_TANH,       CMD_TIME,
-    CMD_TRANS,   EQCMD_TRN,    EQCMD_NUM_T,  CMD_USFV,     CMD_USPV,       CMD_UVEC,
-    CMD_WMEAN,   EQCMD_XCOORD, CMD_XEQ,      CMD_XOR,      CMD_SQUARE,     EQCMD_YCOORD,
-    CMD_YINT,    CMD_Y_POW_X,  CMD_INV,      CMD_10_POW_X, CMD_SX,         CMD_SX2,
-    CMD_SY,      CMD_SY2,      CMD_SXY,      CMD_SN,       CMD_SLNX,       CMD_SLNX2,
-    CMD_SLNY,    CMD_SLNY2,    CMD_SLNXLNY,  CMD_SXLNY,    CMD_SYLNX,      CMD_TO_DEC,
-    CMD_TO_DEG,  CMD_TO_HMS,   CMD_TO_HR,    CMD_TO_OCT,   CMD_TO_RAD,     CMD_NULL
+    CMD_TRANS,   EQCMD_TRN,    CMD_TYPE_T,   EQCMD_NUM_T,  CMD_UNIT_T,     CMD_USFV,
+    CMD_USPV,    CMD_UVEC,     CMD_WMEAN,    EQCMD_XCOORD, CMD_XEQ,        CMD_XOR,
+    CMD_SQUARE,  EQCMD_YCOORD, CMD_YINT,     CMD_Y_POW_X,  CMD_INV,        CMD_10_POW_X,
+    CMD_SX,      CMD_SX2,      CMD_SY,       CMD_SY2,      CMD_SXY,        CMD_SN,
+    CMD_SLNX,    CMD_SLNX2,    CMD_SLNY,     CMD_SLNY2,    CMD_SLNXLNY,    CMD_SXLNY,
+    CMD_SYLNX,   CMD_TO_DEC,   CMD_TO_DEG,   CMD_TO_HMS,   CMD_TO_HR,      CMD_TO_OCT,
+    CMD_TO_RAD,  CMD_NULL,     CMD_NULL,     CMD_NULL,     CMD_NULL,       CMD_NULL
 };
 
-static int catalog_rows = 22;
+static int catalog_rows = 23;
 
 
 static void restart_cursor();

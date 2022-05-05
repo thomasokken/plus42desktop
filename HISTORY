@@ -1,3 +1,9 @@
+2022-05-05: release 1.0.1
+
+* DIM "X", when X existed but was not a matrix, would cause a crash. Fixed.
+* Equations: NOT was broken, not recognized as Boolean operator. Fixed.
+* Equations: Added TYPE? and UNIT? functions.
+
 2022-05-05: release 1.0a (Windows and Linux)
 
 * More efficient display updating, so long-running programs that update the
