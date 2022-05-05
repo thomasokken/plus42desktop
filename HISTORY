@@ -1,3 +1,11 @@
+2022-05-05: release 1.0a (Windows and Linux)
+
+* More efficient display updating, so long-running programs that update the
+  display a lot don't waste a lot of CPU time repainting the display faster
+  than the human eye can see, and spend more time actually running the program
+  instead. Note that this update is for Windows and Linux only, because the
+  Android, iOS, and MacOS versions already worked this way.
+
 2022-04-27: release 1.0
 
 * Based on Free42 3.0.11, with the addition of: a larger and resizable display,
