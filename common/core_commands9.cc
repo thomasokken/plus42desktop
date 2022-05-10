@@ -1133,16 +1133,13 @@ phloat tvm_n;
 phloat tvm_pv;
 phloat tvm_pmt;
 phloat tvm_fv;
-bool tvm_m;
+phloat tvm_m;
 
 static phloat tvm_eq(phloat i) {
-    phloat pmt = tvm_pmt;
-    if (tvm_m)
-        pmt *= 1 + i;
     if (i == 0)
-        return pmt + (tvm_pv + tvm_fv) / tvm_n;
+        return tvm_pmt + (tvm_pv + tvm_fv) / tvm_n;
     else
-        return pmt + ((tvm_pv + tvm_fv) / expm1(tvm_n * log1p(i)) + tvm_pv) * i;
+        return tvm_pmt + ((tvm_pv + tvm_fv) / expm1(tvm_n * log1p(i)) + tvm_m) * i;
 }
 
 static int do_i_pct_yr(phloat p_yr, phloat mode, phloat *res) {
@@ -1151,7 +1148,9 @@ static int do_i_pct_yr(phloat p_yr, phloat mode, phloat *res) {
         return err;
     if (tvm_n == 0)
         return ERR_INVALID_DATA;
-    tvm_m = mode == 1;
+    tvm_m = tvm_pv;
+    if (mode == 1)
+        tvm_m += tvm_pmt;
     phloat i = 0.0001; // Arbitrary starting guess...
     int count = 100;
     while (true) {
