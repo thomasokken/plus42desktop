@@ -4273,7 +4273,8 @@ Evaluator *Parser::parseThing() {
                     || t == "INVRT" || t == "DET" || t == "TRANS"
                     || t == "UVEC" || t == "FNRM" || t == "RNRM"
                     || t == "RSUM" || t == "REAL?" || t == "CPX?"
-                    || t == "MAT?" || t == "LIST?" || t == "UNIT?"
+                    || t == "MAT?" || t == "CPXMAT?" || t == "STR?"
+                    || t == "LIST?" || t == "EQN?" || t == "UNIT?"
                     || t == "TYPE?"
                     || t == "FCSTX" || t == "FCSTY") {
                 min_args = max_args = 1;
@@ -4389,7 +4390,8 @@ Evaluator *Parser::parseThing() {
                     || t == "INVRT" || t == "DET" || t == "TRANS"
                     || t == "UVEC" || t == "FNRM" || t == "RNRM"
                     || t == "RSUM" || t == "REAL?" || t == "CPX?"
-                    || t == "MAT?" || t == "LIST?" || t == "UNIT?"
+                    || t == "MAT?" || t == "CPXMAT?" || t == "STR?"
+                    || t == "LIST?" || t == "EQN?" || t == "UNIT?"
                     || t == "TYPE?"
                     || t == "FCSTX" || t == "FCSTY") {
                 Evaluator *ev = (*evs)[0];
@@ -4492,10 +4494,16 @@ Evaluator *Parser::parseThing() {
                     return new TypeTest(tpos, ev, CMD_REAL_T);
                 else if (t == "CPX?")
                     return new TypeTest(tpos, ev, CMD_CPX_T);
+                else if (t == "CPXMAT?")
+                    return new TypeTest(tpos, ev, CMD_CPXMAT_T);
+                else if (t == "STR?")
+                    return new TypeTest(tpos, ev, CMD_STR_T);
                 else if (t == "MAT?")
                     return new TypeTest(tpos, ev, CMD_MAT_T);
                 else if (t == "LIST?")
                     return new TypeTest(tpos, ev, CMD_LIST_T);
+                else if (t == "EQN?")
+                    return new TypeTest(tpos, ev, CMD_EQN_T);
                 else if (t == "UNIT?")
                     return new TypeTest(tpos, ev, CMD_UNIT_T);
                 else if (t == "TYPE?")

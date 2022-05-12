@@ -86,23 +86,24 @@ static int rep_key = -1;
 #define EQMN_PGM_FCN2   1001
 #define EQMN_PGM_FCN3   1002
 #define EQMN_PGM_FCN4   1003
-#define EQMN_MATRIX1    1004
-#define EQMN_MATRIX2    1005
-#define EQMN_BASE1      1006
-#define EQMN_BASE2      1007
-#define EQMN_CONVERT1   1008
-#define EQMN_CONVERT2   1009
-#define EQMN_CONVERT3   1010
-#define EQMN_CONVERT4   1011
-#define EQMN_EXTRA_FCN1 1012
-#define EQMN_EXTRA_FCN2 1013
-#define EQMN_STACK      1014
-#define EQMN_STAT1      1015
-#define EQMN_STAT2      1016
-#define EQMN_STAT3      1017
-#define EQMN_STAT4      1018
-#define EQMN_FIN1       1019
-#define EQMN_FIN2       1020
+#define EQMN_PGM_FCN5   1004
+#define EQMN_MATRIX1    1005
+#define EQMN_MATRIX2    1006
+#define EQMN_BASE1      1007
+#define EQMN_BASE2      1008
+#define EQMN_CONVERT1   1009
+#define EQMN_CONVERT2   1010
+#define EQMN_CONVERT3   1011
+#define EQMN_CONVERT4   1012
+#define EQMN_EXTRA_FCN1 1013
+#define EQMN_EXTRA_FCN2 1014
+#define EQMN_STACK      1015
+#define EQMN_STAT1      1016
+#define EQMN_STAT2      1017
+#define EQMN_STAT3      1018
+#define EQMN_STAT4      1019
+#define EQMN_FIN1       1020
+#define EQMN_FIN2       1021
 
 #define EQCMD_XCOORD   1000
 #define EQCMD_YCOORD   1001
@@ -171,7 +172,7 @@ const eqn_cmd_spec eqn_cmds[] = {
 };
 
 const menu_spec eqn_menus[] = {
-    { /* EQMN_PGM_FCN1 */ MENU_NONE, EQMN_PGM_FCN2, EQMN_PGM_FCN4,
+    { /* EQMN_PGM_FCN1 */ MENU_NONE, EQMN_PGM_FCN2, EQMN_PGM_FCN5,
                       { { 0x0000 + CMD_IF_T,       2, "IF" },
                         { 0x1000 + EQCMD_FOR,      0, ""   },
                         { 0x1000 + EQCMD_BREAK,    0, ""   },
@@ -186,19 +187,26 @@ const menu_spec eqn_menus[] = {
                         { 0x1000 + EQCMD_MAX,   0, ""      },
                         { 0x1000 + EQCMD_MIN,   0, ""      } } },
     { /* EQMN_PGM_FCN3 */ MENU_NONE, EQMN_PGM_FCN4, EQMN_PGM_FCN2,
-                      { { 0x1000 + CMD_REAL_T, 0, "" },
-                        { 0x1000 + CMD_CPX_T,  0, "" },
-                        { 0x1000 + CMD_MAT_T,  0, "" },
-                        { 0x1000 + CMD_LIST_T, 0, "" },
-                        { 0x1000 + CMD_UNIT_T, 0, "" },
-                        { 0x1000 + CMD_TYPE_T, 0, "" } } },
-    { /* EQMN_PGM_FCN4 */ MENU_NONE, EQMN_PGM_FCN1, EQMN_PGM_FCN3,
-                      { { 0x0000 + CMD_SIGMAADD, 1, "\5" },
+                      { { 0x1000 + CMD_REAL_T,   0, "" },
+                        { 0x1000 + CMD_CPX_T,    0, "" },
+                        { 0x1000 + CMD_MAT_T,    0, "" },
+                        { 0x1000 + CMD_CPXMAT_T, 0, "" },
+                        { 0x1000 + CMD_STR_T,    0, "" },
+                        { 0x1000 + CMD_LIST_T,   0, "" } } },
+    { /* EQMN_PGM_FCN4 */ MENU_NONE, EQMN_PGM_FCN5, EQMN_PGM_FCN3,
+                      { { 0x1000 + CMD_EQN_T,    0, "" },
+                        { 0x1000 + CMD_UNIT_T,   0, "" },
+                        { 0x1000 + CMD_TYPE_T,   0, "" },
+                        { 0x0000 + CMD_SIGMAADD, 1, "\5" },
                         { 0x0000 + CMD_SIGMASUB, 1, "\3" },
-                        { 0x1000 + CMD_TIME,     0, "" },
-                        { 0x1000 + CMD_DATE,     0, "" },
-                        { 0x1000 + CMD_NULL,     0, ""   },
-                        { 0x1000 + CMD_NULL,     0, ""   } } },
+                        { 0x1000 + CMD_TIME,     0, ""   } } },
+    { /* EQMN_PGM_FCN5 */ MENU_NONE, EQMN_PGM_FCN1, EQMN_PGM_FCN4,
+                      { { 0x1000 + CMD_DATE,     0, "" },
+                        { 0x1000 + CMD_NULL,     0, "" },
+                        { 0x1000 + CMD_NULL,     0, "" },
+                        { 0x1000 + CMD_NULL,     0, "" },
+                        { 0x1000 + CMD_NULL,     0, "" },
+                        { 0x1000 + CMD_NULL,     0, "" } } },
     { /* EQMN_MATRIX1 */ MENU_NONE, EQMN_MATRIX2, EQMN_MATRIX2,
                       { { 0x1000 + CMD_NEWMAT, 0, "" },
                         { 0x1000 + CMD_INVRT,  0, "" },
@@ -328,29 +336,29 @@ static const menu_spec *getmenu(int id) {
 }
 
 static short catalog[] = {
-    CMD_ABS,     CMD_ACOS,     CMD_ACOSH,    CMD_AND,      EQCMD_ANGLE,    CMD_ASIN,
-    CMD_ASINH,   CMD_ATAN,     CMD_ATANH,    CMD_BASEADD,  CMD_BASESUB,    CMD_BASEMUL,
-    CMD_BASEDIV, CMD_BASECHS,  EQCMD_BREAK,  CMD_COMB,     EQCMD_CONTINUE, CMD_CORR,
-    CMD_COS,     CMD_COSH,     CMD_CPX_T,    CMD_CROSS,    CMD_DATE,       CMD_DATE_PLUS,
-    CMD_DDAYS,   CMD_DET,      CMD_DOT,      CMD_EVALN,    CMD_E_POW_X,    CMD_E_POW_X_1,
-    CMD_FCSTX,   CMD_FCSTY,    EQCMD_FLOW,   CMD_FNRM,     EQCMD_FOR,      CMD_FP,
-    CMD_FV,      CMD_GAMMA,    CMD_HMSADD,   CMD_HMSSUB,   EQCMD_IDIV,     CMD_IF_T,
-    EQCMD_INT,   CMD_INVRT,    CMD_IP,       CMD_I_PCT_YR, CMD_LN,         CMD_LN_1_X,
-    CMD_LOG,     CMD_LIST_T,   CMD_MAT_T,    EQCMD_MAX,    EQCMD_MEANX,    EQCMD_MEANY,
-    EQCMD_MIN,   CMD_MOD,      EQCMD_MCOLS,  EQCMD_MROWS,  CMD_N,          CMD_FACT,
-    CMD_NEWLIST, CMD_NEWMAT,   CMD_NOT,      CMD_OR,       CMD_PERM,       CMD_PCOMPLX,
-    CMD_PMT,     CMD_PV,       EQCMD_RADIUS, CMD_RAN,      CMD_RCOMPLX,    CMD_REAL_T,
-    EQCMD_REGX,  EQCMD_REGY,   EQCMD_REGZ,   EQCMD_REGT,   CMD_RND,        CMD_RNRM,
-    CMD_RSUM,    EQCMD_SDEVX,  EQCMD_SDEVY,  CMD_SEED,     EQCMD_SEQ,      CMD_SIGN,
-    CMD_SIN,     CMD_SINH,     EQCMD_SIZEC,  EQCMD_SIZES,  CMD_SLOPE,      CMD_SPFV,
-    CMD_SPPV,    CMD_SQRT,     EQCMD_STACK,  CMD_TAN,      CMD_TANH,       CMD_TIME,
-    CMD_TRANS,   EQCMD_TRN,    CMD_TYPE_T,   EQCMD_NUM_T,  CMD_UNIT_T,     CMD_USFV,
-    CMD_USPV,    CMD_UVEC,     CMD_WMEAN,    EQCMD_XCOORD, CMD_XEQ,        CMD_XOR,
-    CMD_SQUARE,  EQCMD_YCOORD, CMD_YINT,     CMD_Y_POW_X,  CMD_INV,        CMD_10_POW_X,
-    CMD_SX,      CMD_SX2,      CMD_SY,       CMD_SY2,      CMD_SXY,        CMD_SN,
-    CMD_SLNX,    CMD_SLNX2,    CMD_SLNY,     CMD_SLNY2,    CMD_SLNXLNY,    CMD_SXLNY,
-    CMD_SYLNX,   CMD_TO_DEC,   CMD_TO_DEG,   CMD_TO_HMS,   CMD_TO_HR,      CMD_TO_OCT,
-    CMD_TO_RAD,  CMD_NULL,     CMD_NULL,     CMD_NULL,     CMD_NULL,       CMD_NULL
+    CMD_ABS,       CMD_ACOS,      CMD_ACOSH,    CMD_AND,      EQCMD_ANGLE,    CMD_ASIN,
+    CMD_ASINH,     CMD_ATAN,      CMD_ATANH,    CMD_BASEADD,  CMD_BASESUB,    CMD_BASEMUL,
+    CMD_BASEDIV,   CMD_BASECHS,   EQCMD_BREAK,  CMD_COMB,     EQCMD_CONTINUE, CMD_CORR,
+    CMD_COS,       CMD_COSH,      CMD_CPX_T,    CMD_CPXMAT_T, CMD_CROSS,      CMD_DATE,
+    CMD_DATE_PLUS, CMD_DDAYS,     CMD_DET,      CMD_DOT,      CMD_EQN_T,      CMD_EVALN,
+    CMD_E_POW_X,   CMD_E_POW_X_1, CMD_FCSTX,    CMD_FCSTY,    EQCMD_FLOW,     CMD_FNRM,
+    EQCMD_FOR,     CMD_FP,        CMD_FV,       CMD_GAMMA,    CMD_HMSADD,     CMD_HMSSUB,
+    EQCMD_IDIV,    CMD_IF_T,      EQCMD_INT,    CMD_INVRT,    CMD_IP,         CMD_I_PCT_YR,
+    CMD_LN,        CMD_LN_1_X,    CMD_LOG,      CMD_LIST_T,   CMD_MAT_T,      EQCMD_MAX,
+    EQCMD_MEANX,   EQCMD_MEANY,   EQCMD_MIN,    CMD_MOD,      EQCMD_MCOLS,    EQCMD_MROWS,
+    CMD_N,         CMD_FACT,      CMD_NEWLIST,  CMD_NEWMAT,   CMD_NOT,        CMD_OR,
+    CMD_PERM,      CMD_PCOMPLX,   CMD_PMT,      CMD_PV,       EQCMD_RADIUS,   CMD_RAN,
+    CMD_RCOMPLX,   CMD_REAL_T,    EQCMD_REGX,   EQCMD_REGY,   EQCMD_REGZ,     EQCMD_REGT,
+    CMD_RND,       CMD_RNRM,      CMD_RSUM,     EQCMD_SDEVX,  EQCMD_SDEVY,    CMD_SEED,
+    EQCMD_SEQ,     CMD_SIGN,      CMD_SIN,      CMD_SINH,     EQCMD_SIZEC,    EQCMD_SIZES,
+    CMD_SLOPE,     CMD_SPFV,      CMD_SPPV,     CMD_SQRT,     EQCMD_STACK,    CMD_STR_T,
+    CMD_TAN,       CMD_TANH,      CMD_TIME,     CMD_TRANS,    EQCMD_TRN,      CMD_TYPE_T,
+    EQCMD_NUM_T,   CMD_UNIT_T,    CMD_USFV,     CMD_USPV,     CMD_UVEC,       CMD_WMEAN,
+    EQCMD_XCOORD,  CMD_XEQ,       CMD_XOR,      CMD_SQUARE,   EQCMD_YCOORD,   CMD_YINT,
+    CMD_Y_POW_X,   CMD_INV,       CMD_10_POW_X, CMD_SX,       CMD_SX2,        CMD_SY,
+    CMD_SY2,       CMD_SXY,       CMD_SN,       CMD_SLNX,     CMD_SLNX2,      CMD_SLNY,
+    CMD_SLNY2,     CMD_SLNXLNY,   CMD_SXLNY,    CMD_SYLNX,    CMD_TO_DEC,     CMD_TO_DEG,
+    CMD_TO_HMS,    CMD_TO_HR,     CMD_TO_OCT,   CMD_TO_RAD,   CMD_NULL,       CMD_NULL
 };
 
 static int catalog_rows = 23;
