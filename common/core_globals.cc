@@ -1051,8 +1051,9 @@ bool no_keystrokes_yet;
  * Version 21: 1.0    Plot number width; direct solver flag
  * Version 22: 1.0    UNITS skip-top in equation editor
  * Version 23: 1.0    Interactive XSTR max length raised to 50
+ * Version 24: 1.0.3  SOLVE secant impatience
  */
-#define PLUS42_VERSION 23
+#define PLUS42_VERSION 24
 
 
 /*******************/

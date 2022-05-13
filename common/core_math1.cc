@@ -74,6 +74,7 @@ struct solve_state {
     int which;
     int toggle;
     int retry_counter;
+    int secant_impatience;
     phloat retry_value;
     phloat x1, x2, x3;
     phloat fx1, fx2;
@@ -166,6 +167,7 @@ bool persist_math() {
     if (!write_int(solve.which)) return false;
     if (!write_int(solve.toggle)) return false;
     if (!write_int(solve.retry_counter)) return false;
+    if (!write_int(solve.secant_impatience)) return false;
     if (!write_phloat(solve.retry_value)) return false;
     if (!write_phloat(solve.x1)) return false;
     if (!write_phloat(solve.x2)) return false;
@@ -266,6 +268,11 @@ bool unpersist_math(int ver) {
     if (!read_int(&solve.which)) return false;
     if (!read_int(&solve.toggle)) return false;
     if (!read_int(&solve.retry_counter)) return false;
+    if (ver < 24) {
+        solve.secant_impatience = 0;
+    } else {
+        if (!read_int(&solve.secant_impatience)) return false;
+    }
     if (!read_phloat(&solve.retry_value)) return false;
     if (!read_phloat(&solve.x1)) return false;
     if (!read_phloat(&solve.x2)) return false;
@@ -689,6 +696,7 @@ static int start_solve_2(vartype *v1, vartype *v2, bool after_direct) {
     solve.second_f = POS_HUGE_PHLOAT;
     solve.last_disp_time = 0;
     solve.toggle = 1;
+    solve.secant_impatience = 0;
     if (!after_direct)
         solve.caller.keep_running = !should_i_stop_at_this_level() && program_running();
     return call_solve_fn(1, 1);
@@ -1064,6 +1072,16 @@ int return_to_solve(bool failure, bool stop) {
                 }
                 return call_solve_fn(3, 4);
             } else if (solve.fx1 > 0 && solve.fx2 > 0) {
+                if (f > 0) {
+                    if (f > solve.best_f) {
+                        if (++solve.secant_impatience > 30) {
+                            solve.which = -1;
+                            return finish_solve(SOLVE_EXTREMUM);
+                        }
+                    } else {
+                        solve.secant_impatience = 0;
+                    }
+                }
                 if (solve.fx1 > solve.fx2) {
                     if (f >= solve.fx1 && solve.state != 5)
                         goto do_bisection;
@@ -1076,6 +1094,16 @@ int return_to_solve(bool failure, bool stop) {
                     solve.fx2 = f;
                 }
             } else if (solve.fx1 < 0 && solve.fx2 < 0) {
+                if (f < 0) {
+                    if (-f > solve.best_f) {
+                        if (++solve.secant_impatience > 30) {
+                            solve.which = -1;
+                            return finish_solve(SOLVE_EXTREMUM);
+                        }
+                    } else {
+                        solve.secant_impatience = 0;
+                    }
+                }
                 if (solve.fx1 < solve.fx2) {
                     if (f <= solve.fx1 && solve.state != 5)
                         goto do_bisection;

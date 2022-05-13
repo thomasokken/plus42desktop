@@ -1287,7 +1287,7 @@ static void make_tick_label(int mant, int exp, char **text, int *len) {
     }
 }
 
-static bool axis_ticks(bool hor, int c, phloat min, phloat max, int *t1pos, int *t2pos,
+static void axis_ticks(bool hor, int c, phloat min, phloat max, int *t1pos, int *t2pos,
                         char **t1text, char **t2text, int *t1len, int *t2len) {
     phloat s1 = fabs(min);
     phloat s2 = fabs(max);
@@ -1300,11 +1300,6 @@ static bool axis_ticks(bool hor, int c, phloat min, phloat max, int *t1pos, int 
     min2 -= p * 0.49;
     max2 += p * 0.49;
     while (true) {
-        if (scale == 0)
-            // This should never happen, but apparently it sometimes does,
-            // hence this safeguard, at least until I figure out the root
-            // cause of the problem.
-            return false;
         a1 = to_int4(ceil(min2 / scale));
         a2 = to_int4(floor(max2 / scale));
         if (a2 > a1)
@@ -1337,7 +1332,6 @@ static bool axis_ticks(bool hor, int c, phloat min, phloat max, int *t1pos, int 
     *t2pos = last;
     make_tick_label(a1, m, t1text, t1len);
     make_tick_label(a2, m, t2text, t2len);
-    return true;
 }
 
 static int plot_helper(bool reset) {
@@ -1346,7 +1340,8 @@ static int plot_helper(bool reset) {
         return data.err;
 
     for (int i = 0; i < 2; i++) {
-        if (data.axes[i].min == data.axes[i].max) {
+        if (data.axes[i].min == data.axes[i].max
+                || p_isnan(data.axes[i].min) || p_isnan(data.axes[i].max)) {
             return ERR_INVALID_DATA;
         } else if (data.axes[i].min > data.axes[i].max) {
             phloat temp = data.axes[i].min;
@@ -1390,11 +1385,8 @@ static int plot_helper(bool reset) {
     char *xt1s, *xt2s, *yt1s, *yt2s;
     int xt1l, xt2l, yt1l, yt2l;
     int xt1w, xt2w, yt1w, yt2w;
-    if (!axis_ticks(true, yo, data.axes[0].min, data.axes[0].max, &xt1, &xt2, &xt1s, &xt2s, &xt1l, &xt2l)
-        || !axis_ticks(false, xo, data.axes[1].min, data.axes[1].max, &yt1, &yt2, &yt1s, &yt2s, &yt1l, &yt2l)) {
-        // TODO: Should never happen; why does it?
-        return do_it(&data);
-    }
+    axis_ticks(true, yo, data.axes[0].min, data.axes[0].max, &xt1, &xt2, &xt1s, &xt2s, &xt1l, &xt2l);
+    axis_ticks(false, xo, data.axes[1].min, data.axes[1].max, &yt1, &yt2, &yt1s, &yt2s, &yt1l, &yt2l);
     xt1w = small_string_width(xt1s, xt1l);
     xt2w = small_string_width(xt2s, xt2l);
     yt1w = small_string_width(yt1s, yt1l);
