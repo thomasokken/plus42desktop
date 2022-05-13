@@ -1,3 +1,11 @@
+2022-05-13: release 1.0.3
+
+* SOLVE now handles functions that are always positive or always negative a bit
+  better, reporting Extremum when the iteration appears to be bouncing around
+  without improving, instead of continuing indefinitely.
+* PLOT now detects <Not a Number> in XMIN/XMAX/YMIN/YMAX and reports Invalid
+  Data, instead of freezing.
+
 2022-05-09: release 1.0.2
 
 * Added code to prevent freeze in PLOT under certain circumstances.
