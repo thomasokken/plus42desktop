@@ -1130,13 +1130,13 @@ void skin_repaint_display(HDC hdc) {
     if (!display_enabled)
         return;
     Graphics g(hdc);
-    g.TranslateTransform((REAL) display_loc.x, (REAL) display_loc.y);
+    g.SetClip(Rect(display_loc.x - 1, display_loc.y - 1, ((int) ceil(display_scale_x * disp_w)) + 2, ((int) ceil(display_scale_y * disp_h)) + 2));
+    g.TranslateTransform((REAL) (display_loc.x + 1), (REAL) (display_loc.y + 1));
     g.ScaleTransform((REAL) display_scale_x, (REAL) display_scale_y);
     if (display_scale_int)
         g.SetInterpolationMode(InterpolationModeNearestNeighbor);
     else
         g.SetInterpolationMode(InterpolationModeBicubic);
-    g.SetClip(Rect(-1, -1, disp_w + 2, disp_h + 2));
     g.DrawImage(disp_bitmap, -2, -2, disp_w + 4, disp_h + 4);
 }
 
