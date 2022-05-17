@@ -1,3 +1,7 @@
+2022-05-17: release 1.0.4
+
+* TVM: Fixed error checks in N.
+
 2022-05-13: release 1.0.3
 
 * SOLVE now handles functions that are always positive or always negative a bit
