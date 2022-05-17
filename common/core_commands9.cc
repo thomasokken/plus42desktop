@@ -1110,20 +1110,22 @@ static int do_n(phloat i, phloat pv, phloat pmt, phloat fv, phloat p_yr, phloat 
     int err = tvm_arg_check(p_yr, mode, &i, &pmt);
     if (err != ERR_NONE)
         return err;
-    if (pmt == 0)
-        return ERR_INVALID_DATA;
     phloat n;
     if (i == 0) {
+        if (pmt == 0)
+            return ERR_INVALID_DATA;
         n = -(fv + pv) / pmt;
     } else {
         n = -log1p(-(pv + fv) / (fv - (pmt / i))) / log1p(i);
-        int inf;
-        if ((inf = p_isinf(n)) != 0) {
-            if (flags.f.range_error_ignore)
-                n = inf < 0 ? NEG_HUGE_PHLOAT : POS_HUGE_PHLOAT;
-            else
-                return ERR_OUT_OF_RANGE;
-        }
+    }
+    if (p_isnan(n))
+        return ERR_INVALID_DATA;
+    int inf;
+    if ((inf = p_isinf(n)) != 0) {
+        if (flags.f.range_error_ignore)
+            n = inf < 0 ? NEG_HUGE_PHLOAT : POS_HUGE_PHLOAT;
+        else
+            return ERR_OUT_OF_RANGE;
     }
     *res = n;
     return ERR_NONE;
