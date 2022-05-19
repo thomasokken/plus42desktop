@@ -2153,7 +2153,9 @@ void keydown_alpha_mode(int shift, int key) {
                     return;
                 }
             }
-            if (entered_string_length < 15)
+            if ((c & 128) != 0 && entered_string_length == 0)
+                squeak();
+            else if (entered_string_length < 15)
                 entered_string[entered_string_length++] = c;
         } else {
             if (!mode_alpha_entry) {
@@ -3105,6 +3107,7 @@ void keydown_normal_mode(int shift, int key) {
                             unit_success:
                             free_vartype(stack[sp]);
                             stack[sp] = res;
+                            flags.f.stack_lift_disable = 0;
                             redisplay();
                             pending_command = CMD_CANCELLED;
                             if ((flags.f.trace_print || flags.f.normal_print)
@@ -3178,6 +3181,7 @@ void keydown_normal_mode(int shift, int key) {
                             list->array->data[0] = stack[sp];
                             list->array->data[1] = v;
                             stack[sp] = (vartype *) list;
+                            flags.f.stack_lift_disable = 0;
                             redisplay();
                             print_trace();
                             return;
@@ -3210,6 +3214,7 @@ void keydown_normal_mode(int shift, int key) {
                                 list->size--;
                                 free_vartype(v);
                             }
+                            flags.f.stack_lift_disable = 0;
                             redisplay();
                             print_trace();
                             return;
@@ -3218,6 +3223,7 @@ void keydown_normal_mode(int shift, int key) {
                         push_new:
                         if (recall_result(v) != ERR_NONE)
                             goto nomem;
+                        flags.f.stack_lift_disable = 0;
                         redisplay();
                         return;
                     } else {
