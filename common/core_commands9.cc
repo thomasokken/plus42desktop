@@ -1150,10 +1150,23 @@ static int do_i_pct_yr(phloat p_yr, phloat mode, phloat *res) {
         return err;
     if (tvm_n == 0)
         return ERR_INVALID_DATA;
+    phloat i;
+    if (tvm_pv == 0)
+        if (tvm_fv == 0)
+            return ERR_INVALID_DATA;
+        else
+            i = tvm_pmt / tvm_fv;
+    else
+        if (tvm_fv == 0)
+            i = -tvm_pmt / tvm_pv;
+        else {
+            phloat a = tvm_pmt / tvm_fv;
+            phloat b = -tvm_pmt / tvm_pv;
+            i = fabs(b) > fabs(a) && a > -1 ? a : b;
+        }
     tvm_m = tvm_pv;
     if (mode == 1)
         tvm_m += tvm_pmt;
-    phloat i = 0.0001; // Arbitrary starting guess...
     int count = 100;
     while (true) {
         phloat f = tvm_eq(i);
