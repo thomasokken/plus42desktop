@@ -1164,6 +1164,8 @@ static int do_i_pct_yr(phloat p_yr, phloat mode, phloat *res) {
             phloat b = -tvm_pmt / tvm_pv;
             i = fabs(b) > fabs(a) && a > -1 ? a : b;
         }
+    if (p_isinf(i) || p_isnan(i) || i <= -1)
+        i = 0;
     tvm_m = tvm_pv;
     if (mode == 1)
         tvm_m += tvm_pmt;
