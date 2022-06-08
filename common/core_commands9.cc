@@ -1151,42 +1151,56 @@ static int do_i_pct_yr(phloat p_yr, phloat mode, phloat *res) {
     if (tvm_n == 0)
         return ERR_INVALID_DATA;
     phloat i;
-    if (tvm_pv == 0)
-        if (tvm_fv == 0)
+    if (tvm_pmt == 0) {
+        if (tvm_pv == 0 || tvm_fv == 0
+                || (tvm_pv > 0) == (tvm_fv > 0))
             return ERR_INVALID_DATA;
+        i = expm1(log(-tvm_fv / tvm_pv) / tvm_n);
+    } else {
+        if (tvm_pv == 0)
+            if (tvm_fv == 0)
+                return ERR_INVALID_DATA;
+            else
+                i = tvm_pmt / tvm_fv;
         else
-            i = tvm_pmt / tvm_fv;
-    else
-        if (tvm_fv == 0)
-            i = -tvm_pmt / tvm_pv;
-        else {
-            phloat a = tvm_pmt / tvm_fv;
-            phloat b = -tvm_pmt / tvm_pv;
-            i = fabs(b) > fabs(a) && a > -1 ? a : b;
+            if (tvm_fv == 0)
+                i = -tvm_pmt / tvm_pv;
+            else {
+                phloat a = tvm_pmt / tvm_fv;
+                phloat b = -tvm_pmt / tvm_pv;
+                i = fabs(b) > fabs(a) && a > -1 ? a : b;
+            }
+        if (p_isinf(i) || p_isnan(i) || i <= -1)
+            i = 0;
+        tvm_m = tvm_pv;
+        if (mode == 1)
+            tvm_m += tvm_pmt;
+        int count = 100;
+        while (true) {
+            phloat f = tvm_eq(i);
+            if (f == 0)
+                break;
+            phloat h = i / 10000;
+            phloat f2 = tvm_eq(i + h);
+            phloat d = (f2 - f) / h;
+            if (d == 0)
+                break;
+            phloat new_i = i - f / d;
+            if (new_i == i)
+                break;
+            if (--count == 0)
+                break;
+            i = new_i;
         }
-    if (p_isinf(i) || p_isnan(i) || i <= -1)
-        i = 0;
-    tvm_m = tvm_pv;
-    if (mode == 1)
-        tvm_m += tvm_pmt;
-    int count = 100;
-    while (true) {
-        phloat f = tvm_eq(i);
-        if (f == 0)
-            break;
-        phloat h = i / 10000;
-        phloat f2 = tvm_eq(i + h);
-        phloat d = (f2 - f) / h;
-        if (d == 0)
-            break;
-        phloat new_i = i - f / d;
-        if (new_i == i)
-            break;
-        if (--count == 0)
-            break;
-        i = new_i;
     }
     i *= p_yr * 100;
+    int inf;
+    if ((inf = p_isinf(i)) != 0) {
+        if (flags.f.range_error_ignore)
+            i = inf < 0 ? NEG_HUGE_PHLOAT : POS_HUGE_PHLOAT;
+        else
+            return ERR_OUT_OF_RANGE;
+    }
     *res = i;
     return ERR_NONE;
 }
