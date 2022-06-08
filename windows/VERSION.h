@@ -1,3 +1,3 @@
-#define PLUS42_VERSION_1 "Plus42 1.0.4"
-#define PLUS42_VERSION_2 "1.0.4\0"
-#define PLUS42_VERSION_3 1,0,4,0
+#define PLUS42_VERSION_1 "Plus42 1.0.5"
+#define PLUS42_VERSION_2 "1.0.5\0"
+#define PLUS42_VERSION_3 1,0,5,0

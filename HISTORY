@@ -1,3 +1,11 @@
+2022-06-08: release 1.0.5
+
+* TVM: PMT returned incorrect results in BEGIN mode. Fixed.
+* TVM: In some cases, I%YR could return inaccurate results because of poor
+  starting guesses for the iteration. Fixed.
+* More accurate complex ACOS and ACOSH.
+* Android version: Now removes itself from the task list if exited using OFF.
+
 2022-05-17: release 1.0.4
 
 * TVM: Fixed error checks in N.
