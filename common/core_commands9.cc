@@ -1231,7 +1231,7 @@ static int do_pmt(phloat n, phloat i, phloat pv, phloat fv, phloat p_yr, phloat 
                 return ERR_OUT_OF_RANGE;
         }
         if (mode == 1)
-            pmt *= 1 + i;
+            pmt /= 1 + i;
     }
     *res = pmt;
     return ERR_NONE;
