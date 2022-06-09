@@ -1197,9 +1197,14 @@ static int do_i_pct_yr(phloat p_yr, phloat mode, phloat *res) {
             } else {
                 impatience++;
             }
-            phloat h = i / 10000;
-            if (i + h == i)
-                h = i;
+            phloat h;
+            if (i == 0) {
+                h = 1e-6;
+            } else {
+                h = i / 10000;
+                if (i + h == i)
+                    h = i;
+            }
             phloat f2 = tvm_eq(i + h);
             phloat d = (f2 - f) / h;
             if (d == 0)
@@ -1209,7 +1214,7 @@ static int do_i_pct_yr(phloat p_yr, phloat mode, phloat *res) {
                 break;
             i = new_i;
         }
-        if (!pos || !neg)
+        if (!(pos && neg))
             return ERR_NO_SOLUTION_FOUND;
     }
     i *= p_yr * 100;
