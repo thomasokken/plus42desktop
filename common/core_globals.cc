@@ -98,7 +98,8 @@ const error_spec errors[] = {
     { /* VARIABLE_NOT_WRITABLE */  "Variable Not Writable",   21 },
     { /* DIRECTORY_EXISTS */       "Directory Exists",        16 },
     { /* VARIABLE_EXISTS */        "Variable Exists",         15 },
-    { /* TOO_MANY_ARGUMENTS */     "Too Many Arguments",      18 }
+    { /* TOO_MANY_ARGUMENTS */     "Too Many Arguments",      18 },
+    { /* NO_SOLUTION_FOUND */      "No Solution Found",       17 },
 };
 
 

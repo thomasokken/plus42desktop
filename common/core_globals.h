@@ -84,6 +84,7 @@ extern FILE *gfile;
 #define ERR_DIRECTORY_EXISTS       48
 #define ERR_VARIABLE_EXISTS        49
 #define ERR_TOO_MANY_ARGUMENTS     50
+#define ERR_NO_SOLUTION_FOUND      51
 
 #define RTNERR_MAX 8
 
