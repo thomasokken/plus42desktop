@@ -3014,7 +3014,7 @@ static void draw_catalog() {
                     continue;
                 std::string n(local_vars[i].name, local_vars[i].length);
                 for (int j = 0; j < names.size(); j++)
-                    if (names[i] == n)
+                    if (names[j] == n)
                         goto found_dup1;
                 names.push_back(n);
                 dirs.push_back(0);
