@@ -1792,7 +1792,7 @@ int docmd_tnum_p(arg_struct *arg) {
         return err;
     phloat x = ((vartype_real *) stack[sp])->x;
     int np = to_int(x);
-    if (x != np || np < 0 || np > 1200)
+    if (x != np || np < 1 || np > 1200)
         return ERR_INVALID_DATA;
     rm->array->data[AMORT_NP] = np;
     return docmd_tnext(arg);
