@@ -67,10 +67,7 @@ struct state_type {
     bool matrix_singularmatrix;
     bool matrix_outofrange;
     bool auto_repeat;
-    // formerly 'allow big stack'; can't get rid of it completely
-    // because the way we're reading state_type doesn't allow
-    // for it to shrink.
-    bool dummy2;
+    bool localized_copy_paste;
 };
 
 extern state_type state;

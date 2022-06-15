@@ -357,7 +357,7 @@ static const char *compactMenuOutroXml =
 static int use_compactmenu = 0;
 static char *skin_arg = NULL;
 
-static bool decimal_point;
+static char cached_number_format[5];
 
 static void activate(GtkApplication *theApp, gpointer userData);
 
@@ -392,11 +392,25 @@ static void activate(GtkApplication *theApp, gpointer userData) {
 
     app = theApp;
 
-    // Capture state of decimal_point, which may have been changed by
+    // Capture number format, which may have been changed by
     // gtk_init(), and then set it to the C locale, because the binary/decimal
     // conversions expect a decimal point, not a comma.
     struct lconv *loc = localeconv();
-    decimal_point = strcmp(loc->decimal_point, ",") != 0;
+    cached_number_format[0] = loc->decimal_point[0];
+    cached_number_format[1] = 0;
+    if (loc->thousands_sep[0] != 0) {
+        int g1, g2;
+        g1 = loc->grouping[0];
+        if (g1 != 0) {
+            g2 = loc->grouping[1];
+            if (g2 == 0)
+                g2 = g1;
+            cached_number_format[1] = loc->thousands_sep[0];
+            cached_number_format[2] = '0' + g1;
+            cached_number_format[3] = '0' + g2;
+            cached_number_format[4] = 0;
+        }
+    }
     setlocale(LC_NUMERIC, "C");
 
 
@@ -902,7 +916,10 @@ static void init_shell_state(int4 version) {
         case 7:
             /* fall through */
         case 8:
-            /* current version (SHELL_VERSION = 8),
+            core_settings.localized_copy_paste = true;
+            /* fall through */
+        case 9:
+            /* current version (SHELL_VERSION = 9),
              * so nothing to do here since everything
              * was initialized from the state file.
              */
@@ -938,6 +955,8 @@ static int read_shell_state() {
         core_settings.matrix_outofrange = state.matrix_outofrange;
         core_settings.auto_repeat = state.auto_repeat;
     }
+    if (state_version >= 9)
+        core_settings.localized_copy_paste = state.localized_copy_paste;
 
     init_shell_state(state_version);
     return 1;
@@ -960,7 +979,7 @@ static int write_shell_state() {
     state.matrix_singularmatrix = core_settings.matrix_singularmatrix;
     state.matrix_outofrange = core_settings.matrix_outofrange;
     state.auto_repeat = core_settings.auto_repeat;
-    state.dummy = true;
+    state.localized_copy_paste = core_settings.localized_copy_paste;
     if (fwrite(&state, 1, sizeof(state_type), statefile) != sizeof(int4))
         return 0;
 
@@ -2149,6 +2168,7 @@ static void preferencesCB() {
     static GtkWidget *singularmatrix;
     static GtkWidget *matrixoutofrange;
     static GtkWidget *autorepeat;
+    static GtkWidget *localizedcopypaste;
     static GtkWidget *repaintwholedisplay;
     static GtkWidget *printtotext;
     static GtkWidget *textpath;
@@ -2176,25 +2196,27 @@ static void preferencesCB() {
         gtk_grid_attach(GTK_GRID(grid), matrixoutofrange, 0, 1, 4, 1);
         autorepeat = gtk_check_button_new_with_label("Auto-repeat for number entry and ALPHA mode");
         gtk_grid_attach(GTK_GRID(grid), autorepeat, 0, 2, 4, 1);
+        localizedcopypaste = gtk_check_button_new_with_label("Localized Copy & Paste");
+        gtk_grid_attach(GTK_GRID(grid), localizedcopypaste, 0, 3, 4, 1);
         repaintwholedisplay = gtk_check_button_new_with_label("Always repaint entire display");
-        gtk_grid_attach(GTK_GRID(grid), repaintwholedisplay, 0, 3, 4, 1);
+        gtk_grid_attach(GTK_GRID(grid), repaintwholedisplay, 0, 4, 4, 1);
         printtotext = gtk_check_button_new_with_label("Print to text file:");
-        gtk_grid_attach(GTK_GRID(grid), printtotext, 0, 4, 1, 1);
+        gtk_grid_attach(GTK_GRID(grid), printtotext, 0, 5, 1, 1);
         textpath = gtk_entry_new();
-        gtk_grid_attach(GTK_GRID(grid), textpath, 1, 4, 2, 1);
+        gtk_grid_attach(GTK_GRID(grid), textpath, 1, 5, 2, 1);
         GtkWidget *browse1 = gtk_button_new_with_label("Browse...");
-        gtk_grid_attach(GTK_GRID(grid), browse1, 3, 4, 1, 1);
+        gtk_grid_attach(GTK_GRID(grid), browse1, 3, 5, 1, 1);
         printtogif = gtk_check_button_new_with_label("Print to GIF file:");
-        gtk_grid_attach(GTK_GRID(grid), printtogif, 0, 5, 1, 1);
+        gtk_grid_attach(GTK_GRID(grid), printtogif, 0, 6, 1, 1);
         gifpath = gtk_entry_new();
-        gtk_grid_attach(GTK_GRID(grid), gifpath, 1, 5, 2, 1);
+        gtk_grid_attach(GTK_GRID(grid), gifpath, 1, 6, 2, 1);
         GtkWidget *browse2 = gtk_button_new_with_label("Browse...");
-        gtk_grid_attach(GTK_GRID(grid), browse2, 3, 5, 1, 1);
+        gtk_grid_attach(GTK_GRID(grid), browse2, 3, 6, 1, 1);
         GtkWidget *label = gtk_label_new("Maximum GIF height (pixels):");
-        gtk_grid_attach(GTK_GRID(grid), label, 1, 6, 1, 1);
+        gtk_grid_attach(GTK_GRID(grid), label, 1, 7, 1, 1);
         gifheight = gtk_entry_new();
         gtk_entry_set_max_length(GTK_ENTRY(gifheight), 5);
-        gtk_grid_attach(GTK_GRID(grid), gifheight, 2, 6, 1, 1);
+        gtk_grid_attach(GTK_GRID(grid), gifheight, 2, 7, 1, 1);
 
         g_signal_connect(G_OBJECT(browse1), "clicked", G_CALLBACK(browse_file),
                 (gpointer) new browse_file_info("Select Text File Name",
@@ -2211,6 +2233,7 @@ static void preferencesCB() {
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(singularmatrix), core_settings.matrix_singularmatrix);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(matrixoutofrange), core_settings.matrix_outofrange);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autorepeat), core_settings.auto_repeat);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(localizedcopypaste), core_settings.localized_copy_paste);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(printtotext), state.printerToTxtFile);
     gtk_entry_set_text(GTK_ENTRY(textpath), state.printerTxtFileName);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(printtogif), state.printerToGifFile);
@@ -2225,6 +2248,7 @@ static void preferencesCB() {
         core_settings.matrix_singularmatrix = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(singularmatrix));
         core_settings.matrix_outofrange = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(matrixoutofrange));
         core_settings.auto_repeat = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(autorepeat));
+        core_settings.localized_copy_paste = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(localizedcopypaste));
 
         state.printerToTxtFile = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(printtotext));
         char *old = strclone(state.printerTxtFileName);
@@ -3126,8 +3150,8 @@ uint4 shell_milliseconds() {
     return (uint4) (tv.tv_sec * 1000L + tv.tv_usec / 1000);
 }
 
-bool shell_decimal_point() {
-    return decimal_point;
+const char *shell_number_format() {
+    return cached_number_format;
 }
 
 int shell_date_format() {

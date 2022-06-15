@@ -26,7 +26,7 @@ extern GtkWidget *calc_widget;
 extern bool allow_paint;
 extern int disp_rows, disp_cols;
 
-#define SHELL_VERSION 8
+#define SHELL_VERSION 9
 
 struct state_type {
     int extras;
@@ -45,10 +45,7 @@ struct state_type {
     bool matrix_outofrange;
     bool auto_repeat;
     bool old_repaint;
-    // formerly 'allow big stack'; can't get rid of it completely
-    // because the way we're reading state_type doesn't allow
-    // for it to shrink.
-    bool dummy;
+    bool localized_copy_paste;
 };
 
 extern state_type state;

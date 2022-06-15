@@ -2587,7 +2587,7 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
     free(xstr_buf);
 }
 
-static int complex2buf(char *buf, phloat re, phloat im, bool always_rect) {
+static int complex2buf(char *buf, phloat re, phloat im, bool always_rect, const char *format = NULL) {
     bool polar = !always_rect && flags.f.polar;
     phloat x, y;
     if (polar) {
@@ -2598,14 +2598,14 @@ static int complex2buf(char *buf, phloat re, phloat im, bool always_rect) {
         x = re;
         y = im;
     }
-    int bufptr = phloat2string(x, buf, 99, 2, 0, 3, 0, MAX_MANT_DIGITS);
+    int bufptr = phloat2string(x, buf, 99, 2, 0, 3, 0, MAX_MANT_DIGITS, format);
     if (polar) {
         string2buf(buf, 99, &bufptr, " \342\210\240 ", 5);
     } else {
         if (y >= 0 || p_isinf(y) != 0 || p_isnan(y))
             buf[bufptr++] = '+';
     }
-    bufptr += phloat2string(y, buf + bufptr, 99 - bufptr, 2, 0, 3, 0, MAX_MANT_DIGITS);
+    bufptr += phloat2string(y, buf + bufptr, 99 - bufptr, 2, 0, 3, 0, MAX_MANT_DIGITS, format);
     if (!polar)
         buf[bufptr++] = 'i';
     /* Convert small-caps 'E' to regular 'e' */
@@ -2834,14 +2834,16 @@ char *core_copy() {
         buf[0] = 0;
         return buf;
     } else if (stack[sp]->type == TYPE_REAL) {
+        const char *format = core_settings.localized_copy_paste ? number_format() : NULL;
         char *buf = (char *) malloc(50);
-        int bufptr = real2buf(buf, ((vartype_real *) stack[sp])->x);
+        int bufptr = real2buf(buf, ((vartype_real *) stack[sp])->x, format);
         buf[bufptr] = 0;
         return buf;
     } else if (stack[sp]->type == TYPE_COMPLEX) {
+        const char *format = core_settings.localized_copy_paste ? number_format() : NULL;
         char *buf = (char *) malloc(100);
         vartype_complex *c = (vartype_complex *) stack[sp];
-        int bufptr = complex2buf(buf, c->re, c->im, false);
+        int bufptr = complex2buf(buf, c->re, c->im, false, format);
         buf[bufptr] = 0;
         return buf;
     } else if (stack[sp]->type == TYPE_STRING) {
@@ -2851,6 +2853,7 @@ char *core_copy() {
         buf[bufptr] = 0;
         return buf;
     } else if (stack[sp]->type == TYPE_REALMATRIX) {
+        const char *format = core_settings.localized_copy_paste ? number_format() : NULL;
         vartype_realmatrix *rm = (vartype_realmatrix *) stack[sp];
         phloat *data = rm->array->data;
         char *is_string = rm->array->is_string;
@@ -2860,7 +2863,7 @@ char *core_copy() {
             for (int c = 0; c < rm->columns; c++) {
                 int bufptr;
                 if (is_string[n] == 0) {
-                    bufptr = real2buf(buf, data[n]);
+                    bufptr = real2buf(buf, data[n], format);
                     tb_write(&tb, buf, bufptr);
                 } else {
                     char *text;
@@ -2883,13 +2886,14 @@ char *core_copy() {
         }
         goto textbuf_finish;
     } else if (stack[sp]->type == TYPE_COMPLEXMATRIX) {
+        const char *format = core_settings.localized_copy_paste ? number_format() : NULL;
         vartype_complexmatrix *cm = (vartype_complexmatrix *) stack[sp];
         phloat *data = cm->array->data;
         char buf[100];
         int n = 0;
         for (int r = 0; r < cm->rows; r++) {
             for (int c = 0; c < cm->columns; c++) {
-                int bufptr = complex2buf(buf, data[n], data[n + 1], true);
+                int bufptr = complex2buf(buf, data[n], data[n + 1], true, format);
                 if (c < cm->columns - 1)
                     buf[bufptr++] = '\t';
                 tb_write(&tb, buf, bufptr);
@@ -2910,6 +2914,7 @@ char *core_copy() {
         buf[bufptr] = 0;
         return buf;
     } else if (stack[sp]->type == TYPE_UNIT) {
+        const char *format = core_settings.localized_copy_paste ? number_format() : NULL;
         vartype_unit *u = (vartype_unit *) stack[sp];
         char *buf = (char *) malloc(50 + u->length);
         if (buf == NULL) {
@@ -2917,7 +2922,7 @@ char *core_copy() {
             redisplay();
             return NULL;
         }
-        int bufptr = real2buf(buf, u->x);
+        int bufptr = real2buf(buf, u->x, format);
         buf[bufptr++] = ' ';
         bufptr += hp2ascii(buf + bufptr, u->text, u->length);
         buf[bufptr] = 0;
@@ -2942,7 +2947,7 @@ const char *STR_INF = "<Infinity>";
 const char *STR_NEG_INF = "<-Infinity>";
 const char *STR_NAN = "<Not a Number>";
 
-static int scan_number(const char *buf, int len, int pos) {
+static int scan_number(const char *buf, int len, int pos, const char *format) {
     if (buf[pos] == '<' || len > 1 && (buf[pos] == '-' || buf[pos] == '+') && buf[pos + 1] == '<') {
         int off = buf[pos] == '<' ? 0 : 1;
         if (len >= 10 + off && strncmp(buf + pos + off, STR_INF, 10) == 0)
@@ -2960,8 +2965,14 @@ static int scan_number(const char *buf, int len, int pos) {
     // 3: after E
     // 4: in exponent
     int state = 0;
-    char dec = flags.f.decimal_point ? '.' : ',';
-    char sep = flags.f.decimal_point ? ',' : '.';
+    char dec, sep;
+    if (format == NULL) {
+        dec = flags.f.decimal_point ? '.' : ',';
+        sep = flags.f.decimal_point ? ',' : '.';
+    } else {
+        dec = format[0];
+        sep = format[1];
+    }
     for (int p = pos; p < len; p++) {
         char c = buf[p];
         switch (state) {
@@ -3011,7 +3022,7 @@ static int scan_number(const char *buf, int len, int pos) {
     return len;
 }
 
-static bool parse_phloat(const char *p, int len, phloat *res) {
+static bool parse_phloat(const char *p, int len, phloat *res, const char *format) {
     if (p[0] == '<' || len > 1 && (p[0] == '-' || p[0] == '+') && p[1] == '<') {
         int off = p[0] == '<' ? 0 : 1;
         bool neg = p[0] == '-';
@@ -3045,8 +3056,14 @@ static bool parse_phloat(const char *p, int len, phloat *res) {
     bool in_int_mant = true;
     bool empty_mant = true;
     int i = 0, j = 0;
-    char decimal = flags.f.decimal_point ? '.' : ',';
-    char separator = flags.f.decimal_point ? ',' : '.';
+    char decimal, separator;
+    if (format == NULL) {
+        decimal = flags.f.decimal_point ? '.' : ',';
+        separator = flags.f.decimal_point ? ',' : '.';
+    } else {
+        decimal = format[0];
+        separator = format[1];
+    }
     while (i < 100 && j < len) {
         char c = p[j++];
         if (c == 0)
@@ -3059,7 +3076,7 @@ static bool parse_phloat(const char *p, int len, phloat *res) {
             in_mant = false;
         } else if (c == decimal) {
             in_int_mant = false;
-            buf[i++] = c;
+            buf[i++] = flags.f.decimal_point ? '.' : ',';
         } else if (c >= '0' && c <= '9') {
             if (in_mant) {
                 empty_mant = false;
@@ -3492,13 +3509,13 @@ static vartype *parse_base(const char *buf, int len) {
     return new_real((phloat) n);
 }
 
-static vartype *parse_unit(const char *buf, int len) {
+static vartype *parse_unit(const char *buf, int len, const char *format) {
     int i, s1, e1, s2, e2;
     i = 0;
     while (i < len && buf[i] == ' ')
         i++;
     s1 = i;
-    i = scan_number(buf, len, i);
+    i = scan_number(buf, len, i, format);
     e1 = i;
     if (e1 == s1)
         return NULL;
@@ -3511,14 +3528,14 @@ static vartype *parse_unit(const char *buf, int len) {
     if (e2 == s2)
         return NULL;
     phloat x;
-    if (!parse_phloat(buf + s1, e1 - s1, &x))
+    if (!parse_phloat(buf + s1, e1 - s1, &x, format))
         return NULL;
     if (!is_unit(buf + s2, e2 - s2))
         return NULL;
     return new_unit(x, buf + s2, e2 - s2);
 }
 
-static int parse_scalar(const char *buf, int len, bool strict, phloat *re, phloat *im, int *slen) {
+static int parse_scalar(const char *buf, int len, bool strict, phloat *re, phloat *im, int *slen, const char *format = NULL) {
     int i, s1, e1, s2, e2;
     bool polar = false;
     bool empty_im = false;
@@ -3529,7 +3546,7 @@ static int parse_scalar(const char *buf, int len, bool strict, phloat *re, phloa
     while (i < len && buf[i] == ' ')
         i++;
     s1 = i;
-    i = scan_number(buf, len, i);
+    i = scan_number(buf, len, i, format);
     e1 = i;
     if (e1 == s1)
         goto attempt_2;
@@ -3542,7 +3559,7 @@ static int parse_scalar(const char *buf, int len, bool strict, phloat *re, phloa
     while (i < len && buf[i] == ' ')
         i++;
     s2 = i;
-    i = scan_number(buf, len, i);
+    i = scan_number(buf, len, i, format);
     e2 = i;
     if (e2 == s2)
         goto attempt_2;
@@ -3559,10 +3576,10 @@ static int parse_scalar(const char *buf, int len, bool strict, phloat *re, phloa
     while (i < len && buf[i] == ' ')
         i++;
     s1 = i;
-    i = scan_number(buf, len, i);
+    i = scan_number(buf, len, i, format);
     e1 = i;
     s2 = i;
-    i = scan_number(buf, len, i);
+    i = scan_number(buf, len, i, format);
     e2 = i;
     if (i < len && (buf[i] == 'i' || buf[i] == 'j'))
         i++;
@@ -3604,7 +3621,7 @@ static int parse_scalar(const char *buf, int len, bool strict, phloat *re, phloa
     while (i < len && buf[i] == ' ')
         i++;
     s1 = i;
-    i = scan_number(buf, len, i);
+    i = scan_number(buf, len, i, format);
     e1 = i;
     if (e1 == s1)
         goto attempt_4;
@@ -3617,7 +3634,7 @@ static int parse_scalar(const char *buf, int len, bool strict, phloat *re, phloa
     while (i < len && buf[i] == ' ')
         i++;
     s2 = i;
-    i = scan_number(buf, len, i);
+    i = scan_number(buf, len, i, format);
     e2 = i;
     if (e2 == s2)
         goto attempt_4;
@@ -3635,11 +3652,11 @@ static int parse_scalar(const char *buf, int len, bool strict, phloat *re, phloa
     finish_complex:
     if (no_re)
         *re = 0;
-    else if (!parse_phloat(buf + s1, e1 - s1, re))
+    else if (!parse_phloat(buf + s1, e1 - s1, re, format))
         goto attempt_4;
     if (empty_im)
         *im = buf[s2] == '+' ? 1 : -1;
-    else if (!parse_phloat(buf + s2, e2 - s2, im))
+    else if (!parse_phloat(buf + s2, e2 - s2, im, format))
         goto attempt_4;
     if (polar)
         generic_p2r(*re, *im, re, im);
@@ -3651,7 +3668,7 @@ static int parse_scalar(const char *buf, int len, bool strict, phloat *re, phloa
     while (i < len && buf[i] == ' ')
         i++;
     s1 = i;
-    i = scan_number(buf, len, i);
+    i = scan_number(buf, len, i, format);
     e1 = i;
     if (e1 == s1)
         goto finish_string;
@@ -3661,7 +3678,7 @@ static int parse_scalar(const char *buf, int len, bool strict, phloat *re, phloa
         if (i < len)
             goto finish_string;
     }
-    if (parse_phloat(buf + s1, e1 - s1, re))
+    if (parse_phloat(buf + s1, e1 - s1, re, format))
         return TYPE_REAL;
 
     finish_string:
@@ -4610,7 +4627,7 @@ static vartype *deserialize_list(const char *buf, int *pos) {
                 list->array->data[i] = v;
             } else {
                 phloat x;
-                if (!parse_phloat(buf + tstart, us, &x))
+                if (!parse_phloat(buf + tstart, us, &x, NULL))
                     goto failure;
                 vartype *v = new_unit(x, buf + tstart + us + 1, tlen - us - 1);
                 if (v == NULL)
@@ -4722,12 +4739,13 @@ void core_paste(const char *buf) {
             }
             len = ascii2hp(hpbuf, len, buf, len);
             v = parse_base(hpbuf, len);
+            const char *format = core_settings.localized_copy_paste ? number_format() : NULL;
             if (v == NULL)
-                v = parse_unit(hpbuf, len);
+                v = parse_unit(hpbuf, len, format);
             if (v == NULL) {
                 phloat re, im;
                 int slen;
-                int type = parse_scalar(hpbuf, len, false, &re, &im, &slen);
+                int type = parse_scalar(hpbuf, len, false, &re, &im, &slen, format);
                 switch (type) {
                     case TYPE_REAL:
                         v = new_real(re);
@@ -4773,6 +4791,7 @@ void core_paste(const char *buf) {
             int pos = 0;
             int spos = 0;
             int p = 0, row = 0, col = 0;
+            const char *format = core_settings.localized_copy_paste ? number_format() : NULL;
             while (row < rows) {
                 c = buf[pos++];
                 if (c == 0 || c == '\t' || c == '\r' || c == '\n') {
@@ -4786,7 +4805,7 @@ void core_paste(const char *buf) {
                     spos = pos;
                     phloat re, im;
                     int slen;
-                    int type = parse_scalar(hpbuf, hplen, true, &re, &im, &slen);
+                    int type = parse_scalar(hpbuf, hplen, true, &re, &im, &slen, format);
                     if (is_string != NULL) {
                         switch (type) {
                             case TYPE_REAL:
@@ -5719,4 +5738,26 @@ static int handle_error(int error) {
             display_error(error, true);
         return 0;
     }
+}
+
+const char *number_format() {
+    const char *uf = shell_number_format();
+    static char df[9];
+    df[0] = 0;
+    int len = ascii2hp(df, 4, uf);
+    if (len >= 4)
+        df[4] = 0;
+    else
+        df[1] = 0;
+    // Sanity enforcement:
+    // Decimal must be '.' or ','; default to '.'
+    // Grouping char must be 0 (no grouping), '.', ',', '\'', or ' '; default to 0
+    // Primary and secondary group sizes must be between 1 and 9; default to no grouping
+    if (df[0] != ',')
+        df[0] = '.';
+    if (df[1] != 0 && df[1] != '.' && df[1] != ',' && df[1] != '\'' && df[1] != ' ')
+        df[1] = 0;
+    if (df[1] != 0 && !(df[2] >= '1' && df[2] <= '9' && df[3] >= '1' && df[3] <= '9'))
+        df[1] = 0;
+    return df;
 }

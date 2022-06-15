@@ -123,6 +123,7 @@ static bool is_file(const char *name);
 @synthesize prefsSingularMatrix;
 @synthesize prefsMatrixOutOfRange;
 @synthesize prefsAutoRepeat;
+@synthesize prefsLocalizedCopyPaste;
 @synthesize prefsPrintText;
 @synthesize prefsPrintTextFile;
 @synthesize prefsPrintTextRaw;
@@ -483,6 +484,7 @@ static void low_battery_checker(CFRunLoopTimerRef timer, void *info) {
     [prefsSingularMatrix setState:core_settings.matrix_singularmatrix];
     [prefsMatrixOutOfRange setState:core_settings.matrix_outofrange];
     [prefsAutoRepeat setState:core_settings.auto_repeat];
+    [prefsLocalizedCopyPaste setState:core_settings.localized_copy_paste];
     [prefsPrintText setState:state.printerToTxtFile];
     [prefsPrintTextFile setStringValue:[NSString stringWithUTF8String:state.printerTxtFileName]];
     [prefsPrintGIF setState:state.printerToGifFile];
@@ -495,6 +497,7 @@ static void low_battery_checker(CFRunLoopTimerRef timer, void *info) {
     core_settings.matrix_singularmatrix = [prefsSingularMatrix state];
     core_settings.matrix_outofrange = [prefsMatrixOutOfRange state];
     core_settings.auto_repeat = [prefsAutoRepeat state];
+    core_settings.localized_copy_paste = [prefsLocalizedCopyPaste state];
     state.printerToTxtFile = [prefsPrintText state];
     char buf[FILENAMELEN];
     [[prefsPrintTextFile stringValue] getCString:buf maxLength:FILENAMELEN encoding:NSUTF8StringEncoding];
@@ -1483,10 +1486,23 @@ uint4 shell_milliseconds() {
     return (uint4) (tv.tv_sec * 1000L + tv.tv_usec / 1000);
 }
 
-bool shell_decimal_point() {
+const char *shell_number_format() {
     NSLocale *loc = [NSLocale currentLocale];
-    NSString *dec = [loc objectForKey:NSLocaleDecimalSeparator];
-    return ![dec isEqualToString:@","];
+    static NSString *f = nil;
+    [f release];
+    f = [loc objectForKey:NSLocaleDecimalSeparator];
+    NSNumberFormatter *fmt = [[NSNumberFormatter alloc] init];
+    fmt.numberStyle = NSNumberFormatterDecimalStyle;
+    if (fmt.usesGroupingSeparator) {
+        NSString *sep = [loc objectForKey:NSLocaleGroupingSeparator];
+        int ps = fmt.groupingSize;
+        int ss = fmt.secondaryGroupingSize;
+        if (ss == 0)
+            ss = ps;
+        f = [NSString stringWithFormat:@"%@%@%c%c", f, sep, '0' + ps, '0' + ss];
+    }
+    [f retain];
+    return [f UTF8String];
 }
 
 int shell_date_format() {
@@ -1841,7 +1857,10 @@ static void init_shell_state(int4 version) {
         case 2:
             /* fall through */
         case 3:
-            /* current version (SHELL_VERSION = 3),
+            core_settings.localized_copy_paste = true;
+            /* fall through */
+        case 4:
+            /* current version (SHELL_VERSION = 4),
              * so nothing to do here since everything
              * was initialized from the state file.
              */
@@ -1880,6 +1899,9 @@ static int read_shell_state() {
         core_settings.auto_repeat = state.auto_repeat;
     }
 
+    if (state_version >= 4)
+        core_settings.localized_copy_paste = state.localized_copy_paste;
+
     init_shell_state(state_version);
     return 1;
 }
@@ -1901,7 +1923,7 @@ static int write_shell_state() {
     state.matrix_singularmatrix = core_settings.matrix_singularmatrix;
     state.matrix_outofrange = core_settings.matrix_outofrange;
     state.auto_repeat = core_settings.auto_repeat;
-    state.dummy = true;
+    state.localized_copy_paste = core_settings.localized_copy_paste;
     if (fwrite(&state, 1, sizeof(state_type), statefile) != sizeof(state_type))
         return 0;
     
