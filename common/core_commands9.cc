@@ -1742,6 +1742,9 @@ static int init_amort() {
     rm->array->data[AMORT_INT] = 0;       // INT
     rm->array->data[AMORT_PRIN] = 0;      // PRIN
     rm->array->data[AMORT_BAL] = pv_2;    // BAL
+    rm->array->data[AMORT_TABLE_FIRST] = 1;
+    rm->array->data[AMORT_TABLE_LAST] = 1;
+    rm->array->data[AMORT_TABLE_INCR] = 1;
     rm->array->data[AMORT_HEADER_I_YR] = i_yr_2;
     rm->array->data[AMORT_HEADER_P_YR] = p_yr_2;
     rm->array->data[AMORT_HEADER_PV] = pv_2;
