@@ -1,3 +1,12 @@
+2022-06-18: release 1.0.8
+
+* I%YR iteration robustness improvements.
+* Localized Copy & Paste.
+* Fixed handling of invalid number keys in BASE.
+* Setting AMORT->TABLE parameters to 1 initially.
+* Fixed #P parameter check so it doesn't allow 0.
+* iOS and MacOS versions: Fixed skin rendering for iOS 16 and MacOS 13.
+
 2022-06-11: release 1.0.7
 
 * Fixed crash in variable catalog.
