@@ -1131,91 +1131,75 @@ static int do_n(phloat i, phloat pv, phloat pmt, phloat fv, phloat p_yr, phloat 
     return ERR_NONE;
 }
 
-phloat tvm_n;
-phloat tvm_pv;
-phloat tvm_pmt;
-phloat tvm_fv;
-phloat tvm_m;
-
-static phloat tvm_eq(phloat i) {
-    if (i == 0)
-        return tvm_pmt + (tvm_pv + tvm_fv) / tvm_n;
-    else
-        return tvm_pmt + ((tvm_pv + tvm_fv) / expm1(tvm_n * log1p(i)) + tvm_m) * i;
-}
-
-static int do_i_pct_yr(phloat p_yr, phloat mode, phloat *res) {
+static int do_i_pct_yr(phloat n, phloat pv, phloat pmt, phloat fv, phloat p_yr, phloat mode, phloat *res) {
     int err = tvm_arg_check(p_yr, mode, NULL, NULL);
     if (err != ERR_NONE)
         return err;
-    if (tvm_n == 0)
+    if (n == 0)
         return ERR_INVALID_DATA;
     phloat i;
-    if (tvm_pmt == 0) {
-        if (tvm_pv == 0 || tvm_fv == 0
-                || (tvm_pv > 0) == (tvm_fv > 0))
+    if (pmt == 0) {
+        if (pv == 0 || fv == 0
+                || (pv > 0) == (fv > 0))
             return ERR_INVALID_DATA;
-        i = expm1(log(-tvm_fv / tvm_pv) / tvm_n);
+        i = expm1(log(-fv / pv) / n);
     } else {
-        if (tvm_pv == 0)
-            if (tvm_fv == 0)
+        if (mode == 1) {
+            pv += pmt;
+            fv -= pmt;
+        }
+        if (pv == 0)
+            if (fv == 0)
                 return ERR_INVALID_DATA;
             else
-                i = tvm_pmt / tvm_fv;
+                i = pmt / fv;
         else
-            if (tvm_fv == 0)
-                i = -tvm_pmt / tvm_pv;
+            if (fv == 0)
+                i = -pmt / pv;
             else {
-                phloat a = tvm_pmt / tvm_fv;
-                phloat b = -tvm_pmt / tvm_pv;
+                phloat a = pmt / fv;
+                phloat b = -pmt / pv;
                 i = fabs(b) > fabs(a) && a > -1 ? a : b;
             }
         if (p_isinf(i) || p_isnan(i) || i <= -1)
             i = 0;
-        tvm_m = tvm_pv;
-        if (mode == 1)
-            tvm_m += tvm_pmt;
-        phloat best = POS_HUGE_PHLOAT;
-        int impatience = 0;
-        bool pos = false;
-        bool neg = false;
-        while (impatience < 30) {
-            phloat f = tvm_eq(i);
-            if (f == 0) {
-                pos = neg = true;
-                break;
-            } else if (f > 0) {
-                pos = true;
-            } else {
-                neg = true;
-            }
-            phloat a = fabs(f);
-            if (a < best) {
-                best = a;
-                impatience = 0;
-                pos = neg = false;
-            } else {
-                impatience++;
-            }
-            phloat h;
+        int c = 2;
+        phloat f;
+        while (true) {
+            phloat eps, f0 = f;
             if (i == 0) {
-                h = 1e-6;
+                phloat a = (pv + fv) / n;
+                phloat b = pv - fv;
+                f = a + pmt;
+                phloat fp = (a + b) / 2;
+                i = eps = -f / fp;
             } else {
-                h = i / 10000;
-                if (i + h == i)
-                    h = i;
+                phloat x = i / expm1(n * log1p(i));
+                phloat k = (pv + fv) * x;
+                phloat y = n * x - 1;
+                f = k + pv * i + pmt;
+                phloat num = y + (n - 1) * i;
+                phloat den = i + i * i;
+                x = f * den / (k * num - pv * den);
+                i = i + x; // Newton's method
+                eps = x;
             }
-            phloat f2 = tvm_eq(i + h);
-            phloat d = (f2 - f) / h;
-            if (d == 0)
+            if (c > 0) {
+                c--;
+                continue;
+            }
+            if (p_isnan(f))
+                return ERR_NO_SOLUTION_FOUND;
+            if (f == 0 || (f > 0) != (f0 > 0))
                 break;
-            phloat new_i = i - f / d;
-            if (new_i == i)
-                break;
-            i = new_i;
+            if (fabs(f) >= fabs(f0)) {
+                if (i == i - eps / 100) {
+                    i -= eps;
+                    break;
+                } else
+                    return ERR_NO_SOLUTION_FOUND;
+            }
         }
-        if (!(pos && neg))
-            return ERR_NO_SOLUTION_FOUND;
     }
     i *= p_yr * 100;
     int inf;
@@ -1312,14 +1296,14 @@ int docmd_gen_n(arg_struct *arg) {
 }
 
 int docmd_gen_i(arg_struct *arg) {
-    tvm_n = ((vartype_real *) stack[sp - 5])->x;
-    tvm_pv = ((vartype_real *) stack[sp - 4])->x;
-    tvm_pmt = ((vartype_real *) stack[sp - 3])->x;
-    tvm_fv = ((vartype_real *) stack[sp - 2])->x;
+    phloat n = ((vartype_real *) stack[sp - 5])->x;
+    phloat pv = ((vartype_real *) stack[sp - 4])->x;
+    phloat pmt = ((vartype_real *) stack[sp - 3])->x;
+    phloat fv = ((vartype_real *) stack[sp - 2])->x;
     phloat p_yr = ((vartype_real *) stack[sp - 1])->x;
     phloat mode = ((vartype_real *) stack[sp])->x;
     phloat i;
-    int err = do_i_pct_yr(p_yr, mode, &i);
+    int err = do_i_pct_yr(n, pv, pmt, fv, p_yr, mode, &i);
     if (err != ERR_NONE)
         return err;
     else
@@ -1504,12 +1488,12 @@ int docmd_i_pct_yr(arg_struct *arg) {
     int err = check_tvm_params(n, pv, pmt, fv, p_yr, mode);
     if (err != ERR_NONE)
         return err;
-    tvm_n = ((vartype_real *) n)->x;
-    tvm_pv = ((vartype_real *) pv)->x;
-    tvm_pmt = ((vartype_real *) pmt)->x;
-    tvm_fv = ((vartype_real *) fv)->x;
     phloat i;
-    err = do_i_pct_yr(((vartype_real *) p_yr)->x,
+    err = do_i_pct_yr(((vartype_real *) n)->x,
+                      ((vartype_real *) pv)->x,
+                      ((vartype_real *) pmt)->x,
+                      ((vartype_real *) fv)->x,
+                      ((vartype_real *) p_yr)->x,
                       ((vartype_real *) mode)->x,
                       &i);
     if (err != ERR_NONE)
