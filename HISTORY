@@ -1,3 +1,12 @@
+2022-06-19: release 1.0.9
+
+* SGN() didn't evaluate its parameter, and instead consumed the value from
+  level 1. Fixed.
+  Note that this was a code generator bug; any expressions containing SGN()
+  will have to be re-parsed in order to eliminate the effects of this bug.
+* SOLVE in PLOT, when used with a function with X:<STK>, would create an
+  extraneous variable named "". Fixed.
+
 2022-06-18: release 1.0.8
 
 * I%YR iteration robustness improvements.
