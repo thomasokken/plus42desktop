@@ -2577,6 +2577,7 @@ class Sgn : public UnaryEvaluator {
     }
 
     void generateCode(GeneratorContext *ctx) {
+        ev->generateCode(ctx);
         ctx->addLine(tpos, CMD_UNIT_T);
         ctx->addLine(tpos, CMD_UVAL);
         ctx->addLine(tpos, CMD_REAL_T);
