@@ -770,15 +770,18 @@ static int finish_solve(int message) {
         solve.param_unit = NULL;
         ((vartype_unit *) v)->x = b;
     }
-    int err = store_var(solve.var_name, solve.var_length, v);
-    if (err != ERR_NONE) {
-        free_vartype(v);
-        return err;
+    if (solve.var_length > 0) {
+        int err = store_var(solve.var_name, solve.var_length, v);
+        if (err != ERR_NONE) {
+            free_vartype(v);
+            return err;
+        }
+        v = dup_vartype(v);
     }
 
     if (flags.f.big_stack && !ensure_stack_capacity(4))
         return ERR_INSUFFICIENT_MEMORY;
-    new_x = dup_vartype(v);
+    new_x = v;
     new_y = new_real(s);
     new_z = new_real(final_f);
     new_t = new_real(message);
