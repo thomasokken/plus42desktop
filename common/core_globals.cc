@@ -4096,13 +4096,15 @@ bool should_i_stop_at_this_level() {
 static void remove_locals() {
     if (matedit_mode == 3 && matedit_dir <= 0 && -matedit_dir >= rtn_level)
         leave_matrix_editor();
+    int old_count = local_vars_count;
     for (int i = local_vars_count - 1; i >= 0; i--) {
         if (local_vars[i].level < rtn_level)
             break;
         free_vartype(local_vars[i].value);
         local_vars_count--;
     }
-    update_catalog();
+    if (local_vars_count != old_count)
+        update_catalog();
 }
 
 int rtn(int err) {
