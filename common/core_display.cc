@@ -2614,6 +2614,8 @@ bool show_nonlocal_vars(int catsect) {
 }
 
 static void draw_catalog() {
+    if (program_running())
+        return;
     int catsect = get_cat_section();
     int catindex = get_cat_index();
     if (catsect == CATSECT_TOP) {
