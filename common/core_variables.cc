@@ -1040,7 +1040,8 @@ static bool var_exists(int section, int type) {
 bool vars_exist(int section) {
     bool show_ancestors = show_nonlocal_vars(section);
     for (int i = 0; i < local_vars_count; i++)
-        if (var_exists(section, local_vars[i].value->type))
+        if ((local_vars[i].flags & (VAR_HIDDEN | VAR_PRIVATE)) == 0
+                && var_exists(section, local_vars[i].value->type))
             return true;
     directory *dir = cwd;
     do {
