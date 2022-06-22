@@ -1244,7 +1244,7 @@ static int do_pmt(phloat n, phloat i, phloat pv, phloat fv, phloat p_yr, phloat 
     if (i == 0) {
         pmt = -(pv + fv) / n;
     } else {
-        pmt = -(pv + fv * exp(-n * log1p(i))) / (-expm1(-n * log1p(i)) / i);
+        pmt = -((pv + fv) / expm1(n * log1p(i)) + pv) * i;
         int inf;
         if ((inf = p_isinf(pmt)) != 0) {
             if (flags.f.range_error_ignore)
