@@ -1,3 +1,9 @@
+2022-08-13: release 1.0.10
+
+* Fixed crash in PARSE when parsing ITEM().
+* Fixed (re,im) complex pasting. This was broken by localized copy & paste.
+* Special cases for pure real and pure imaginary in SQRT.
+
 2022-06-19: release 1.0.9
 
 * SGN() didn't evaluate its parameter, and instead consumed the value from

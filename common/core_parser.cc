@@ -4028,9 +4028,11 @@ std::vector<Evaluator *> *Parser::parseExprList(int min_args, int max_args, int 
             if (!lex->isIdentifier(t))
                 goto fail;
             if (t == "ITEM") {
-                std::vector<Evaluator *> *evs = parseExprList(2, 3, EXPR_LIST_NAME);
                 std::string t2;
                 int t2pos;
+                if (!nextToken(&t2, &t2pos) || t2 != "(")
+                    goto fail;
+                std::vector<Evaluator *> *evs = parseExprList(2, 3, EXPR_LIST_NAME);
                 if (!nextToken(&t2, &t2pos) || t2 != ")") {
                     for (int i = 0; i < evs->size(); i++)
                         delete (*evs)[i];
