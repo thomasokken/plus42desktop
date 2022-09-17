@@ -5185,6 +5185,10 @@ static synonym_spec hp41_synonyms[] =
     { "0>=?",   false, 4, CMD_0_GE_NN },
     { "MKDIR",  false, 5, CMD_CRDIR   },
     { "RMDIR",  false, 5, CMD_PGDIR   },
+    { "<>",     false, 2, CMD_GEN_NE  },
+    { "#",      false, 1, CMD_GEN_NE  },
+    { "<=",     false, 2, CMD_GEN_LE  },
+    { ">=",     false, 2, CMD_GEN_GE  },
     { "",       true,  0, CMD_NONE    }
 };
 
