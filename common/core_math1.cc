@@ -856,6 +856,27 @@ int return_to_solve(bool failure, bool stop) {
             return ERR_TOO_FEW_ARGUMENTS;
         if (flags.f.big_stack && !ensure_stack_capacity(1))
             return ERR_INSUFFICIENT_MEMORY;
+
+        /* If the variable being solved for already exists, try to convert
+         * the direct solver's result to the same unit as the existing value.
+         */
+        if (stack[sp]->type == TYPE_UNIT) {
+            bool writable;
+            vartype *prev = recall_var(solve.var_name, solve.var_length, &writable);
+            if (prev != NULL && prev->type == TYPE_UNIT && writable) {
+                phloat n;
+                int err = convert_helper(prev, stack[sp], &n);
+                if (err == ERR_NONE) {
+                    vartype *nv = dup_vartype(prev);
+                    if (nv != NULL) {
+                        ((vartype_unit *) nv)->x = n;
+                        free_vartype(stack[sp]);
+                        stack[sp] = nv;
+                    }
+                }
+            }
+        }
+
         vartype *v = dup_vartype(stack[sp]);
         vartype *m = new_string("Direct", 6);
         if (v == NULL || m == NULL) {
