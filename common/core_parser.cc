@@ -3927,7 +3927,7 @@ Evaluator *Parser::parseTerm() {
                 goto fail;
             if (t == "")
                 return ev;
-            if (t == "*" || t == "/" || t == "_") {
+            if (t == "*" || t == "/") {
                 if (ev->isBool()) {
                     fail:
                     delete ev;
@@ -3942,10 +3942,8 @@ Evaluator *Parser::parseTerm() {
                 }
                 if (t == "*")
                     ev = new Product(tpos, ev, ev2);
-                else if (t == "/")
-                    ev = new Quotient(tpos, ev, ev2);
                 else
-                    ev = new Unit(tpos, ev, ev2);
+                    ev = new Quotient(tpos, ev, ev2);
             } else {
                 pushback(t, tpos);
                 return ev;
@@ -3966,7 +3964,7 @@ Evaluator *Parser::parseFactor() {
             delete ev;
             return NULL;
         }
-        if (t == "^" || t == "\36") {
+        if (t == "^" || t == "\36" || t == "_") {
             if (ev->isBool())
                 goto fail;
             Evaluator *ev2 = parseThing();
@@ -3976,7 +3974,10 @@ Evaluator *Parser::parseFactor() {
                 delete ev2;
                 goto fail;
             }
-            ev = new Power(tpos, ev, ev2);
+            if (t == "^" || t == "\36")
+                ev = new Power(tpos, ev, ev2);
+            else
+                ev = new Unit(tpos, ev, ev2);
         } else {
             pushback(t, tpos);
             return ev;
