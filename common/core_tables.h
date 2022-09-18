@@ -447,7 +447,7 @@
 #define CMD_CPXMAT_T    401
 #define CMD_TYPE_T      402
 /* (Skipping 403 because of single-byte equality checks with CMD_END) */
-#define CMD_A_THRU_F    404
+#define CMD_A_THRU_F_2  404
 /* String & List Functions */
 #define CMD_XSTR        405
 #define CMD_XASTO       406

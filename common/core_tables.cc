@@ -490,7 +490,7 @@ const command_spec cmd_array[] =
     { /* TYPE_T */     docmd_type_t,      "TYP\305?",            0x00, 0x00, 0xa2, 0x76,  5, ARG_NONE,   1, ALLT },
     /* (Skipping 403 because of single-byte equality checks with CMD_END) */
     { /* DUMMY */      NULL,              "",                    0x44, 0x00, 0x00, 0x00,  0, ARG_OTHER,  0, UNIM },
-    { /* A_THRU_F */   docmd_a_thru_f,    "A..F",                0x00, 0x00, 0xa7, 0x1b,  4, ARG_NONE,   0, NA_T },
+    { /* A_THRU_F_2 */ docmd_a_thru_f,    "A...F",               0x00, 0x00, 0xa7, 0x1b,  5, ARG_NONE,   0, NA_T },
 
     /* String & List Functions */
     { /* XSTR */       docmd_xstr,        "XSTR",                0x20, 0x41, 0x00, 0x00,  4, ARG_XSTR,   0, NA_T },
