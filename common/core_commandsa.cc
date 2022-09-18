@@ -1044,7 +1044,7 @@ int return_to_plot(bool failure, bool stop) {
         }
 
         if (state == PLOT_STATE_PLOTTING) {
-            int v = to_int((ymax - y) / (ymax - ymin) * (disp_h - 1) + 0.5);
+            int v = to_int(floor((ymax - y) / (ymax - ymin) * (disp_h - 1) + 0.5));
             phloat lasty = data.last_y;
             data.set_phloat(PLOT_LAST_Y, data.last_y = y);
             if (p_isnan(lasty)) {
@@ -1053,7 +1053,7 @@ int return_to_plot(bool failure, bool stop) {
                     flush_display();
                 }
             } else {
-                int lv = to_int((ymax - lasty) / (ymax - ymin) * (disp_h - 1) + 0.5);
+                int lv = to_int(floor((ymax - lasty) / (ymax - ymin) * (disp_h - 1) + 0.5));
                 /* Don't draw lines if both endpoints are off-screen */
                 if (lv >= 0 && lv < disp_h || v >= 0 && v < disp_h) {
                     int x = to_int(pixel);
