@@ -466,7 +466,10 @@ void core_keytimeout1() {
         pending_command = saved_pending_command;
     } else if (pending_command != CMD_NONE && pending_command != CMD_CANCELLED
             && (cmd_array[pending_command].flags & FLAG_NO_SHOW) == 0) {
+        bool saved_prgm_mode = flags.f.prgm_mode;
+        flags.f.prgm_mode = 0;
         redisplay(2);
+        flags.f.prgm_mode = saved_prgm_mode;
     }
 }
 
@@ -477,7 +480,10 @@ void core_keytimeout2() {
     if (pending_command != CMD_NONE && pending_command != CMD_CANCELLED
             && (cmd_array[pending_command].flags & FLAG_NO_SHOW) == 0) {
         pending_command = CMD_NULL;
+        bool saved_prgm_mode = flags.f.prgm_mode;
+        flags.f.prgm_mode = 0;
         redisplay(2);
+        flags.f.prgm_mode = saved_prgm_mode;
         pending_command = CMD_CANCELLED;
     }
 }
