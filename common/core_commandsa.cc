@@ -1987,5 +1987,7 @@ int docmd_line(arg_struct *arg) {
     int xx2 = x2 < 0 ? -to_int(-x2 + 0.5) : to_int(x2 + 0.5);
     int yy2 = y2 < 0 ? -to_int(-y2 + 0.5) : to_int(y2 + 0.5);
     draw_line(xx1 - 1, yy1 - 1, xx2 - 1, yy2 - 1);
+    flush_display();
+    mode_message_lines = ALL_LINES;
     return ERR_NONE;
 }
