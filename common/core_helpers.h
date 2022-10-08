@@ -87,6 +87,7 @@ void print_wide(const char *left, int leftlen,
 void print_command(int cmd, const arg_struct *arg);
 void print_trace();
 void print_stack_trace();
+void print_one_var(const char *name, int length);
 int alpha_print_helper(const char *text, int length);
 void alpha_view_helper(const char *text, int length);
 

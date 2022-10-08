@@ -849,19 +849,40 @@ static int store_params2(std::vector<std::string> *params, bool lenient) {
     int nparams = params == NULL ? 0 : (int) params->size();
     if (n < nparams)
         return ERR_TOO_FEW_ARGUMENTS;
-    if (n > nparams && (nparams != 0 || !lenient))
-        return ERR_TOO_MANY_ARGUMENTS;
+    bool stack_params = false;
+    if (n > nparams) {
+        if (nparams != 0 || !lenient)
+            return ERR_TOO_MANY_ARGUMENTS;
+        stack_params = true;
+    }
     if (!ensure_var_space(nparams))
         return ERR_INSUFFICIENT_MEMORY;
     int vsp = sp - nparams - 1;
+
+    if (flags.f.trace_print && flags.f.printer_exists) {
+        char buf[24];
+        int ptr = 0;
+        string2buf(buf, 24, &ptr, "\17PAR: ", 6);
+        ptr += int2string(n, buf + ptr, 24 - ptr);
+        if (n > 0)
+            string2buf(buf, 24, &ptr, stack_params ? " STK" : " VAR", 4);
+        string2buf(buf, 24, &ptr, " PARAM", 6);
+        if (n != 1)
+            char2buf(buf, 24, &ptr, 'S');
+        print_text(buf, ptr, true);
+    }
+
     for (int i = 0; i < nparams; i++) {
         std::string p = (*params)[i];
         store_var(p.c_str(), (int) p.length(), stack[vsp++], true);
+        if (flags.f.trace_print && flags.f.printer_exists)
+            print_one_var(p.c_str(), (int) p.length());
     }
     free_vartype(stack[sp - 1]);
     free_vartype(lastx);
     lastx = stack[sp];
     sp -= nparams + 2;
+    print_trace();
     return ERR_NONE;
 }
 

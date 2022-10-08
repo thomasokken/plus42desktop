@@ -1308,33 +1308,6 @@ int docmd_pgmmenu(arg_struct *arg) {
     return err;
 }
 
-static void print_one_var(const char *name, int length) {
-    vartype *v = recall_var(name, length);
-    char lbuf[32], rbuf[100];
-    int llen = 0, rlen = 0;
-    string2buf(lbuf, 8, &llen, name, length);
-    char2buf(lbuf, 8, &llen, '=');
-
-    if (v == NULL) {
-        print_wide(lbuf, llen, "<Unset>", 7);
-    } else if (v->type == TYPE_STRING) {
-        vartype_string *s = (vartype_string *) v;
-        char *sbuf = (char *) malloc(s->length + 2);
-        if (sbuf == NULL) {
-            print_wide(lbuf, llen, "<Low Mem>", 9);
-        } else {
-            sbuf[0] = '"';
-            memcpy(sbuf + 1, s->txt(), s->length);
-            sbuf[s->length + 1] = '"';
-            print_wide(lbuf, llen, sbuf, s->length + 2);
-            free(sbuf);
-        }
-    } else {
-        rlen = vartype2string(v, rbuf, 100);
-        print_wide(lbuf, llen, rbuf, rlen);
-    }
-}
-
 int docmd_pgmvar(arg_struct *arg) {
     if (!flags.f.printer_enable && program_running())
         return ERR_NONE;
