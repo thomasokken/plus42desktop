@@ -3489,7 +3489,7 @@ bool display_header() {
         draw_pixel(x, 6);
 
     int app_w = 0;
-    if (mode_appmenu >= MENU_BASE && mode_appmenu <= MENU_BASE_LOGIC || get_front_menu() == MENU_MODES3) {
+    if (mode_appmenu >= MENU_BASE && mode_appmenu <= MENU_BASE_LOGIC || mode_plainmenu == MENU_MODES3) {
         char buf[50];
         int pos = 0;
         string2buf(buf, 50, &pos, "WS: ", 4);
