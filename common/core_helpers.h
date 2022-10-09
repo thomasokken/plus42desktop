@@ -123,7 +123,7 @@ int ulong2string(uint8 n, char *buf, int buflen);
 int vartype2string(const vartype *v, char *buf, int buflen, int max_mant_digits = 12);
 const char *phloat2program(phloat d);
 int easy_phloat2string(phloat d, char *buf, int buflen, int base_mode);
-int real2buf(char *buf, phloat x, const char *format = NULL);
+int real2buf(char *buf, phloat x, const char *format = NULL, bool force_decimal = true);
 int ip2revstring(phloat d, char *buf, int buflen);
 
 vartype_list *get_path();

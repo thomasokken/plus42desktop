@@ -1896,7 +1896,7 @@ int vartype2string(const vartype *v, char *buf, int buflen, int max_mant_digits)
         case TYPE_UNIT: {
             vartype_unit *u = (vartype_unit *) v;
             int p = phloat2string(u->x, buf, buflen,
-                                 1, digits, dispmode,
+                                 0, digits, dispmode,
                                  flags.f.thousands_separators,
                                  max_mant_digits);
             char2buf(buf, buflen, &p, '_');
@@ -2102,8 +2102,8 @@ int easy_phloat2string(phloat d, char *buf, int buflen, int base_mode) {
                          digits, dispmode, flags.f.thousands_separators);
 }
 
-int real2buf(char *buf, phloat x, const char *format) {
-    int bufptr = phloat2string(x, buf, 49, 2, 0, 3, 0, MAX_MANT_DIGITS, format);
+int real2buf(char *buf, phloat x, const char *format, bool force_decimal) {
+    int bufptr = phloat2string(x, buf, 49, force_decimal ? 0 : 1, 0, 3, 0, MAX_MANT_DIGITS, format);
     /* Convert small-caps 'E' to regular 'e' */
     for (int i = 0; i < bufptr; i++)
         if (buf[i] == 24)

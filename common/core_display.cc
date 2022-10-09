@@ -3434,7 +3434,7 @@ void show() {
         case TYPE_UNIT: {
             vartype_unit *u = (vartype_unit *) rx;
             bufptr = phloat2string(((vartype_real *) rx)->x, buf, sz,
-                                    2, 0, 3,
+                                    0, 0, 3,
                                     flags.f.thousands_separators, MAX_MANT_DIGITS);
             int ulen = u->length;
             int nlen = bufptr;

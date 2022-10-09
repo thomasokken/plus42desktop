@@ -2604,14 +2604,14 @@ static int complex2buf(char *buf, phloat re, phloat im, bool always_rect, const 
         x = re;
         y = im;
     }
-    int bufptr = phloat2string(x, buf, 99, 2, 0, 3, 0, MAX_MANT_DIGITS, format);
+    int bufptr = phloat2string(x, buf, 99, 0, 0, 3, 0, MAX_MANT_DIGITS, format);
     if (polar) {
         string2buf(buf, 99, &bufptr, " \342\210\240 ", 5);
     } else {
         if (y >= 0 || p_isinf(y) != 0 || p_isnan(y))
             buf[bufptr++] = '+';
     }
-    bufptr += phloat2string(y, buf + bufptr, 99 - bufptr, 2, 0, 3, 0, MAX_MANT_DIGITS, format);
+    bufptr += phloat2string(y, buf + bufptr, 99 - bufptr, 0, 0, 3, 0, MAX_MANT_DIGITS, format);
     if (!polar)
         buf[bufptr++] = 'i';
     /* Convert small-caps 'E' to regular 'e' */
@@ -2842,7 +2842,7 @@ char *core_copy() {
     } else if (stack[sp]->type == TYPE_REAL) {
         const char *format = core_settings.localized_copy_paste ? number_format() : NULL;
         char *buf = (char *) malloc(50);
-        int bufptr = real2buf(buf, ((vartype_real *) stack[sp])->x, format);
+        int bufptr = real2buf(buf, ((vartype_real *) stack[sp])->x, format, false);
         buf[bufptr] = 0;
         return buf;
     } else if (stack[sp]->type == TYPE_COMPLEX) {
