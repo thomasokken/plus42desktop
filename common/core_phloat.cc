@@ -23,6 +23,7 @@
 
 #include "core_phloat.h"
 #include "core_helpers.h"
+#include "core_display.h"
 #include "shell.h"
 
 #ifndef BCD_MATH
@@ -1055,13 +1056,13 @@ int phloat2string(phloat pd, char *buf, int buflen, int base_mode, int digits,
             n &= (1ULL << wsize) - 1;
 
         uint8 mask;
-        mask = 0xfffff00000000000ULL;
+        mask = disp_r * disp_c >= 64 ? 0 : (uint8) (-1LL << (disp_r * disp_c));
         if (inexact)
             mask <<= 1;
         if (too_big)
             mask <<= 1;
         if (base_mode == 2 && base == 2 && (n & mask) != 0) {
-            // More than 44 bits; won't fit. Use hex instead.
+            // Too many bits; won't fit. Use hex instead.
             string2buf(buf, buflen, &chars_so_far, "hex ", 4);
             base = 16;
         }
