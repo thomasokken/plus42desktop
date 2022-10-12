@@ -534,17 +534,27 @@ static int ref_move_copy(bool copy) {
 
         // Next, programs...
 
+        bool first = true;
         for (int i = cwd->prgms_count - 1; i >= 0; i--) {
             if (!copy) {
                 for (int j = 0; j < new_prgms_count; j++)
                     if (new_prgms[j].capacity == cwd->id && new_prgms[j].size == i)
                         goto skip3;
             }
+            if (first && cwd->prgms[i].text[0] == CMD_END) {
+                // There is an empty program at the end of the current
+                // directory, while we are moving or copying programs in:
+                // remove the empty program, similarly to how we treat
+                // such empty programs during import.
+                free(cwd->prgms[i].text);
+                goto skip3;
+            }
             new_prgms[new_prgms_count].capacity = cwd->id;
             new_prgms[new_prgms_count].size = i;
             new_prgms[new_prgms_count].text = NULL;
             new_prgms_count++;
-            skip3:;
+            skip3:
+            first = false;
         }
         for (int i = 0; i < new_prgms_count; i++) {
             directory *dir = get_dir(new_prgms[i].capacity);
