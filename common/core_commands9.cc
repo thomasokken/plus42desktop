@@ -1174,7 +1174,7 @@ static int do_i_pct_yr(phloat n, phloat pv, phloat pmt, phloat fv, phloat p_yr, 
         if (p_isinf(i) || p_isnan(i) || i <= -1)
             i = 0;
         int c = 2;
-        phloat f;
+        phloat f = 0;
         while (true) {
             phloat eps, f0 = f;
             if (1 + i * i == 1) {
