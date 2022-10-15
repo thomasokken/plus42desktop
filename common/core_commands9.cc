@@ -1177,12 +1177,14 @@ static int do_i_pct_yr(phloat n, phloat pv, phloat pmt, phloat fv, phloat p_yr, 
         phloat f;
         while (true) {
             phloat eps, f0 = f;
-            if (i == 0) {
+            if (1 + i * i == 1) {
                 phloat a = (pv + fv) / n;
                 phloat b = pv - fv;
-                f = a + pmt;
                 phloat fp = (a + b) / 2;
-                i = eps = -f / fp;
+                phloat fpp = (n * n - 1) * a / 6;
+                f = a + pmt + fp * i;
+                fp += fpp * i;
+                i += (eps = -f / fp);
             } else {
                 phloat x = i / expm1(n * log1p(i));
                 phloat k = (pv + fv) * x;
@@ -1203,8 +1205,8 @@ static int do_i_pct_yr(phloat n, phloat pv, phloat pmt, phloat fv, phloat p_yr, 
             if (f == 0 || (f > 0) != (f0 > 0))
                 break;
             if (fabs(f) >= fabs(f0)) {
-                if (i == i - eps / 100) {
-                    i -= eps;
+                if (i == i - eps / 1000) {
+                    i -= eps / 2;
                     break;
                 } else
                     return ERR_NO_SOLUTION_FOUND;
