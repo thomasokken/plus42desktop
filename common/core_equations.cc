@@ -2332,6 +2332,8 @@ static void start_edit(int pos) {
             int maxlen = lines * disp_c;
             while (pos - display_pos > maxlen / 2)
                 display_pos += disp_c;
+            while (display_pos > 0 && edit_len - display_pos < maxlen - disp_c + 1)
+                display_pos -= disp_c;
         }
         update_menu(MENU_NONE);
         restart_cursor();
