@@ -1,3 +1,22 @@
+2022-10-27: release 1.0.12
+
+* SOLVE does a better job of reporting Sign Reversal when a function changes
+  sign around a vertical asymptote, instead of reporting it as a root.
+* When returning to the equation editor after a parse error, the text could be
+  positioned incorrectly on the screen, and the editor could even crash, in
+  some cases. Fixed.
+* Added Boolean operators to the equation editor's PGM.FCN menu.
+* Made I%YR solver a bit more robust.
+* BASE: complex numbers and numbers with units were displayed in non-decimal
+  bases in some cases.
+* Better HEXM and OCTM handling in SHOW.
+* Fixed number entry in PRGM mode when BINM/OCTM/HEXM active
+* No longer setting flag 22 if number entry ends with DROP in NSTK mode.
+* Added LINE PLOT.M SPFV SPPV TVM USFV USPV to CATALOG->MISC.
+* ->PAR now produces more helpful output in TRACE mode.
+* Windows, Mac, and Linux versions: added Alt-1 through Alt-6 as mappings for
+  the second row of the keyboard.
+
 2022-10-01: release 1.0.11
 
 * Fixed crash in SHOW for certain complex numbers.

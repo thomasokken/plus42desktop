@@ -968,13 +968,11 @@ int return_to_plot(bool failure, bool stop) {
     phloat ymax = data.axes[1].max;
 
     if (!failure && sp != -1 && (res->type == TYPE_REAL || res->type == TYPE_UNIT)) {
-        if (state != PLOT_STATE_INTEG && data.axes[1].len > 0 && stack[sp - 1]->type != TYPE_STRING && ((vartype_real *) stack[sp - 3])->x != 0) {
+        if (state == PLOT_STATE_SOLVE && stack[sp - 1]->type != TYPE_STRING && ((vartype_real *) stack[sp - 3])->x != 0) {
             // Not an error, but the solver didn't find a root
-            if (state == PLOT_STATE_SOLVE) {
-                replot = true;
-                data.set_phloat(PLOT_RESULT, data.result = ((vartype_real *) stack[sp - 3])->x);
-                data.set_int(PLOT_RESULT_TYPE, data.result_type = PLOT_RESULT_SOLVE_FAIL);
-            }
+            replot = true;
+            data.set_phloat(PLOT_RESULT, data.result = ((vartype_real *) stack[sp - 3])->x);
+            data.set_int(PLOT_RESULT_TYPE, data.result_type = PLOT_RESULT_SOLVE_FAIL);
             goto fail;
         }
         phloat y;
