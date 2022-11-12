@@ -394,14 +394,15 @@ class BinaryEvaluator : public Evaluator {
 
     void collectVariables(std::vector<std::string> *vars, std::vector<std::string> *locals) {
         left->collectVariables(vars, locals);
-        right->collectVariables(vars, locals);
+        if (right != NULL)
+            right->collectVariables(vars, locals);
     }
 
     int howMany(const std::string &name) {
         int a = left->howMany(name);
         if (a == -1)
             return -1;
-        int b = right->howMany(name);
+        int b = right == NULL ? 0 : right->howMany(name);
         if (b == -1)
             return -1;
         int c = a + b;
