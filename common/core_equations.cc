@@ -1063,6 +1063,9 @@ static void draw_print2_menu() {
 }
 
 void eqn_set_selected_row(int row) {
+    screen_row += row - selected_row;
+    if (screen_row < 0)
+        screen_row = 0;
     selected_row = row;
 }
 
