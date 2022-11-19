@@ -810,6 +810,8 @@ static const unitdef *find_unit(std::string s, int *exponent, vartype **user, st
         }
         char prefix = s[0];
         switch (prefix) {
+            case 'Q': *exponent = 30; break;
+            case 'R': *exponent = 27; break;
             case 'Y': *exponent = 24; break;
             case 'Z': *exponent = 21; break;
             case 'E': *exponent = 18; break;
@@ -829,6 +831,8 @@ static const unitdef *find_unit(std::string s, int *exponent, vartype **user, st
             case 'a': *exponent = -18; break;
             case 'z': *exponent = -21; break;
             case 'y': *exponent = -24; break;
+            case 'r': *exponent = -27; break;
+            case 'q': *exponent = -30; break;
             default: *user = NULL; return NULL;
         }
         s = s.substr(1, s.length() - 1);
