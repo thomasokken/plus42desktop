@@ -1,3 +1,8 @@
+2022-11-19: release 1.0.14
+
+* Added support for new SI prefixes: R (ronna, 10^27), Q (quetta, 10^30), r
+  (ronto, 10^-27), and q (quecto, 10^-30).
+
 2022-11-12: release 1.0.13
 
 * Fixed crash with one-arg RADIUS, ANGLE, XCOORD, and YCOORD.
