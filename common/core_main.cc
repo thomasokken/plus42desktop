@@ -3252,16 +3252,16 @@ int ascii2hp(char *dst, int dstlen, const char *src, int srclen /* = -1 */) {
             case 0x00f6: code =  28; break; // lowercase o with umlaut
             case 0x00dc:                    // uppercase u with umlaut
             case 0x00fc: code =  29; break; // lowercase u with umlaut
-            case 0x00b7:                    // middle dot (Emu42)
             case 0x2191: code =  30; break; // upward-pointing arrow
+            case 0x00b7:                    // middle dot (Emu42)
             case 0x2022: code =  31; break; // bullet
             case 0x201c:                    // left curly double quote
             case 0x201d: code =  34; break; // right curly double quote
             case 0x2018:                    // left curly single quote
             case 0x2019: code =  39; break; // right curly single quote
+            case 0x2212: code =  45; break; // minus sign
             case 0x22a2:                    // right tack sign (i41CX)
             case 0x22a6:                    // assertion sign (Emu42)
-            case 0x2212: code =  45; break; // minus sign
             case 0x251c: code = 127; break; // append sign
             case 0x028f: code = 129; break; // small-caps y
             case 0x03a9: code = 130; break; // Uppercase omega
