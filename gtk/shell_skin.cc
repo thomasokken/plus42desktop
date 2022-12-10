@@ -987,7 +987,7 @@ void skin_repaint_key(cairo_t *cr, int key, bool state) {
 
         for (int v = y; v < y + height; v++)
             for (int h = x; h < x + width; h++)
-                if (((disp_bits[v * 17 + (h >> 3)] & (1 << (h & 7))) != 0) != state) {
+                if (((disp_bits[v * disp_bpl + (h >> 3)] & (1 << (h & 7))) != 0) != state) {
                     cairo_rectangle(cr, h, v, 1, 1);
                     cairo_fill(cr);
                 }
@@ -1096,8 +1096,8 @@ bool need_to_paint_only_display(cairo_t *cr) {
     cairo_clip_extents(cr, &left, &top, &right, &bottom);
     return left >= display_loc.x - display_scale_x
         && top >= display_loc.y - display_scale_y
-        && right <= display_loc.x + 132 * display_scale_x
-        && bottom <= display_loc.y + 17 * display_scale_y;
+        && right <= display_loc.x + (disp_w + 1) * display_scale_x
+        && bottom <= display_loc.y + (disp_h + 1) * display_scale_y;
 }
 
 void skin_repaint_display(cairo_t *cr) {
