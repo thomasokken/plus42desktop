@@ -1,3 +1,9 @@
+2022-12-14: release 1.0.15
+
+* Fixed a couple of bugs in Paste of scalars in BINM, OCTM, and HEXM modes.
+* Fixed pasting of U+22A2 and U+22A6 ('append' characters used by i41CX and
+  Emu42) and U+00B7 ('bullet' character used by Emu42).
+
 2022-11-19: release 1.0.14
 
 * Added support for new SI prefixes: R (ronna, 10^27), Q (quetta, 10^30), r
