@@ -110,6 +110,7 @@
 /windows/.vs
 /windows/Debug
 /windows/Release
+/windows/32
 /windows/keymap.cpp
 /windows/skins.cpp
 /windows/Free42Binary.exe
@@ -117,7 +118,8 @@
 /windows/Plus42Binary.exe
 /windows/Plus42Decimal.exe
 /windows/IntelRDFPMathLib20U1
-/windows/cl111libbid.lib
+/windows/cl111libbid32.lib
+/windows/cl111libbid64.lib
 /windows/readtest.c
 /windows/readtest_lines.cpp
 /windows/bid_conf.h
