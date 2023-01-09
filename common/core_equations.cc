@@ -615,7 +615,6 @@ static eqn_name_entry eqn_name[] = {
     { CMD_TO_HMS,    4, "HMS("     },
     { CMD_TO_DEC,    4, "DEC("     },
     { CMD_TO_OCT,    4, "OCT("     },
-    { CMD_TO_OCT,    4, "OCT("     },
     { CMD_SIGN,      4, "SGN("     },
     { CMD_DATE,      5, "CDATE"    },
     { CMD_TIME,      5, "CTIME"    },
