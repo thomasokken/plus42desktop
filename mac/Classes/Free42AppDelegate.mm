@@ -1,6 +1,6 @@
 /*****************************************************************************
  * Plus42 -- an enhanced HP-42S calculator simulator
- * Copyright (C) 2004-2022  Thomas Okken
+ * Copyright (C) 2004-2023  Thomas Okken
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, version 2,
@@ -476,7 +476,7 @@ static void low_battery_checker(CFRunLoopTimerRef timer, void *info) {
 - (IBAction) showAbout:(id)sender {
     const char *version = [Free42AppDelegate getVersion];
     [aboutVersion setStringValue:[NSString stringWithFormat:@"Plus42 %s", version]];
-    [aboutCopyright setStringValue:@"© 2004-2022 Thomas Okken"];
+    [aboutCopyright setStringValue:@"© 2004-2023 Thomas Okken"];
     [NSApp runModalForWindow:aboutWindow];
 }
 
