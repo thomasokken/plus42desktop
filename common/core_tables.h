@@ -449,7 +449,7 @@
 /* (Skipping 403 because of single-byte equality checks with CMD_END) */
 #define CMD_A_THRU_F_2  404
 #define CMD_DROP_CANCL  405
-#define CMD_PRRG        406
+#define CMD_PRREG       406
 /* String & List Functions */
 #define CMD_XSTR        407
 #define CMD_XASTO       408
