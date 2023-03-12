@@ -647,8 +647,18 @@ static bool insert_function(int cmd) {
         return false;
     }
     for (int i = 0; eqn_name[i].cmd != CMD_NULL; i++) {
-        if (cmd == eqn_name[i].cmd)
-            return insert_text(eqn_name[i].name, eqn_name[i].len);
+        if (cmd == eqn_name[i].cmd) {
+            if (cmd == CMD_GEN_AND || cmd == CMD_GEN_OR || cmd == CMD_GEN_XOR || cmd == CMD_GEN_NOT) {
+                if (edit_pos > 0 && edit_buf[edit_pos - 1] != ' ')
+                    if (!insert_text(" ", 1))
+                        return false;
+                if (!insert_text(eqn_name[i].name, eqn_name[i].len))
+                    return false;
+                if (edit_pos == edit_len || edit_buf[edit_pos] != ' ')
+                    return insert_text(" ", 1);
+            } else
+                return insert_text(eqn_name[i].name, eqn_name[i].len);
+        }
     }
     for (int i = 0; i < catalog_rows * 6; i++) {
         if (cmd == catalog[i]) {
