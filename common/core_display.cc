@@ -3773,6 +3773,10 @@ struct prp_data_struct {
     bool trace;
     bool normal;
     bool full_xstr;
+    std::set<int4> *target_lines;
+
+    prp_data_struct() : target_lines(NULL) {}
+    ~prp_data_struct() { delete target_lines; }
 };
 
 static prp_data_struct *prp_data;
@@ -3800,6 +3804,27 @@ int print_program(pgm_index prgm, int4 pc, int4 lines, bool normal) {
         dat->trace = flags.f.trace_print;
         dat->normal = flags.f.normal_print;
         dat->full_xstr = true;
+        if (flags.f.trace_print) {
+            std::set<int4> *target_lines = new (std::nothrow) std::set<int4>;
+            if (target_lines == NULL) {
+                free(dat);
+                return ERR_INSUFFICIENT_MEMORY;
+            }
+            int4 tmppc = 0;
+            int cmd;
+            arg_struct arg;
+            while (true) {
+                get_next_command(&tmppc, &cmd, &arg, 0, NULL);
+                if (cmd == CMD_END)
+                    break;
+                if (cmd == CMD_GTOL || cmd == CMD_XEQL)
+                    target_lines->insert(arg.val.num);
+            }
+            if (target_lines->empty())
+                delete target_lines;
+            else
+                dat->target_lines = target_lines;
+        }
     }
 
     current_prgm = prgm;
@@ -3836,7 +3861,8 @@ static int print_program_worker(bool interrupted) {
 
         char *xstr = NULL;
         if (dat->trace) {
-            if (dat->cmd == CMD_LBL || dat->first) {
+            if (dat->cmd == CMD_LBL || dat->first
+                    || dat->target_lines != NULL && dat->target_lines->find(dat->line) != dat->target_lines->end()) {
                 if (dat->len > 0) {
                     print_lines(dat->buf, dat->len, true);
                     printed = 1;
