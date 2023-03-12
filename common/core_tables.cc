@@ -63,7 +63,7 @@
 // XROM 31,00-63 (a7c0-a7ff) (Data Logger)
 
 // Retired XROMs: a7db (FUNC0), a7dc (FUNC1), a7dd (FUNC2), a7e0 (RTNERR), a7fa (CAPS), a7fb (Mixed)
-// Freed, can be used again: a71c a71d
+// Freed, can be used again: a71d
 
 const command_spec cmd_array[] =
 {
@@ -492,6 +492,7 @@ const command_spec cmd_array[] =
     { /* DUMMY */      NULL,              "",                    0x44, 0x00, 0x00, 0x00,  0, ARG_OTHER,  0, UNIM },
     { /* A_THRU_F_2 */ docmd_a_thru_f,    "A...F",               0x00, 0x00, 0xa7, 0x1b,  5, ARG_NONE,   0, NA_T },
     { /* DROP_CANCL */ docmd_drop_cancl,  "DROP",                0x04, 0x00, 0x00, 0x00,  4, ARG_NONE,   1, ALLT },
+    { /* PRRG */       docmd_prrg,        "PRRG",                0x00, 0x00, 0xa7, 0x1c,  4, ARG_NONE,   0, NA_T },
 
     /* String & List Functions */
     { /* XSTR */       docmd_xstr,        "XSTR",                0x20, 0x41, 0x00, 0x00,  4, ARG_XSTR,   0, NA_T },
