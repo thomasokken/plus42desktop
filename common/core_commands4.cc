@@ -37,6 +37,7 @@ int docmd_insr(arg_struct *arg) {
     vartype *m, *newx;
     vartype_realmatrix *rm;
     vartype_complexmatrix *cm;
+    vartype_list *list;
     int4 rows, columns, i;
     int err, refcount;
     int interactive;
@@ -74,13 +75,23 @@ int docmd_insr(arg_struct *arg) {
             if (newx == NULL)
                 return ERR_INSUFFICIENT_MEMORY;
         }
-    } else {
+    } else if (m->type == TYPE_COMPLEXMATRIX) {
         cm = (vartype_complexmatrix *) m;
         rows = cm->rows;
         columns = cm->columns;
         refcount = cm->array->refcount;
         if (interactive) {
             newx = new_complex(0, 0);
+            if (newx == NULL)
+                return ERR_INSUFFICIENT_MEMORY;
+        }
+    } else {
+        list = (vartype_list *) m;
+        rows = list->size;
+        columns = 1;
+        refcount = list->array->refcount;
+        if (interactive) {
+            newx = new_real(0);
             if (newx == NULL)
                 return ERR_INSUFFICIENT_MEMORY;
         }
@@ -109,20 +120,32 @@ int docmd_insr(arg_struct *arg) {
                 rm->array->is_string[i] = 0;
                 rm->array->data[i] = 0;
             }
-        } else {
+        } else if (m->type == TYPE_COMPLEXMATRIX) {
             for (i = 2 * rows * columns - 1;
                             i >= 2 * (matedit_i + 1) * columns; i--)
                 cm->array->data[i] = cm->array->data[i - 2 * columns];
             for (i = 2 * matedit_i * columns;
                             i < 2 * (matedit_i + 1) * columns; i++)
                 cm->array->data[i] = 0;
+        } else {
+            vartype *v = new_real(0);
+            if (v == NULL) {
+                free_vartype(newx);
+                return ERR_INSUFFICIENT_MEMORY;
+            }
+            memmove(list->array->data + matedit_i + 1, list->array->data + matedit_i, (rows - matedit_i - 1) * sizeof(vartype *));
+            list->array->data[matedit_i] = v;
         }
     } else {
         /* Make sure the new array is less than 2 GB,
          * so it's addressable with a signed 32-bit index */
-        double d_bytes = ((double) (rows + 1)) * ((double) columns) * sizeof(phloat);
-        if (m->type == TYPE_COMPLEXMATRIX)
-            d_bytes *= 2;
+        int esize;
+        switch (m->type) {
+            case TYPE_REALMATRIX: esize = sizeof(phloat); break;
+            case TYPE_COMPLEXMATRIX: esize = 2 * sizeof(phloat); break;
+            case TYPE_LIST: esize = sizeof(vartype *); break;
+        }
+        double d_bytes = ((double) (rows + 1)) * ((double) columns) * esize;
         if (((double) (int4) d_bytes) != d_bytes)
             return ERR_INSUFFICIENT_MEMORY;
 
@@ -168,7 +191,7 @@ int docmd_insr(arg_struct *arg) {
             rm->array->refcount--;
             rm->array = array;
             rm->rows++;
-        } else {
+        } else if (m->type == TYPE_COMPLEXMATRIX) {
             complexmatrix_data *array = (complexmatrix_data *)
                                 malloc(sizeof(complexmatrix_data));
             if (array == NULL) {
@@ -194,6 +217,38 @@ int docmd_insr(arg_struct *arg) {
             cm->array->refcount--;
             cm->array = array;
             cm->rows++;
+        } else {
+            list_data *array = (list_data *) malloc(sizeof(list_data));
+            if (array == NULL) {
+                if (interactive)
+                    free_vartype(newx);
+                return ERR_INSUFFICIENT_MEMORY;
+            }
+            array->data = (vartype **) malloc(newsize * sizeof(vartype *));
+            if (array->data == NULL) {
+                if (interactive)
+                    free_vartype(newx);
+                free(array);
+                return ERR_INSUFFICIENT_MEMORY;
+            }
+            for (int4 i = 0; i < newsize; i++) {
+                array->data[i] = i < matedit_i ? dup_vartype(list->array->data[i])
+                               : i > matedit_i ? dup_vartype(list->array->data[i - 1])
+                               : new_real(0);
+                if (array->data[i] == NULL) {
+                    for (int4 j = 0; j < i; j++)
+                        free_vartype(array->data[j]);
+                        if (interactive)
+                            free_vartype(newx);
+                        free(array->data);
+                        free(array);
+                        return ERR_INSUFFICIENT_MEMORY;
+                }
+            }
+            array->refcount = 1;
+            list->array->refcount--;
+            list->array = array;
+            list->size++;
         }
     }
     if (interactive) {
@@ -429,11 +484,14 @@ int docmd_rclel(arg_struct *arg) {
             v = new_string(text, length);
         } else
             v = new_real(rm->array->data[n]);
-    } else {
+    } else if (m->type == TYPE_COMPLEXMATRIX) {
         vartype_complexmatrix *cm = (vartype_complexmatrix *) m;
         int4 n = matedit_i * cm->columns + matedit_j;
         v = new_complex(cm->array->data[2 * n],
                         cm->array->data[2 * n + 1]);
+    } else {
+        vartype_list *list = (vartype_list *) m;
+        v = dup_vartype(list->array->data[matedit_i]);
     }
     if (v == NULL)
         return ERR_INSUFFICIENT_MEMORY;
@@ -760,7 +818,7 @@ int docmd_stoel(arg_struct *arg) {
             return ERR_NONE;
         } else
             return ERR_INVALID_TYPE;
-    } else /* m->type == TYPE_COMPLEXMATRIX */ {
+    } else if (m->type == TYPE_COMPLEXMATRIX) {
         vartype_complexmatrix *cm = (vartype_complexmatrix *) m;
         int4 n = matedit_i * cm->columns + matedit_j;
         if (stack[sp]->type == TYPE_REAL) {
@@ -776,6 +834,14 @@ int docmd_stoel(arg_struct *arg) {
             return ERR_ALPHA_DATA_IS_INVALID;
         else
             return ERR_INVALID_TYPE;
+    } else /* m->type == TYPE_LIST */ {
+        vartype_list *list = (vartype_list *) m;
+        vartype *v = dup_vartype(stack[sp]);
+        if (v == NULL)
+            return ERR_INSUFFICIENT_MEMORY;
+        free_vartype(list->array->data[matedit_i]);
+        list->array->data[matedit_i] = v;
+        return ERR_NONE;
     }
 }
 
@@ -828,9 +894,13 @@ int docmd_stoij(arg_struct *arg) {
         vartype_realmatrix *rm = (vartype_realmatrix *) m;
         if (i == 0 || i > rm->rows || j == 0 || j > rm->columns)
             return ERR_DIMENSION_ERROR;
-    } else {
+    } else if (m->type == TYPE_COMPLEXMATRIX) {
         vartype_complexmatrix *cm = (vartype_complexmatrix *) m;
         if (i == 0 || i > cm->rows || j == 0 || j > cm->columns)
+            return ERR_DIMENSION_ERROR;
+    } else {
+        vartype_list *list = (vartype_list *) m;
+        if (i == 0 || i > list->size || j != 1)
             return ERR_DIMENSION_ERROR;
     }
 
@@ -972,6 +1042,7 @@ static int matedit_move(int direction) {
     vartype *m, *v;
     vartype_realmatrix *rm;
     vartype_complexmatrix *cm;
+    vartype_list *list;
     int4 rows, columns, new_i, new_j, old_n, new_n;
     int edge_flag = 0;
     int end_flag = 0;
@@ -997,10 +1068,14 @@ static int matedit_move(int direction) {
         rm = (vartype_realmatrix *) m;
         rows = rm->rows;
         columns = rm->columns;
-    } else {
+    } else if (m->type == TYPE_COMPLEXMATRIX) {
         cm = (vartype_complexmatrix *) m;
         rows = cm->rows;
         columns = cm->columns;
+    } else {
+        list = (vartype_list *) m;
+        rows = list->size;
+        columns = 1;
     }
 
     if (!disentangle(m))
@@ -1100,7 +1175,7 @@ static int matedit_move(int direction) {
             free_vartype(v);
             return ERR_INVALID_TYPE;
         }
-    } else /* m->type == TYPE_COMPLEXMATRIX */ {
+    } else if (m->type == TYPE_COMPLEXMATRIX) {
         if (old_n != new_n) {
             v = new_complex(cm->array->data[2 * new_n],
                             cm->array->data[2 * new_n + 1]);
@@ -1120,6 +1195,23 @@ static int matedit_move(int direction) {
             free_vartype(v);
             return stack[sp]->type == TYPE_STRING ? ERR_ALPHA_DATA_IS_INVALID
                                               : ERR_INVALID_TYPE;
+        }
+    } else /* m->type == TYPE_LIST */ {
+        if (old_n != new_n) {
+            v = dup_vartype(list->array->data[new_n]);
+            if (v == NULL)
+                return ERR_INSUFFICIENT_MEMORY;
+        }
+        if (sp == -1) {
+            /* There's nothing to store, so leave cell unchanged */
+        } else {
+            vartype *nv = dup_vartype(stack[sp]);
+            if (nv == NULL) {
+                free_vartype(v);
+                return ERR_INSUFFICIENT_MEMORY;
+            }
+            free_vartype(list->array->data[old_n]);
+            list->array->data[old_n] = nv;
         }
     }
 
