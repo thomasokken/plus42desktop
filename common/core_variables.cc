@@ -1044,9 +1044,11 @@ static bool var_exists(int section, int type) {
             return section == CATSECT_CPX;
         case TYPE_REALMATRIX:
         case TYPE_COMPLEXMATRIX:
-            return section == CATSECT_MAT || section == CATSECT_MAT_ONLY;
+            return section == CATSECT_MAT || section == CATSECT_MAT_ONLY
+                || section == CATSECT_MAT_LIST || section == CATSECT_MAT_LIST_ONLY;
         case TYPE_LIST:
-            return section == CATSECT_LIST || section == CATSECT_LIST_STR_ONLY;
+            return section == CATSECT_LIST || section == CATSECT_LIST_STR_ONLY
+                || section == CATSECT_MAT_LIST || section == CATSECT_MAT_LIST_ONLY;
         case TYPE_EQUATION:
             return section == CATSECT_EQN || section == CATSECT_EQN_ONLY;
         case TYPE_UNIT:

@@ -1895,8 +1895,8 @@ void keydown_command_entry(int shift, int key) {
                         } else
                             goto out_of_alpha;
                     } else if (incomplete_argtype == ARG_MAT) {
-                        if (vars_exist(CATSECT_MAT_ONLY))
-                            set_catalog_menu(CATSECT_MAT_ONLY);
+                        if (vars_exist(CATSECT_MAT_LIST_ONLY))
+                            set_catalog_menu(CATSECT_MAT_LIST_ONLY);
                         else
                             set_menu(MENULEVEL_COMMAND, MENU_NONE);
                     } else if (incomplete_argtype == ARG_DIR) {
@@ -1994,8 +1994,8 @@ void keydown_command_entry(int shift, int key) {
                     if (vars_exist(CATSECT_REAL_ONLY))
                         set_catalog_menu(CATSECT_REAL_ONLY);
                 } else if (incomplete_argtype == ARG_MAT) {
-                    if (vars_exist(CATSECT_MAT_ONLY))
-                        set_catalog_menu(CATSECT_MAT_ONLY);
+                    if (vars_exist(CATSECT_MAT_LIST_ONLY))
+                        set_catalog_menu(CATSECT_MAT_LIST_ONLY);
                 } else if (incomplete_argtype == ARG_DIR) {
                     if (cwd->children_count != 0)
                         set_catalog_menu(CATSECT_DIRS_ONLY);
@@ -2062,6 +2062,7 @@ void keydown_command_entry(int shift, int key) {
                             || catsect == CATSECT_PGM_ONLY
                             || catsect == CATSECT_REAL_ONLY
                             || catsect == CATSECT_MAT_ONLY
+                            || catsect == CATSECT_MAT_LIST_ONLY
                             || catsect == CATSECT_EQN_ONLY
                             || catsect == CATSECT_VARS_ONLY
                             || catsect == CATSECT_LIST_STR_ONLY

@@ -2590,6 +2590,7 @@ static int ext_x_cmp_cat[] = {
 bool show_nonlocal_vars(int catsect) {
     if (catsect != CATSECT_REAL_ONLY
             && catsect != CATSECT_MAT_ONLY
+            && catsect != CATSECT_MAT_LIST_ONLY
             && catsect != CATSECT_EQN_ONLY
             && catsect != CATSECT_VARS_ONLY
             && catsect != CATSECT_LIST_STR_ONLY)
@@ -2976,6 +2977,12 @@ static void draw_catalog() {
             case CATSECT_MAT_ONLY:
                 show_type[TYPE_REALMATRIX] = true;
                 show_type[TYPE_COMPLEXMATRIX] = true;
+                break;
+            case CATSECT_MAT_LIST:
+            case CATSECT_MAT_LIST_ONLY:
+                show_type[TYPE_REALMATRIX] = true;
+                show_type[TYPE_COMPLEXMATRIX] = true;
+                show_type[TYPE_LIST] = true;
                 break;
             case CATSECT_LIST:
                 show_type[TYPE_LIST] = true;
@@ -4269,6 +4276,8 @@ void set_catalog_menu(int section) {
         case CATSECT_CPX:
         case CATSECT_MAT:
         case CATSECT_MAT_ONLY:
+        case CATSECT_MAT_LIST:
+        case CATSECT_MAT_LIST_ONLY:
         case CATSECT_EQN:
         case CATSECT_EQN_ONLY:
         case CATSECT_OTHER:
@@ -4442,6 +4451,10 @@ void update_catalog() {
             if (!vars_exist(section))
                 set_cat_section(CATSECT_TOP);
             break;
+        case CATSECT_MAT_LIST:
+            if (!vars_exist(section))
+                set_cat_section(CATSECT_TOP);
+            break;
         case CATSECT_LIST:
         case CATSECT_EQN:
         case CATSECT_OTHER:
@@ -4450,6 +4463,7 @@ void update_catalog() {
             break;
         case CATSECT_REAL_ONLY:
         case CATSECT_MAT_ONLY:
+        case CATSECT_MAT_LIST_ONLY:
         case CATSECT_EQN_ONLY:
         case CATSECT_VARS_ONLY:
         case CATSECT_LIST_STR_ONLY:
