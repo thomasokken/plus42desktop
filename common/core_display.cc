@@ -3818,6 +3818,8 @@ int print_program(pgm_index prgm, int4 pc, int4 lines, bool normal) {
                 free(dat);
                 return ERR_INSUFFICIENT_MEMORY;
             }
+            pgm_index saved_prgm = current_prgm;
+            current_prgm = prgm;
             int4 tmppc = 0;
             int cmd;
             arg_struct arg;
@@ -3828,6 +3830,7 @@ int print_program(pgm_index prgm, int4 pc, int4 lines, bool normal) {
                 if (cmd == CMD_GTOL || cmd == CMD_XEQL)
                     target_lines->insert(arg.val.num);
             }
+            current_prgm = saved_prgm;
             if (target_lines->empty())
                 delete target_lines;
             else
