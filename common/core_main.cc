@@ -3946,7 +3946,7 @@ static void paste_programs(const char *buf) {
             int argtype;
             bool stk_allowed = true;
             bool string_required = false;
-            if (cmd == CMD_SIZE) {
+            if (cmd == CMD_SIZE || cmd == CMD_GTOL || cmd == CMD_XEQL) {
                 if (!nexttoken(hpbuf, cmd_end, hpend, &tok_start, &tok_end))
                     goto line_done;
                 if (tok_end - tok_start > 4)
