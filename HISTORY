@@ -1,3 +1,23 @@
+2023-03-17: release 1.0.16
+
+* EDIT, EDITN, and INDEX now support lists, acting like they are 1-column
+  matrices. (Empty lists are not supported, they must have at least one
+  element. This limitation will be removed in a future release. Note that you
+  can create a new 1-element list by simply doing NEWLIST 0 +.)
+  This includes STOIJ, RCLIJ, STOEL, RCLEL, I+, I-, J+, J-, ←, ↑, ↓, →, INSR,
+  DELR, and DIM.
+* Equation editor: now inserts spaces around logical AND, OR, XOR, and NOT.
+* Added PRREG. Because PRV "REGS" is not a good substitute.
+* Added NN→S. This works like N→S (convert number to string on the stack), but
+  without the 12-digit mantissa length limit, so you get full precision in ALL
+  mode.
+* Fixed stack lift handling in DELR and STOFLAG.
+* Fixed pasting 1/X, 10^X, and 4STK, when pasted without line number and with
+  trailing space.
+* PRP and LIST in TRACE mode now print line numbers for all lines that are
+  targets of GTOL or XEQL, like it already did for LBL lines.
+* Fixed pasting of GTOL and XEQL.
+
 2022-12-14: release 1.0.15
 
 * Fixed a couple of bugs in Paste of scalars in BINM, OCTM, and HEXM modes.
