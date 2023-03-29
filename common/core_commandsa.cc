@@ -38,8 +38,11 @@
 #define PLOT_RESULT_NONE 0
 #define PLOT_RESULT_EVAL 1
 #define PLOT_RESULT_SOLVE 2
-#define PLOT_RESULT_SOLVE_FAIL 3
-#define PLOT_RESULT_INTEG 4
+#define PLOT_RESULT_SOLVE_DIRECT 3
+#define PLOT_RESULT_SOLVE_SIGN_REVERSAL 4
+#define PLOT_RESULT_SOLVE_EXTREMUM 5
+#define PLOT_RESULT_SOLVE_FAIL 6
+#define PLOT_RESULT_INTEG 7
 
 #define PLOT_FUN 0
 #define PLOT_X_VAR 1
@@ -968,12 +971,30 @@ int return_to_plot(bool failure, bool stop) {
     phloat ymax = data.axes[1].max;
 
     if (!failure && sp != -1 && (res->type == TYPE_REAL || res->type == TYPE_UNIT)) {
-        if ((state == PLOT_STATE_SOLVE || state != PLOT_STATE_INTEG && data.axes[1].len > 0) && stack[sp - 1]->type != TYPE_STRING && ((vartype_real *) stack[sp - 3])->x != 0) {
+        phloat errp;
+        if ((state == PLOT_STATE_SOLVE || state != PLOT_STATE_INTEG && data.axes[1].len > 0)
+                && stack[sp - 1]->type != TYPE_STRING
+                && (errp = ((vartype_real *) stack[sp - 3])->x) != SOLVE_ROOT) {
             // Not an error, but the solver didn't find a root
             if (state == PLOT_STATE_SOLVE) {
                 replot = true;
-                data.set_phloat(PLOT_RESULT, data.result = ((vartype_real *) stack[sp - 3])->x);
-                data.set_int(PLOT_RESULT_TYPE, data.result_type = PLOT_RESULT_SOLVE_FAIL);
+                if (errp != SOLVE_SIGN_REVERSAL && errp != SOLVE_EXTREMUM) {
+                    // Bad Guess(es) or Constant? -- actual failures to find anything
+                    data.set_phloat(PLOT_RESULT, data.result = errp);
+                    data.set_int(PLOT_RESULT_TYPE, data.result_type = PLOT_RESULT_SOLVE_FAIL);
+                } else {
+                    // Sign Reversal or Extremum -- we want to return the actual point
+                    // the solver ended up converging on
+                    phloat x;
+                    int err = convert_helper(data.axes[0].unit, res, &x);
+                    if (err != ERR_NONE)
+                        return err;
+                    data.set_phloat(PLOT_RESULT, data.result = x);
+                    if (errp == SOLVE_SIGN_REVERSAL)
+                        data.set_int(PLOT_RESULT_TYPE, data.result_type = PLOT_RESULT_SOLVE_SIGN_REVERSAL);
+                    else
+                        data.set_int(PLOT_RESULT_TYPE, data.result_type = PLOT_RESULT_SOLVE_EXTREMUM);
+                }
             }
             goto fail;
         }
@@ -1112,7 +1133,8 @@ int return_to_plot(bool failure, bool stop) {
         } else if (state == PLOT_STATE_SOLVE) {
             replot = true;
             data.set_phloat(PLOT_RESULT, data.result = y);
-            data.set_int(PLOT_RESULT_TYPE, data.result_type = PLOT_RESULT_SOLVE);
+            data.set_int(PLOT_RESULT_TYPE, data.result_type =
+                    stack[sp - 1]->type == TYPE_STRING ? PLOT_RESULT_SOLVE_DIRECT : PLOT_RESULT_SOLVE);
             result = new_real(y);
         } else if (state == PLOT_STATE_INTEG) {
             replot = true;
@@ -1172,7 +1194,10 @@ int return_to_plot(bool failure, bool stop) {
                             result_unit = data.axes[1].unit;
                             break;
                         }
-                        case PLOT_RESULT_SOLVE: {
+                        case PLOT_RESULT_SOLVE:
+                        case PLOT_RESULT_SOLVE_DIRECT:
+                        case PLOT_RESULT_SOLVE_SIGN_REVERSAL:
+                        case PLOT_RESULT_SOLVE_EXTREMUM: {
                             if (data.axes[0].len == 0)
                                 string2buf(buf, 100, &pos, "<X>", 3);
                             else
@@ -1208,6 +1233,32 @@ int return_to_plot(bool failure, bool stop) {
                             string2buf(buf, 100, &pos, u->text, u->length);
                             if (data.result_type == PLOT_RESULT_INTEG)
                                 free_vartype(result_unit);
+                        }
+                        if (data.result_type == PLOT_RESULT_SOLVE_DIRECT
+                                || data.result_type == PLOT_RESULT_SOLVE_SIGN_REVERSAL
+                                || data.result_type == PLOT_RESULT_SOLVE_EXTREMUM) {
+                            const char *text;
+                            int len;
+                            switch (to_int(data.result_type)) {
+                                case PLOT_RESULT_SOLVE_DIRECT: {
+                                    vartype_string *s = (vartype_string *) stack[sp - 1];
+                                    text = s->txt();
+                                    len = s->length;
+                                    break;
+                                }
+                                case PLOT_RESULT_SOLVE_SIGN_REVERSAL: {
+                                    text = solve_message[SOLVE_SIGN_REVERSAL].text;
+                                    len = solve_message[SOLVE_SIGN_REVERSAL].length;
+                                    break;
+                                }
+                                case PLOT_RESULT_SOLVE_EXTREMUM: {
+                                    text = solve_message[SOLVE_EXTREMUM].text;
+                                    len = solve_message[SOLVE_EXTREMUM].length;
+                                    break;
+                                }
+                            }
+                            char2buf(buf, 100, &pos, ' ');
+                            string2buf(buf, 100, &pos, text, len);
                         }
                     }
                     int w = small_string_width(buf, pos);
