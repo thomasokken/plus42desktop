@@ -3584,9 +3584,7 @@ void redisplay(int mode) {
         clear_row(i);
 
     int menu_id;
-    if (mode == 2)
-        menu_id = MENU_NONE;
-    else if (mode_commandmenu != MENU_NONE)
+    if (mode_commandmenu != MENU_NONE)
         menu_id = mode_commandmenu;
     else if (mode_alphamenu != MENU_NONE)
         menu_id = mode_alphamenu;
@@ -3599,6 +3597,14 @@ void redisplay(int mode) {
     else if (mode_appmenu != MENU_NONE)
         menu_id = mode_appmenu;
     else
+        menu_id = MENU_NONE;
+    
+    int catsect;
+    if (mode == 2 &&
+            !((pending_command == CMD_XEQ || pending_command == CMD_GTO)
+              && menu_id == MENU_CATALOG
+              && ((catsect = get_cat_section()) == CATSECT_PGM
+                  || catsect == CATSECT_PGM_ONLY)))
         menu_id = MENU_NONE;
 
     if (menu_id == MENU_CATALOG) {
