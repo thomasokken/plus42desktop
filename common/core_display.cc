@@ -3469,44 +3469,57 @@ void show() {
             goto show_one_or_more_lines;
         }
         case TYPE_REALMATRIX: {
-            vartype_realmatrix *rm = (vartype_realmatrix *) rx;
-            phloat *d = rm->array->data;
-            bufptr = vartype2string(rx, buf, disp_c);
-            while (bufptr < disp_c)
-                buf[bufptr++] = ' ';
-            string2buf(buf, sz, &bufptr, "1:1=", 4);
-            if (rm->array->is_string[0] != 0) {
-                char *text;
-                int4 len;
-                get_matrix_string(rm, 0, &text, &len);
-                char2buf(buf, sz, &bufptr, '"');
-                string2buf(buf, sz, &bufptr, text, len);
-                if (bufptr < sz)
+            if (disp_r == 2) {
+                vartype_realmatrix *rm = (vartype_realmatrix *) rx;
+                phloat *d = rm->array->data;
+                bufptr = vartype2string(rx, buf, disp_c);
+                while (bufptr < disp_c)
+                    buf[bufptr++] = ' ';
+                string2buf(buf, sz, &bufptr, "1:1=", 4);
+                if (rm->array->is_string[0] != 0) {
+                    char *text;
+                    int4 len;
+                    get_matrix_string(rm, 0, &text, &len);
                     char2buf(buf, sz, &bufptr, '"');
+                    string2buf(buf, sz, &bufptr, text, len);
+                    if (bufptr < sz)
+                        char2buf(buf, sz, &bufptr, '"');
+                } else {
+                    bufptr += procrustean_phloat2string(*d, buf + bufptr, sz - bufptr);
+                }
             } else {
-                bufptr += procrustean_phloat2string(*d, buf + bufptr, sz - bufptr);
+                try {
+                    std::string s;
+                    full_real_matrix_to_string(rx, &s, disp_r);
+                    string_copy(buf, &bufptr, s.c_str(), s.length());
+                } catch (std::bad_alloc &) {
+                    string_copy(buf, &bufptr, "<Low Mem>", 9);
+                }
             }
             goto show_one_or_more_lines;
         }
         case TYPE_COMPLEXMATRIX: {
-            vartype_complexmatrix *cm = (vartype_complexmatrix *) rx;
-            vartype_complex c;
-            bufptr = vartype2string(rx, buf, disp_c);
-            while (bufptr < disp_c)
-                buf[bufptr++] = ' ';
-            string2buf(buf, sz, &bufptr, "1:1=", 4);
-            c.type = TYPE_COMPLEX;
-            c.re = cm->array->data[0];
-            c.im = cm->array->data[1];
             if (disp_r == 2) {
+                vartype_complexmatrix *cm = (vartype_complexmatrix *) rx;
+                vartype_complex c;
+                bufptr = vartype2string(rx, buf, disp_c);
+                while (bufptr < disp_c)
+                    buf[bufptr++] = ' ';
+                string2buf(buf, sz, &bufptr, "1:1=", 4);
+                c.type = TYPE_COMPLEX;
+                c.re = cm->array->data[0];
+                c.im = cm->array->data[1];
                 bufptr += vartype2string((vartype *) &c, buf + bufptr, sz - bufptr);
-                goto show_one_or_more_lines;
             } else {
-                int lines = (disp_r + 1) / 2;
-                real_space = lines * disp_c - 4;
-                rx = (vartype *) &c;
-                goto do_complex;
+                try {
+                    std::string s;
+                    full_complex_matrix_to_string(rx, &s, disp_r);
+                    string_copy(buf, &bufptr, s.c_str(), s.length());
+                } catch (std::bad_alloc &) {
+                    string_copy(buf, &bufptr, "<Low Mem>", 9);
+                }
             }
+            goto show_one_or_more_lines;
         }
         case TYPE_STRING:
         case TYPE_EQUATION: {
@@ -3531,13 +3544,29 @@ void show() {
             goto show_one_or_more_lines;
         }
         case TYPE_LIST: {
-            vartype_list *list = (vartype_list *) rx;
-            bufptr = vartype2string(rx, buf, disp_c);
-            if (list->size > 0) {
-                while (bufptr < disp_c)
-                    buf[bufptr++] = ' ';
-                string2buf(buf, sz, &bufptr, "1=", 2);
-                bufptr += vartype2string(list->array->data[0], buf + bufptr, sz - bufptr);
+            if (disp_r == 2) {
+                vartype_list *list = (vartype_list *) rx;
+                bufptr = vartype2string(rx, buf, disp_c);
+                if (list->size > 0) {
+                    while (bufptr < disp_c)
+                        buf[bufptr++] = ' ';
+                    string2buf(buf, sz, &bufptr, "1=", 2);
+                    bufptr += vartype2string(list->array->data[0], buf + bufptr, sz - bufptr);
+                }
+            } else {
+                try {
+                    int maxlen = disp_r * disp_c;
+                    std::string s;
+                    full_list_to_string(rx, &s, maxlen + 2);
+                    s.erase(s.length() - 1);
+                    if (s.length() > maxlen) {
+                        s.erase(maxlen - 1);
+                        s += "\32";
+                    }
+                    string_copy(buf, &bufptr, s.c_str(), s.length());
+                } catch (std::bad_alloc &) {
+                    string_copy(buf, &bufptr, "<Low Mem>", 9);
+                }
             }
             goto show_one_or_more_lines;
         }
