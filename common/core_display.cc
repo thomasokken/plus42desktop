@@ -1976,6 +1976,75 @@ static void full_list_to_string(vartype *v, std::string *buf, int maxlen) {
     *buf += "} ";
 }
 
+static void full_real_matrix_to_string(vartype *v, std::string *buf, int lines_available) {
+    vartype_realmatrix *rm = (vartype_realmatrix *) v;
+    int rows = rm->rows;
+    int cols = rm->columns;
+    int lines = rows < lines_available ? rows : lines_available;
+    int line_end = 0;
+    for (int r = 0; r < lines; r++) {
+        *buf += r == 0 ? "[[" : " [";
+        line_end += disp_c;
+        int n = r * cols;
+        for (int c = 0; c < cols && buf->length() < line_end; c++) {
+            *buf += " ";
+            if (rm->array->is_string[n] == 0) {
+                phloat p = rm->array->data[n];
+                char b[50];
+                int len = easy_phloat2string(p, b, 50, 0);
+                *buf += std::string(b, len);
+            } else {
+                const char *text;
+                int4 length;
+                get_matrix_string(rm, n, &text, &length);
+                *buf += "\"";
+                *buf += std::string(text, length);
+                *buf += "\"";
+            }
+            n++;
+        }
+        *buf += r == rows - 1 ? " ]]" : " ]";
+        if (buf->length() > line_end) {
+            buf->erase(line_end - 1);
+            *buf += "\32";
+        } else {
+            while (buf->length() < line_end)
+                *buf += " ";
+        }
+    }
+}
+
+static void full_complex_matrix_to_string(vartype *v, std::string *buf, int lines_available) {
+    vartype_complexmatrix *cm = (vartype_complexmatrix *) v;
+    int rows = ((vartype_realmatrix *) v)->rows;
+    int cols = ((vartype_realmatrix *) v)->columns;
+    int lines = rows < lines_available ? rows : lines_available;
+    int line_end = 0;
+    vartype_complex cplx;
+    cplx.type = TYPE_COMPLEX;
+    for (int r = 0; r < lines; r++) {
+        *buf += r == 0 ? "[[" : " [";
+        line_end += disp_c;
+        int n = r * cols * 2;
+        for (int c = 0; c < cols && buf->length() < line_end; c++) {
+            *buf += " ";
+            cplx.re = cm->array->data[n++];
+            cplx.im = cm->array->data[n++];
+            char b[100];
+            int len = vartype2string((vartype *) &cplx, b, 100);
+            *buf += std::string(b, len);
+        }
+        *buf += r == rows - 1 ? " ]]" : " ]";
+        if (buf->length() > line_end) {
+            buf->erase(line_end - 1);
+            *buf += "\32";
+        } else {
+            while (buf->length() < line_end)
+                *buf += " ";
+        }
+    }
+}
+
 static int display_x(int row, int lines_available) {
     if (disp_r == 2 && !mode_number_entry) {
         display_level(0, row);
@@ -2039,6 +2108,10 @@ static int display_x(int row, int lines_available) {
                     line.erase(maxlen - 1);
                     line += "\32";
                 }
+            } else if (v->type == TYPE_REALMATRIX) {
+                full_real_matrix_to_string(v, &line, lines_available);
+            } else if (v->type == TYPE_COMPLEXMATRIX) {
+                full_complex_matrix_to_string(v, &line, lines_available);
             } else {
                 int len = vartype2string(v, buf, 100);
                 line += std::string(buf, len);
