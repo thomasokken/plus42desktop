@@ -994,6 +994,12 @@ int return_to_plot(bool failure, bool stop) {
                         data.set_int(PLOT_RESULT_TYPE, data.result_type = PLOT_RESULT_SOLVE_SIGN_REVERSAL);
                     else
                         data.set_int(PLOT_RESULT_TYPE, data.result_type = PLOT_RESULT_SOLVE_EXTREMUM);
+                    if (data.axes[0].unit->type == TYPE_UNIT) {
+                        vartype_unit *u = (vartype_unit *) data.axes[0].unit;
+                        result = new_unit(x, u->text, u->length);
+                    } else {
+                        result = new_real(x);
+                    }
                 }
             }
             goto fail;
@@ -1006,9 +1012,12 @@ int return_to_plot(bool failure, bool stop) {
             if (u == NULL)
                 return ERR_INVALID_UNIT;
             int err = convert_helper(u, res, &y);
-            free_vartype(u);
-            if (err != ERR_NONE)
+            if (err != ERR_NONE) {
+                free_vartype(u);
                 return err;
+            }
+            ((vartype_real *) u)->x = y;
+            result = u;
         } else if (state == PLOT_STATE_SOLVE) {
             // And, of course, in the case of SOLVE, the result will have X axis units
             int err = convert_helper(data.axes[0].unit, res, &y);
@@ -1135,12 +1144,17 @@ int return_to_plot(bool failure, bool stop) {
             data.set_phloat(PLOT_RESULT, data.result = y);
             data.set_int(PLOT_RESULT_TYPE, data.result_type =
                     stack[sp - 1]->type == TYPE_STRING ? PLOT_RESULT_SOLVE_DIRECT : PLOT_RESULT_SOLVE);
-            result = new_real(y);
+            if (data.axes[0].unit->type == TYPE_UNIT) {
+                vartype_unit *u = (vartype_unit *) data.axes[0].unit;
+                result = new_unit(y, u->text, u->length);
+            } else {
+                result = new_real(y);
+            }
         } else if (state == PLOT_STATE_INTEG) {
             replot = true;
             data.set_phloat(PLOT_RESULT, data.result = y);
             data.set_int(PLOT_RESULT_TYPE, data.result_type = PLOT_RESULT_INTEG);
-            result = new_real(y);
+            // already set result earlier
         }
     } else {
         fail:
