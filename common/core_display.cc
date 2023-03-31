@@ -1955,6 +1955,27 @@ static void display_level(int level, int row) {
     draw_string(0, row, buf, bufptr);
 }
 
+static void full_list_to_string(vartype *v, std::string *buf, int maxlen) {
+    *buf += "{ ";
+    if (buf->length() >= maxlen)
+        return;
+    vartype_list *list = (vartype_list *) v;
+    for (int i = 0; i < list->size; i++) {
+        vartype *v2 = list->array->data[i];
+        if (v2->type == TYPE_LIST) {
+            full_list_to_string(v2, buf, maxlen);
+        } else {
+            char b[100];
+            int len = vartype2string(v2, b, 100);
+            *buf += std::string(b, len);
+            *buf += " ";
+        }
+        if (buf->length() >= maxlen)
+            return;
+    }
+    *buf += "} ";
+}
+
 static int display_x(int row, int lines_available) {
     if (disp_r == 2 && !mode_number_entry) {
         display_level(0, row);
@@ -2010,6 +2031,14 @@ static int display_x(int row, int lines_available) {
                 vartype_unit *u = (vartype_unit *) v;
                 line += '_';
                 line += std::string(u->text, u->length);
+            } else if (v->type == TYPE_LIST) {
+                int maxlen = lines_available * disp_c;
+                full_list_to_string(v, &line, maxlen + 2);
+                line.erase(line.length() - 1);
+                if (line.length() > maxlen) {
+                    line.erase(maxlen - 1);
+                    line += "\32";
+                }
             } else {
                 int len = vartype2string(v, buf, 100);
                 line += std::string(buf, len);
