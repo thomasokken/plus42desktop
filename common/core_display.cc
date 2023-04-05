@@ -3440,7 +3440,6 @@ void show() {
         }
         case TYPE_COMPLEX: {
             real_space = ((disp_r + 1) / 2) * disp_c;
-            do_complex:
             c = *((vartype_complex *) rx);
             phloat x, y;
             if (flags.f.polar) {
