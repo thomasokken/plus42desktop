@@ -3162,7 +3162,7 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
             eqn_draw();
         } else if (edit.id == MENU_CATALOG) {
             if (edit.catsect == CATSECT_EQN_NAMED) {
-                int index = get_cat_row() * 6 + key - 1;
+                int index = edit.catalog_row * 6 + key - 1;
                 std::vector<std::string> names;
                 try {
                     names = get_equation_names();
