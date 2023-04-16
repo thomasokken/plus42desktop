@@ -1,3 +1,17 @@
+2023-04-17: release 1.0.18
+
+* Fixed crash when loading state, when the current program is an equation that
+  is only referenced by SOLVE/INTEG internal variables.
+* Changed Σ+/Σ- so that, in NSTK mode, they will accept a single real argument,
+  assuming Y=0 in that case.
+* Added STOP() function for equation debugging.
+* In the equation editor, the named-equation catalog could select items from
+  the wrong row.
+* Fixed handling of LCLV of indexed matrix. It used to leave any pushed indexed
+  matrix in limbo until RTN. With this change, the pushed indexed matrix is
+  popped immediately.
+* Tuned TONE frequencies to A440 scale.
+
 2023-04-10: release 1.0.17a (iOS and MacOS)
 
 * Copy in PRGM mode was dropping line 01, because of an optimizer bug in the
