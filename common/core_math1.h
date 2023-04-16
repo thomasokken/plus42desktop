@@ -25,6 +25,7 @@
 bool persist_math();
 bool unpersist_math(int ver);
 void reset_math();
+void math_equation_deleted(int eqn_index);
 void clean_stack(int prev_sp);
 
 struct message_spec {

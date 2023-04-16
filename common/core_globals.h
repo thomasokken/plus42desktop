@@ -656,6 +656,7 @@ int get_frame_depth(int *depth);
 void step_out();
 void step_over();
 void return_here_after_last_rtn();
+void equation_deleted(int eqn_index);
 void unwind_after_eqn_error();
 bool should_i_stop_at_this_level();
 int rtn(int err);

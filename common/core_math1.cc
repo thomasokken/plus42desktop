@@ -55,6 +55,13 @@ struct caller_info {
             return err != ERR_NONE ? err : keep_running ? ERR_NONE : ERR_STOP;
         }
     }
+    void equation_deleted(int equation_index) {
+        if (prev_prgm.dir == eq_dir->id && prev_prgm.idx == equation_index) {
+            prev_prgm.dir = cwd->id;
+            prev_prgm.idx = cwd->prgms_count - 1;
+            prev_pc = cwd->prgms[cwd->prgms_count - 1].size - 2;
+        }
+    }
 };
 
 /* Solver */
@@ -371,6 +378,11 @@ bool unpersist_math(int ver) {
 void reset_math() {
     reset_solve();
     reset_integ();
+}
+
+void math_equation_deleted(int eqn_index) {
+    solve.caller.equation_deleted(eqn_index);
+    integ.caller.equation_deleted(eqn_index);
 }
 
 void clean_stack(int prev_sp) {

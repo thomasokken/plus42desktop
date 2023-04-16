@@ -377,14 +377,7 @@ void free_vartype(vartype *v) {
             vartype_equation *eq = (vartype_equation *) v;
             if (--(eq->data->refcount) == 0) {
                 int eqn_index = eq->data->eqn_index;
-                if (current_prgm.dir == eq_dir->id && current_prgm.idx == eqn_index) {
-                    // This shouldn't be possible while a program is running,
-                    // but could happen if the user initiates an action that
-                    // clears the RTN stack, while execution is halted in
-                    // generated code.
-                    current_prgm.set(cwd->id, cwd->prgms_count - 1);
-                    pc = cwd->prgms[cwd->prgms_count - 1].size - 2;
-                }
+                equation_deleted(eqn_index);
                 free(eq_dir->prgms[eqn_index].text);
                 eq_dir->prgms[eqn_index].text = NULL;
                 eq_dir->prgms[eqn_index].eq_data = NULL;

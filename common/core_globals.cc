@@ -2357,8 +2357,13 @@ static bool unpersist_globals() {
     } else {
         current_prgm.set(currdir, currprgm);
     }
-    pc = line2pc(currpc);
-    incomplete_saved_pc = line2pc(incomplete_saved_pc);
+    pc = currpc;
+
+    // Deferring the line2pc() conversion for pc and incomplete_saved_pc.
+    // It is possible that the current program is generated code that is
+    // referenced only by private SOLVE or INTEG variables, in which case
+    // it hasn't been loaded yet. So, to be safe, these conversions must
+    // be performed after unpersist_math().
 
     ret = true;
 
@@ -4101,6 +4106,19 @@ void return_here_after_last_rtn() {
     }
 }
 
+void equation_deleted(int eqn_index) {
+    if (current_prgm.dir == eq_dir->id && current_prgm.idx == eqn_index) {
+        current_prgm.set(cwd->id, cwd->prgms_count - 1);
+        pc = cwd->prgms[cwd->prgms_count - 1].size - 2;
+    }
+    if (rtn_after_last_rtn_dir == eq_dir->id && rtn_after_last_rtn_prgm == eqn_index) {
+        rtn_after_last_rtn_dir = cwd->id;
+        rtn_after_last_rtn_prgm = cwd->prgms_count - 1;
+        rtn_after_last_rtn_pc = cwd->prgms[cwd->prgms_count - 1].size - 2;
+    }
+    math_equation_deleted(eqn_index);
+}
+
 void unwind_after_eqn_error() {
     int4 saved_dir = rtn_after_last_rtn_dir;
     int4 saved_prgm = rtn_after_last_rtn_prgm;
@@ -4797,6 +4815,8 @@ static bool load_state2(bool *clear, bool *too_new) {
         return false;
     if (!unpersist_math(ver))
         return false;
+    pc = line2pc(pc);
+    incomplete_saved_pc = line2pc(incomplete_saved_pc);
 
     // It would be better to also prevent all the useless rebuild_label_table()
     // calls that have happened during state file loading until this point.
