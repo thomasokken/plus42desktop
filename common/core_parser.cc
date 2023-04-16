@@ -4281,7 +4281,7 @@ Evaluator *Parser::parseThing() {
                     || t == "MAT?" || t == "CPXMAT?" || t == "STR?"
                     || t == "LIST?" || t == "EQN?" || t == "UNIT?"
                     || t == "TYPE?"
-                    || t == "UBASE" || t == "UVAL"
+                    || t == "UBASE" || t == "UVAL" || t == "STOP"
                     || t == "FCSTX" || t == "FCSTY") {
                 min_args = max_args = 1;
                 mode = EXPR_LIST_EXPR;
@@ -4399,7 +4399,7 @@ Evaluator *Parser::parseThing() {
                     || t == "MAT?" || t == "CPXMAT?" || t == "STR?"
                     || t == "LIST?" || t == "EQN?" || t == "UNIT?"
                     || t == "TYPE?"
-                    || t == "UBASE" || t == "UVAL"
+                    || t == "UBASE" || t == "UVAL" || t == "STOP"
                     || t == "FCSTX" || t == "FCSTY") {
                 Evaluator *ev = (*evs)[0];
                 delete evs;
@@ -4519,6 +4519,8 @@ Evaluator *Parser::parseThing() {
                     return new UnaryFunction(tpos, ev, CMD_UBASE);
                 else if (t == "UVAL")
                     return new UnaryFunction(tpos, ev, CMD_UVAL);
+                else if (t == "STOP")
+                    return new InvertibleUnaryFunction(tpos, ev, CMD_STOP, CMD_STOP);
                 else if (t == "FCSTX")
                     return new InvertibleUnaryFunction(tpos, ev, CMD_FCSTX, CMD_FCSTY);
                 else if (t == "FCSTY")
