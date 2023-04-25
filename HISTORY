@@ -82,7 +82,7 @@
 * Fixed number entry in PRGM mode when BINM/OCTM/HEXM active.
 * No longer setting flag 22 if number entry ends with DROP in NSTK mode.
 * Added LINE PLOT.M SPFV SPPV TVM USFV USPV to CATALOG->MISC.
-* ->PAR now produces more helpful output in TRACE mode.
+* →PAR now produces more helpful output in TRACE mode.
 * Windows, Mac, and Linux versions: added Alt-1 through Alt-6 as mappings for
   the second row of the keyboard.
 
