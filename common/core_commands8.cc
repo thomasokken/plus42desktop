@@ -842,7 +842,7 @@ static const unitdef *find_unit(std::string s, int *exponent, vartype **user, st
 /* Hack to get things to compile in Ubuntu 14.04 */
 static std::string to_string(int i) {
     char buf[20];
-    sprintf(buf, "%d", i);
+    snprintf(buf, 20, "%d", i);
     return std::string(buf, strlen(buf));
 }
 

@@ -1234,7 +1234,7 @@ bool eqn_draw() {
                      + (flags.f.digits_bit1 ? 2 : 0)
                      + (flags.f.digits_bit0 ? 1 : 0);
             }
-            sprintf(buf, "(Curr: %02d)", curr);
+            snprintf(buf, 16, "(Curr: %02d)", curr);
             draw_string(p, 0, buf, strlen(buf));
         }
         draw_menu(true);
@@ -1687,7 +1687,7 @@ static int keydown_modes(int key, bool shift, int *repeat) {
                 squeak();
             } else if (cmd == CMD_WSIZE_T) {
                 char buf[23];
-                sprintf(buf, "WSIZE = %02d", mode_wsize);
+                snprintf(buf, 23, "WSIZE = %02d", mode_wsize);
                 clear_row(0);
                 draw_string(0, 0, buf, strlen(buf));
                 flush_display();
