@@ -41,6 +41,7 @@ bool eqn_timeout();
 void eqn_restart_cursor();
 
 int return_to_eqn_edit();
+void eqn_save_error_pos(int eqn_id, int pos);
 
 
 #endif

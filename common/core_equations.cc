@@ -42,6 +42,9 @@ static int display_pos;
 static int screen_row = 0;
 static int headers = 0;
 
+static int error_eqn_id;
+static int error_eqn_pos;
+
 #define DIALOG_NONE 0
 #define DIALOG_SAVE_CONFIRM 1
 #define DIALOG_DELETE_CONFIRM 2
@@ -440,6 +443,12 @@ bool unpersist_eqn(int4 ver) {
             return false;
     } else
         current_result = NULL;
+    if (ver >= 25) {
+        if (!read_int(&error_eqn_id)) return false;
+        if (!read_int(&error_eqn_pos)) return false;
+    } else {
+        error_eqn_id = -1;
+    }
 
     if (active && edit_pos != -1 && dialog == DIALOG_NONE)
         start_eqn_cursor = true;
@@ -487,6 +496,8 @@ bool persist_eqn() {
     if (!write_bool(cursor_on)) return false;
     if (!write_int(current_error)) return false;
     if (!persist_vartype(current_result)) return false;
+    if (!write_int(error_eqn_id)) return false;
+    if (!write_int(error_eqn_pos)) return false;
     return true;
 }
 
@@ -678,6 +689,17 @@ static bool insert_function(int cmd) {
     return false;
 }
 
+static void deleting_row(int row) {
+    if (error_eqn_id == -1)
+        return;
+    vartype *v = eqns->array->data[row];
+    if (v->type != TYPE_EQUATION)
+        return;
+    vartype_equation *eq = (vartype_equation *) v;
+    if (eq->data->eqn_index == error_eqn_id)
+        error_eqn_id = -1;
+}
+
 static void save() {
     if (eqns != NULL) {
         if (!disentangle((vartype *) eqns)) {
@@ -728,6 +750,7 @@ static void save() {
             eqns->array->data[selected_row] = v;
         }
     } else {
+        deleting_row(selected_row);
         free_vartype(eqns->array->data[selected_row]);
         eqns->array->data[selected_row] = v;
     }
@@ -1817,6 +1840,7 @@ static bool delete_eqn() {
         show_error(ERR_INSUFFICIENT_MEMORY);
         return false;
     }
+    deleting_row(selected_row);
     free_vartype(eqns->array->data[selected_row]);
     memmove(eqns->array->data + selected_row,
             eqns->array->data + selected_row + 1,
@@ -2651,6 +2675,31 @@ static int keydown_list(int key, bool shift, int *repeat) {
                 shell_request_timeout3(2000);
             } else
                 squeak();
+            return 1;
+        }
+        case KEY_RUN: {
+            if (error_eqn_id == -1) {
+                no_eqn:
+                squeak();
+                return 1;
+            }
+            int4 idx = -1;
+            for (int4 i = 0; i < num_eqns; i++) {
+                vartype *v = eqns->array->data[i];
+                if (v->type != TYPE_EQUATION)
+                    continue;
+                vartype_equation *eq = (vartype_equation *) v;
+                if (eq->data->eqn_index == error_eqn_id) {
+                    idx = i;
+                    break;
+                }
+            }
+            if (idx == -1) {
+                error_eqn_id = -1;
+                goto no_eqn;
+            }
+            eqn_set_selected_row(idx);
+            start_edit(error_eqn_pos);
             return 1;
         }
 
@@ -3740,4 +3789,9 @@ int return_to_eqn_edit() {
     else
         current_result = dup_vartype(stack[sp]);
     return eqn_start(menu_whence);
+}
+
+void eqn_save_error_pos(int eqn_id, int pos) {
+    error_eqn_id = eqn_id;
+    error_eqn_pos = pos;
 }

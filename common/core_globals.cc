@@ -1053,8 +1053,9 @@ bool no_keystrokes_yet;
  * Version 22: 1.0    UNITS skip-top in equation editor
  * Version 23: 1.0    Interactive XSTR max length raised to 50
  * Version 24: 1.0.3  SOLVE secant impatience
+ * Version 25: 1.1    Saved equation error position
  */
-#define PLUS42_VERSION 24
+#define PLUS42_VERSION 25
 
 
 /*******************/
