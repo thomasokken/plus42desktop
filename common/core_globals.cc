@@ -5136,7 +5136,7 @@ void hard_reset(int reason) {
     mode_plot_result_width = 0;
 
     reset_math();
-    eqn_end();
+    reset_eqn();
 
     clear_display();
     clear_custom_menu();

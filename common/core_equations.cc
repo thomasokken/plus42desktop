@@ -501,6 +501,27 @@ bool persist_eqn() {
     return true;
 }
 
+void reset_eqn() {
+    eqn_end();
+
+    eqns = NULL;
+    selected_row = -1;
+    screen_row = 0;
+    headers = 0;
+
+    error_eqn_id = -1;
+
+    dialog = DIALOG_NONE;
+    free(edit_buf);
+    edit_buf = NULL;
+    current_error = ERR_NONE;
+    free_vartype(current_result);
+    current_result = NULL;
+
+    timeout_action = 0;
+    rep_key = -1;
+}
+
 #if 0
 static bool is_name_char(char c) {
     /* The non-name characters are the same as on the 17B,
