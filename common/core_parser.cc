@@ -3609,21 +3609,38 @@ class Lexer {
 
 /* static */ Evaluator *Parser::parse(std::string expr, bool *compatMode, bool *compatModeOverridden, int *errpos) {
     try {
-        return parse2(expr, compatMode, compatModeOverridden, errpos);
+        bool savedCompatMode = *compatMode;
+        Evaluator *ev = parse2(expr, false, compatMode, compatModeOverridden, errpos);
+        if (ev != NULL)
+            return ev;
+        // If parsing failed, try again without looking for a name. This is to
+        // support cases like [1:2:3]=A, where the initial [1 part gets mis-
+        // identified as an equation name. If this second attempt also fails,
+        // report whichever errpos is higher, on the assumption that whichever
+        // assumption allows the parser to get farthest into the expression is
+        // most likely to be the correct one.
+        int ep1 = *errpos;
+        *compatMode = savedCompatMode;
+        ev = parse2(expr, true, compatMode, compatModeOverridden, errpos);
+        if (ev != NULL)
+            return ev;
+        if (ep1 > *errpos)
+            *errpos = ep1;
+        return NULL;
     } catch (std::bad_alloc &) {
         *errpos = -1;
         return NULL;
     }
 }
 
-/* static */ Evaluator *Parser::parse2(std::string expr, bool *compatMode, bool *compatModeOverridden, int *errpos) {
+/* static */ Evaluator *Parser::parse2(std::string expr, bool noName, bool *compatMode, bool *compatModeOverridden, int *errpos) {
     std::string t, t2, eqnName;
     std::vector<std::string> *paramNames = NULL;
     int tpos;
 
     // Look for equation name
     Lexer *lex = new Lexer(expr, *compatMode);
-    if (lex->compatModeOverridden)
+    if (noName || lex->compatModeOverridden)
         goto name_done;
     lex->compatMode = true;
     paramNames = new std::vector<std::string>;

@@ -99,7 +99,7 @@ class Parser {
     int context;
     std::vector<For *> forStack;
 
-    static Evaluator *parse2(std::string expr, bool *compatMode, bool *compatModeOverridden, int *errpos);
+    static Evaluator *parse2(std::string expr, bool noName, bool *compatMode, bool *compatModeOverridden, int *errpos);
 
     public:
 
