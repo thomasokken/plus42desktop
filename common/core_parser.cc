@@ -3610,8 +3610,9 @@ class Lexer {
 /* static */ Evaluator *Parser::parse(std::string expr, bool *compatMode, bool *compatModeOverridden, int *errpos) {
     try {
         bool savedCompatMode = *compatMode;
-        Evaluator *ev = parse2(expr, false, compatMode, compatModeOverridden, errpos);
-        if (ev != NULL)
+        bool noName;
+        Evaluator *ev = parse2(expr, &noName, compatMode, compatModeOverridden, errpos);
+        if (ev != NULL || noName)
             return ev;
         // If parsing failed, try again without looking for a name. This is to
         // support cases like [1:2:3]=A, where the initial [1 part gets mis-
@@ -3621,7 +3622,7 @@ class Lexer {
         // most likely to be the correct one.
         int ep1 = *errpos;
         *compatMode = savedCompatMode;
-        ev = parse2(expr, true, compatMode, compatModeOverridden, errpos);
+        ev = parse2(expr, NULL, compatMode, compatModeOverridden, errpos);
         if (ev != NULL)
             return ev;
         if (ep1 > *errpos)
@@ -3633,14 +3634,22 @@ class Lexer {
     }
 }
 
-/* static */ Evaluator *Parser::parse2(std::string expr, bool noName, bool *compatMode, bool *compatModeOverridden, int *errpos) {
+/* static */ Evaluator *Parser::parse2(std::string expr, bool *noName, bool *compatMode, bool *compatModeOverridden, int *errpos) {
     std::string t, t2, eqnName;
     std::vector<std::string> *paramNames = NULL;
     int tpos;
 
     // Look for equation name
     Lexer *lex = new Lexer(expr, *compatMode);
-    if (noName || lex->compatModeOverridden)
+    if (noName != NULL)
+        // If lex->compatModeOverridden is set before we've even done any
+        // parsing, this means that the equation starts with :STD: or :COMP:.
+        // This means that the second parsing attempt (see the comment in
+        // parse(), above), where we try parsing the equation again but without
+        // looking for a name, can be skipped, since we already know that there
+        // is no name.
+        *noName = lex->compatModeOverridden;
+    if (noName == NULL || lex->compatModeOverridden)
         goto name_done;
     lex->compatMode = true;
     paramNames = new std::vector<std::string>;
