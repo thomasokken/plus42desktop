@@ -1191,9 +1191,9 @@ static int mappable_rnd_c(phloat xre, phloat xim, phloat *yre, phloat *yim) {
 
 int round_easy(phloat x, phloat *y) {
     if (flags.f.fix_or_all && flags.f.eng_or_all) {
-	// This is the internal rounding used by AMORT; unlike the RND
-	// function, which rounds to 12 digits in ALL mode, I think it makes
-	// more sense not to round at all in the case of AMORT steps.
+        // This is the internal rounding used by AMORT; unlike the RND
+        // function, which rounds to 12 digits in ALL mode, I think it makes
+        // more sense not to round at all in the case of AMORT steps.
         *y = x;
         return ERR_NONE;
     }
