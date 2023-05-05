@@ -1,3 +1,15 @@
+2023-05-05: release 1.0.19
+
+* Fixed the definition of the 'ton' unit (U.S. short ton). It was 10^10 times
+  too large, due to a missing sign in the units definition table.
+* Equations like [1:2:3]=A, when entered without a name, weren't parsed
+  correctly, because the part before the first colon would be incorrectly
+  interpreted as a name. Fixed.
+* When an error occurs while evaluating an equation, and that equation exists
+  in the EQN list, pressing R/S in the EQN list view will now start editing
+  that equation, with the cursor on the part of the equation where the error
+  occurred.
+
 2023-04-17: release 1.0.18
 
 * Fixed crash when loading state, when the current program is an equation that
