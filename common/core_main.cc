@@ -4636,7 +4636,13 @@ static vartype *deserialize_list(const char *buf, int *pos) {
                 phloat x;
                 if (!parse_phloat(buf + tstart, us, &x, NULL))
                     goto failure;
-                vartype *v = new_unit(x, buf + tstart + us + 1, tlen - us - 1);
+                int ulen = tlen - us - 1;
+                char *ubuf = (char *) malloc(ulen + 4);
+                if (ubuf == NULL)
+                    goto failure;
+                ulen = ascii2hp(ubuf, ulen, buf + tstart + us + 1, ulen);
+                vartype *v = new_unit(x, ubuf, ulen);
+                free(ubuf);
                 if (v == NULL)
                     goto failure;
                 list->array->data[i] = v;
