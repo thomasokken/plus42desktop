@@ -575,6 +575,7 @@ const command_spec cmd_array[] =
     { /* GETEQN */     docmd_geteqn,      "GETEQN",              0x00, 0x00, 0xa7, 0xb6,  6, ARG_NONE,   1, 0x10 },
     { /* TO_PAR */     docmd_to_par,      "\017PAR",             0x00, 0x00, 0xa7, 0xb7,  4, ARG_NONE,   2, FUNC },
     { /* FDEPTH */     docmd_fdepth,      "FDEPTH",              0x00, 0x00, 0xa7, 0xb8,  6, ARG_NONE,   0, NA_T },
+    { /* FLASTX */     docmd_flastx,      "FLASTX",              0x00, 0x00, 0xa7, 0x1c,  6, ARG_NONE,   0, NA_T },
     { /* PUTITEM */    docmd_putitem,     "PUTITEM",             0x00, 0x00, 0xa7, 0xb9,  7, ARG_NONE,   3, FUNC },
     { /* EVALN */      docmd_evaln,       "EV\301LN",            0x00, 0x43, 0xf2, 0x36,  5, ARG_EQN,    0, NA_T },
     { /* EVALNi */     docmd_evalni,      "EV\301LN",            0x44, 0x00, 0x00, 0x00,  5, ARG_EQN,    0, NA_T },

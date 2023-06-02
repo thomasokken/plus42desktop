@@ -128,14 +128,15 @@ static int rep_key = -1;
 #define EQCMD_REGY     1017
 #define EQCMD_REGZ     1018
 #define EQCMD_REGT     1019
-#define EQCMD_STACK    1020
-#define EQCMD_MEANX    1021
-#define EQCMD_MEANY    1022
-#define EQCMD_SDEVX    1023
-#define EQCMD_SDEVY    1024
-#define EQCMD_SIZEC    1025
-#define EQCMD_FLOW     1026
-#define EQCMD_NUM_T    1027
+#define EQCMD_REGL     1020
+#define EQCMD_STACK    1021
+#define EQCMD_MEANX    1022
+#define EQCMD_MEANY    1023
+#define EQCMD_SDEVX    1024
+#define EQCMD_SDEVY    1025
+#define EQCMD_SIZEC    1026
+#define EQCMD_FLOW     1027
+#define EQCMD_NUM_T    1028
 
 struct eqn_cmd_spec {
     const char *name;
@@ -164,6 +165,7 @@ const eqn_cmd_spec eqn_cmds[] = {
     { /* REGY */     "REGY",        4, true  },
     { /* REGZ */     "REGZ",        4, true  },
     { /* REGT */     "REGT",        4, true  },
+    { /* REGL */     "REGL",        4, true  },
     { /* STACK */    "ST\301\303K\333", 6, true  },
     { /* MEANX */    "M\305\301NX", 5, true  },
     { /* MEANY */    "M\305\301NY", 5, true  },
@@ -281,12 +283,12 @@ const menu_spec eqn_menus[] = {
                         { 0x1000 + CMD_NULL,      0, "" },
                         { 0x1000 + CMD_NULL,      0, "" } } },
     { /* EQMN_STACK */ MENU_NONE, MENU_NONE, MENU_NONE,
-                      { { 0x1000 + EQCMD_REGX,  0, ""    },
-                        { 0x1000 + EQCMD_REGY,  0, ""    },
-                        { 0x1000 + EQCMD_REGZ,  0, ""    },
-                        { 0x1000 + EQCMD_REGT,  0, ""    },
-                        { 0x1000 + EQCMD_STACK, 0, "" },
-                        { 0x1000 + CMD_NULL,    0, ""    } } },
+                      { { 0x1000 + EQCMD_REGL,  0, "" },
+                        { 0x1000 + EQCMD_REGX,  0, "" },
+                        { 0x1000 + EQCMD_REGY,  0, "" },
+                        { 0x1000 + EQCMD_REGZ,  0, "" },
+                        { 0x1000 + EQCMD_REGT,  0, "" },
+                        { 0x1000 + EQCMD_STACK, 0, "" } } },
     { /* EQMN_STAT1 */ MENU_NONE, EQMN_STAT2, EQMN_STAT4,
                       { { 0x1000 + EQCMD_MEANX,   0, "" },
                         { 0x1000 + EQCMD_MEANY,   0, "" },
@@ -339,29 +341,29 @@ static const menu_spec *getmenu(int id) {
 }
 
 static short catalog[] = {
-    CMD_ABS,       CMD_ACOS,      CMD_ACOSH,   CMD_AND,      EQCMD_ANGLE,    CMD_ASIN,
-    CMD_ASINH,     CMD_ATAN,      CMD_ATANH,   CMD_BASEADD,  CMD_BASESUB,    CMD_BASEMUL,
-    CMD_BASEDIV,   CMD_BASECHS,   EQCMD_BREAK, CMD_COMB,     EQCMD_CONTINUE, CMD_CORR,
-    CMD_COS,       CMD_COSH,      CMD_CPX_T,   CMD_CPXMAT_T, CMD_CROSS,      CMD_DATE,
-    CMD_DATE_PLUS, CMD_DDAYS,     CMD_DET,     CMD_DOT,      CMD_EQN_T,      CMD_EVALN,
-    CMD_E_POW_X,   CMD_E_POW_X_1, CMD_FCSTX,   CMD_FCSTY,    EQCMD_FLOW,     CMD_FNRM,
-    EQCMD_FOR,     CMD_FP,        CMD_FV,      CMD_GAMMA,    CMD_HMSADD,     CMD_HMSSUB,
-    EQCMD_IDIV,    CMD_IF_T,      EQCMD_INT,   CMD_INVRT,    CMD_IP,         CMD_I_PCT_YR,
-    CMD_LN,        CMD_LN_1_X,    CMD_LOG,     CMD_LIST_T,   CMD_MAT_T,      EQCMD_MAX,
-    EQCMD_MEANX,   EQCMD_MEANY,   EQCMD_MIN,   CMD_MOD,      EQCMD_MCOLS,    EQCMD_MROWS,
-    CMD_N,         CMD_FACT,      CMD_NEWLIST, CMD_NEWMAT,   CMD_NOT,        CMD_OR,
-    CMD_PERM,      CMD_PCOMPLX,   CMD_PMT,     CMD_PV,       EQCMD_RADIUS,   CMD_RAN,
-    CMD_RCOMPLX,   CMD_REAL_T,    EQCMD_REGX,  EQCMD_REGY,   EQCMD_REGZ,     EQCMD_REGT,
-    CMD_RND,       CMD_RNRM,      CMD_RSUM,    EQCMD_SDEVX,  EQCMD_SDEVY,    CMD_SEED,
-    EQCMD_SEQ,     CMD_SIGN,      CMD_SIN,     CMD_SINH,     EQCMD_SIZEC,    EQCMD_SIZES,
-    CMD_SLOPE,     CMD_SPFV,      CMD_SPPV,    CMD_SQRT,     EQCMD_STACK,    CMD_STOP,
-    CMD_STR_T,     CMD_TAN,       CMD_TANH,    CMD_TIME,     CMD_TRANS,      EQCMD_TRN,
-    CMD_TYPE_T,    EQCMD_NUM_T,   CMD_UNIT_T,  CMD_USFV,     CMD_USPV,       CMD_UVEC,
-    CMD_WMEAN,     EQCMD_XCOORD,  CMD_XEQ,     CMD_XOR,      CMD_SQUARE,     EQCMD_YCOORD,
-    CMD_YINT,      CMD_Y_POW_X,   CMD_INV,     CMD_10_POW_X, CMD_SX,         CMD_SX2,
-    CMD_SY,        CMD_SY2,       CMD_SXY,     CMD_SN,       CMD_SLNX,       CMD_SLNX2,
-    CMD_SLNY,      CMD_SLNY2,     CMD_SLNXLNY, CMD_SXLNY,    CMD_SYLNX,      CMD_TO_DEC,
-    CMD_TO_DEG,    CMD_TO_HMS,    CMD_TO_HR,   CMD_TO_OCT,   CMD_TO_RAD,     CMD_NULL
+    CMD_ABS,       CMD_ACOS,      CMD_ACOSH,    CMD_AND,      EQCMD_ANGLE,    CMD_ASIN,
+    CMD_ASINH,     CMD_ATAN,      CMD_ATANH,    CMD_BASEADD,  CMD_BASESUB,    CMD_BASEMUL,
+    CMD_BASEDIV,   CMD_BASECHS,   EQCMD_BREAK,  CMD_COMB,     EQCMD_CONTINUE, CMD_CORR,
+    CMD_COS,       CMD_COSH,      CMD_CPX_T,    CMD_CPXMAT_T, CMD_CROSS,      CMD_DATE,
+    CMD_DATE_PLUS, CMD_DDAYS,     CMD_DET,      CMD_DOT,      CMD_EQN_T,      CMD_EVALN,
+    CMD_E_POW_X,   CMD_E_POW_X_1, CMD_FCSTX,    CMD_FCSTY,    EQCMD_FLOW,     CMD_FNRM,
+    EQCMD_FOR,     CMD_FP,        CMD_FV,       CMD_GAMMA,    CMD_HMSADD,     CMD_HMSSUB,
+    EQCMD_IDIV,    CMD_IF_T,      EQCMD_INT,    CMD_INVRT,    CMD_IP,         CMD_I_PCT_YR,
+    CMD_LN,        CMD_LN_1_X,    CMD_LOG,      CMD_LIST_T,   CMD_MAT_T,      EQCMD_MAX,
+    EQCMD_MEANX,   EQCMD_MEANY,   EQCMD_MIN,    CMD_MOD,      EQCMD_MCOLS,    EQCMD_MROWS,
+    CMD_N,         CMD_FACT,      CMD_NEWLIST,  CMD_NEWMAT,   CMD_NOT,        CMD_OR,
+    CMD_PERM,      CMD_PCOMPLX,   CMD_PMT,      CMD_PV,       EQCMD_RADIUS,   CMD_RAN,
+    CMD_RCOMPLX,   CMD_REAL_T,    EQCMD_REGL,   EQCMD_REGX,   EQCMD_REGY,     EQCMD_REGZ,
+    EQCMD_REGT,    CMD_RND,       CMD_RNRM,     CMD_RSUM,     EQCMD_SDEVX,    EQCMD_SDEVY,
+    CMD_SEED,      EQCMD_SEQ,     CMD_SIGN,     CMD_SIN,      CMD_SINH,       EQCMD_SIZEC,
+    EQCMD_SIZES,   CMD_SLOPE,     CMD_SPFV,     CMD_SPPV,     CMD_SQRT,       EQCMD_STACK,
+    CMD_STOP,      CMD_STR_T,     CMD_TAN,      CMD_TANH,     CMD_TIME,       CMD_TRANS,
+    EQCMD_TRN,     CMD_TYPE_T,    EQCMD_NUM_T,  CMD_UNIT_T,   CMD_USFV,       CMD_USPV,
+    CMD_UVEC,      CMD_WMEAN,     EQCMD_XCOORD, CMD_XEQ,      CMD_XOR,        CMD_SQUARE,
+    EQCMD_YCOORD,  CMD_YINT,      CMD_Y_POW_X,  CMD_INV,      CMD_10_POW_X,   CMD_SX,
+    CMD_SX2,       CMD_SY,        CMD_SY2,      CMD_SXY,      CMD_SN,         CMD_SLNX,
+    CMD_SLNX2,     CMD_SLNY,      CMD_SLNY2,    CMD_SLNXLNY,  CMD_SXLNY,      CMD_SYLNX,
+    CMD_TO_DEC,    CMD_TO_DEG,    CMD_TO_HMS,   CMD_TO_HR,    CMD_TO_OCT,     CMD_TO_RAD
 };
 
 static int catalog_rows = 23;

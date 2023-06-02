@@ -4085,6 +4085,20 @@ int get_frame_depth(int *depth) {
     return ERR_NONE;
 }
 
+int get_saved_lastx(vartype **lastx) {
+    if (!flags.f.big_stack)
+        return ERR_INVALID_CONTEXT;
+    vartype *fd = recall_private_var("FD", 2);
+    if (fd == NULL)
+        return ERR_INVALID_CONTEXT;
+    vartype *res = ((vartype_list *) fd)->array->data[3];
+    res = dup_vartype(res);
+    if (res == NULL)
+        return ERR_INSUFFICIENT_MEMORY;
+    *lastx = res;
+    return ERR_NONE;
+}
+
 void step_out() {
     if (rtn_level > 0)
         rtn_stop_level = rtn_level - 1;

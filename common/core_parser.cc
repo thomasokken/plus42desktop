@@ -2427,7 +2427,7 @@ class Register : public Evaluator {
 
     private:
 
-    int index; // X=1, Y=2, Z=3, T=4
+    int index; // L=0, X=1, Y=2, Z=3, T=4
     Evaluator *ev;
 
     public:
@@ -2447,6 +2447,10 @@ class Register : public Evaluator {
     }
 
     void generateCode(GeneratorContext *ctx) {
+        if (ev == NULL && index == 0) {
+            ctx->addLine(tpos, CMD_FLASTX);
+            return;
+        }
         if (ev == NULL)
             ctx->addLine(tpos, (phloat) index);
         else
@@ -4793,6 +4797,8 @@ Evaluator *Parser::parseThing() {
                 return new Register(tpos, 3);
             else if (t == "REGT")
                 return new Register(tpos, 4);
+            else if (t == "REGL")
+                return new Register(tpos, 0);
             else if (t == "\5X")
                 return new RecallFunction(tpos, CMD_SX);
             else if (t == "\5X2")

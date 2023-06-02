@@ -653,6 +653,7 @@ int push_func_state(int n);
 int push_stack_state(bool big);
 int pop_func_state(bool error);
 int get_frame_depth(int *depth);
+int get_saved_lastx(vartype **lastx);
 void step_out();
 void step_over();
 void return_here_after_last_rtn();

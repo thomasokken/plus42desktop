@@ -535,6 +535,14 @@ int docmd_fdepth(arg_struct *arg) {
     return recall_result(v);
 }
 
+int docmd_flastx(arg_struct *arg) {
+    vartype *v;
+    int err = get_saved_lastx(&v);
+    if (err != ERR_NONE)
+        return err;
+    return recall_result(v);
+}
+
 static int get_sum(int n) {
     vartype *v = recall_var("REGS", 4);
     if (v == NULL)
