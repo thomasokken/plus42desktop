@@ -931,6 +931,8 @@ int docmd_edit(arg_struct *arg) {
     stack[sp] = v;
     matedit_i = 0;
     matedit_j = 0;
+    flags.f.matrix_edge_wrap = 0;
+    flags.f.matrix_end_wrap = 0;
     if (mode_appmenu >= MENU_MATRIX1 && mode_appmenu <= MENU_MATRIX_SIMQ)
         matedit_prev_appmenu = mode_appmenu;
     else
@@ -1017,6 +1019,8 @@ int docmd_editn(arg_struct *arg) {
     stack[sp] = v;
     matedit_i = 0;
     matedit_j = 0;
+    flags.f.matrix_edge_wrap = 0;
+    flags.f.matrix_end_wrap = 0;
     if (mode_appmenu >= MENU_MATRIX1 && mode_appmenu <= MENU_MATRIX_SIMQ)
         matedit_prev_appmenu = mode_appmenu;
     else
@@ -1463,6 +1467,8 @@ int docmd_index(arg_struct *arg) {
     matedit_mode = 1;
     matedit_i = 0;
     matedit_j = 0;
+    flags.f.matrix_edge_wrap = 0;
+    flags.f.matrix_end_wrap = 0;
     string_copy(matedit_name, &matedit_length, arg->val.text, arg->length);
     matedit_dir = mi.dir;
     return ERR_NONE;
