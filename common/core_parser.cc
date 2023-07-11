@@ -4797,7 +4797,7 @@ Evaluator *Parser::parseThing() {
                 return new Register(tpos, 3);
             else if (t == "REGT")
                 return new Register(tpos, 4);
-            else if (t == "REGL")
+            else if (t == "LASTX")
                 return new Register(tpos, 0);
             else if (t == "\5X")
                 return new RecallFunction(tpos, CMD_SX);

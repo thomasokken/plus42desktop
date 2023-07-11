@@ -128,7 +128,7 @@ static int rep_key = -1;
 #define EQCMD_REGY     1017
 #define EQCMD_REGZ     1018
 #define EQCMD_REGT     1019
-#define EQCMD_REGL     1020
+#define EQCMD_LASTX    1020
 #define EQCMD_STACK    1021
 #define EQCMD_MEANX    1022
 #define EQCMD_MEANY    1023
@@ -165,7 +165,7 @@ const eqn_cmd_spec eqn_cmds[] = {
     { /* REGY */     "REGY",        4, true  },
     { /* REGZ */     "REGZ",        4, true  },
     { /* REGT */     "REGT",        4, true  },
-    { /* REGL */     "REGL",        4, true  },
+    { /* LASTX */    "LASTX",       4, true  },
     { /* STACK */    "ST\301\303K\333", 6, true  },
     { /* MEANX */    "M\305\301NX", 5, true  },
     { /* MEANY */    "M\305\301NY", 5, true  },
@@ -283,11 +283,11 @@ const menu_spec eqn_menus[] = {
                         { 0x1000 + CMD_NULL,      0, "" },
                         { 0x1000 + CMD_NULL,      0, "" } } },
     { /* EQMN_STACK */ MENU_NONE, MENU_NONE, MENU_NONE,
-                      { { 0x1000 + EQCMD_REGL,  0, "" },
-                        { 0x1000 + EQCMD_REGX,  0, "" },
+                      { { 0x1000 + EQCMD_REGX,  0, "" },
                         { 0x1000 + EQCMD_REGY,  0, "" },
                         { 0x1000 + EQCMD_REGZ,  0, "" },
                         { 0x1000 + EQCMD_REGT,  0, "" },
+                        { 0x1000 + EQCMD_LASTX, 0, "" },
                         { 0x1000 + EQCMD_STACK, 0, "" } } },
     { /* EQMN_STAT1 */ MENU_NONE, EQMN_STAT2, EQMN_STAT4,
                       { { 0x1000 + EQCMD_MEANX,   0, "" },
@@ -349,11 +349,11 @@ static short catalog[] = {
     CMD_E_POW_X,   CMD_E_POW_X_1, CMD_FCSTX,    CMD_FCSTY,    EQCMD_FLOW,     CMD_FNRM,
     EQCMD_FOR,     CMD_FP,        CMD_FV,       CMD_GAMMA,    CMD_HMSADD,     CMD_HMSSUB,
     EQCMD_IDIV,    CMD_IF_T,      EQCMD_INT,    CMD_INVRT,    CMD_IP,         CMD_I_PCT_YR,
-    CMD_LN,        CMD_LN_1_X,    CMD_LOG,      CMD_LIST_T,   CMD_MAT_T,      EQCMD_MAX,
-    EQCMD_MEANX,   EQCMD_MEANY,   EQCMD_MIN,    CMD_MOD,      EQCMD_MCOLS,    EQCMD_MROWS,
-    CMD_N,         CMD_FACT,      CMD_NEWLIST,  CMD_NEWMAT,   CMD_NOT,        CMD_OR,
-    CMD_PERM,      CMD_PCOMPLX,   CMD_PMT,      CMD_PV,       EQCMD_RADIUS,   CMD_RAN,
-    CMD_RCOMPLX,   CMD_REAL_T,    EQCMD_REGL,   EQCMD_REGX,   EQCMD_REGY,     EQCMD_REGZ,
+    CMD_LASTX,     CMD_LN,        CMD_LN_1_X,   CMD_LOG,      CMD_LIST_T,     CMD_MAT_T,
+    EQCMD_MAX,     EQCMD_MEANX,   EQCMD_MEANY,  EQCMD_MIN,    CMD_MOD,        EQCMD_MCOLS,
+    EQCMD_MROWS,   CMD_N,         CMD_FACT,     CMD_NEWLIST,  CMD_NEWMAT,     CMD_NOT,
+    CMD_OR,        CMD_PERM,      CMD_PCOMPLX,  CMD_PMT,      CMD_PV,         EQCMD_RADIUS,
+    CMD_RAN,       CMD_RCOMPLX,   CMD_REAL_T,   EQCMD_REGX,   EQCMD_REGY,     EQCMD_REGZ,
     EQCMD_REGT,    CMD_RND,       CMD_RNRM,     CMD_RSUM,     EQCMD_SDEVX,    EQCMD_SDEVY,
     CMD_SEED,      EQCMD_SEQ,     CMD_SIGN,     CMD_SIN,      CMD_SINH,       EQCMD_SIZEC,
     EQCMD_SIZES,   CMD_SLOPE,     CMD_SPFV,     CMD_SPPV,     CMD_SQRT,       EQCMD_STACK,
