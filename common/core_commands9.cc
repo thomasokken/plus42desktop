@@ -1016,7 +1016,7 @@ int docmd_units(arg_struct *arg) {
 }
 
 int docmd_unit_fcn(arg_struct *arg) {
-    set_plainmenu(MENU_UNIT_FCN);
+    set_plainmenu(MENU_UNIT_FCN1);
     return ERR_NONE;
 }
 

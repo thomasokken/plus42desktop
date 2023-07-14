@@ -219,18 +219,19 @@ extern const error_spec errors[];
 #define MENU_INTEG_PARAMS  72
 #define MENU_DIR_FCN1      73
 #define MENU_DIR_FCN2      74
-#define MENU_UNIT_FCN      75
-#define MENU_TVM_APP1      76
-#define MENU_TVM_APP2      77
-#define MENU_TVM_AMORT     78
-#define MENU_TVM_TABLE     79
-#define MENU_TVM_PARAMS    80
-#define MENU_TVM_PRGM1     81
-#define MENU_TVM_PRGM2     82
-#define MENU_EQN_FCN       83
-#define MENU_GRAPH         84
-#define MENU_GRAPH_AXES    85
-#define MENU_GRAPH_VIEW    86
+#define MENU_UNIT_FCN1     75
+#define MENU_UNIT_FCN2     76
+#define MENU_TVM_APP1      77
+#define MENU_TVM_APP2      78
+#define MENU_TVM_AMORT     79
+#define MENU_TVM_TABLE     80
+#define MENU_TVM_PARAMS    81
+#define MENU_TVM_PRGM1     82
+#define MENU_TVM_PRGM2     83
+#define MENU_EQN_FCN       84
+#define MENU_GRAPH         85
+#define MENU_GRAPH_AXES    86
+#define MENU_GRAPH_VIEW    87
 
 
 struct menu_item_spec {

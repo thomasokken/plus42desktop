@@ -629,13 +629,20 @@ const menu_spec menus[] = {
                         { 0x1000 + CMD_NULL,  0, "" },
                         { 0x1000 + CMD_NULL,  0, "" },
                         { 0x1000 + CMD_NULL,  0, "" } } },
-    { /* MENU_UNIT_FCN */ MENU_NONE, MENU_NONE, MENU_NONE,
+    { /* MENU_UNIT_FCN1 */ MENU_NONE, MENU_UNIT_FCN2, MENU_UNIT_FCN2,
                       { { 0x1000 + CMD_CONVERT,   0, "" },
                         { 0x1000 + CMD_UBASE,     0, "" },
                         { 0x1000 + CMD_UVAL,      0, "" },
                         { 0x1000 + CMD_UFACT,     0, "" },
                         { 0x1000 + CMD_TO_UNIT,   0, "" },
                         { 0x1000 + CMD_FROM_UNIT, 0, "" } } },
+    { /* MENU_UNIT_FCN2 */ MENU_NONE, MENU_UNIT_FCN1, MENU_UNIT_FCN1,
+                      { { 0x1000 + CMD_UNIT_T, 0, "" },
+                        { 0x1000 + CMD_NULL,   0, "" },
+                        { 0x1000 + CMD_NULL,   0, "" },
+                        { 0x1000 + CMD_NULL,   0, "" },
+                        { 0x1000 + CMD_NULL,   0, "" },
+                        { 0x1000 + CMD_NULL,   0, "" } } },
     { /* MENU_TVM_APP1 */ MENU_NONE, MENU_TVM_APP2, MENU_TVM_APP2,
                       { { 0x1000 + CMD_N,        0, "" },
                         { 0x1000 + CMD_I_PCT_YR, 0, "" },
@@ -1054,8 +1061,9 @@ bool no_keystrokes_yet;
  * Version 23: 1.0    Interactive XSTR max length raised to 50
  * Version 24: 1.0.3  SOLVE secant impatience
  * Version 25: 1.1    Saved equation error position
+ * Version 26: 1.1    Second row for UNIT.FCN menu
  */
-#define PLUS42_VERSION 25
+#define PLUS42_VERSION 26
 
 
 /*******************/
@@ -4740,12 +4748,22 @@ static bool load_state2(bool *clear, bool *too_new) {
     if (!read_int(&mode_alphamenu)) return false;
     if (!read_int(&mode_commandmenu)) return false;
     if (ver < 21) {
+        // inserted MENU_DISP3
         if (mode_appmenu >= 30 && mode_appmenu <= 85) mode_appmenu++;
         if (mode_auxmenu >= 30 && mode_auxmenu <= 85) mode_auxmenu++;
         if (mode_plainmenu >= 30 && mode_plainmenu <= 85) mode_plainmenu++;
         if (mode_transientmenu >= 30 && mode_transientmenu <= 85) mode_transientmenu++;
         if (mode_alphamenu >= 30 && mode_alphamenu <= 85) mode_alphamenu++;
         if (mode_commandmenu >= 30 && mode_commandmenu <= 85) mode_commandmenu++;
+    }
+    if (ver < 26) {
+        // inserted MENU_UNIT_FCN2
+        if (mode_appmenu >= 76 && mode_appmenu <= 86) mode_appmenu++;
+        if (mode_auxmenu >= 76 && mode_auxmenu <= 86) mode_auxmenu++;
+        if (mode_plainmenu >= 76 && mode_plainmenu <= 86) mode_plainmenu++;
+        if (mode_transientmenu >= 76 && mode_transientmenu <= 86) mode_transientmenu++;
+        if (mode_alphamenu >= 76 && mode_alphamenu <= 86) mode_alphamenu++;
+        if (mode_commandmenu >= 76 && mode_commandmenu <= 86) mode_commandmenu++;
     }
     if (!read_bool(&mode_running)) return false;
     if (!read_bool(&mode_varmenu)) return false;
