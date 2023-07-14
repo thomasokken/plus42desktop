@@ -2718,8 +2718,28 @@ static int keydown_list(int key, bool shift, int *repeat) {
                 }
             }
             if (idx == -1) {
-                error_eqn_id = -1;
-                goto no_eqn;
+                // The equation with the error is not in EQNS; add it at the end
+                equation_data *eqd = eq_dir->prgms[error_eqn_id].eq_data;
+                if (eqd == NULL) {
+                    error_eqn_id = -1;
+                    goto no_eqn;
+                }
+                vartype *eq = new_equation(eqd);
+                if (eq == NULL) {
+                    error_eqn_id = -1;
+                    goto no_eqn;
+                }
+                vartype **new_data = (vartype **) realloc(eqns->array->data, (num_eqns + 1) * sizeof(vartype *));
+                if (new_data == NULL) {
+                    error_eqn_id = -1;
+                    free_vartype(eq);
+                    goto no_eqn;
+                }
+                eqns->array->data = new_data;
+                eqns->size++;
+                eqns->array->data[num_eqns] = eq;
+                idx = num_eqns;
+                num_eqns++;
             }
             eqn_set_selected_row(idx);
             start_edit(error_eqn_pos);
