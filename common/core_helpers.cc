@@ -638,7 +638,10 @@ int generic_comparison(const vartype *x, const vartype *y, char which) {
 
 int anum(const char *text, int len, phloat *res) {
     char buf[50];
+    int src_pos = 0;
+    retry:
     bool have_mant = false;
+    bool have_mant_digits = false;
     bool neg_mant = false;
     bool have_radix = false;
     bool have_exp = false;
@@ -646,7 +649,7 @@ int anum(const char *text, int len, phloat *res) {
     int exp_pos = 0;
     int buf_pos = 0;
     buf[buf_pos++] = '+';
-    for (int src_pos = 0; src_pos < len; src_pos++) {
+    for (; src_pos < len; src_pos++) {
         char c = text[src_pos];
         if (!flags.f.decimal_point)
             if (c == '.')
@@ -661,6 +664,7 @@ int anum(const char *text, int len, phloat *res) {
             } else if (c >= '0' && c <= '9') {
                 buf[buf_pos++] = c;
                 have_mant = true;
+                have_mant_digits = true;
             } else if (c == '.') {
                 buf[buf_pos++] = '0';
                 buf[buf_pos++] = '.';
@@ -674,12 +678,15 @@ int anum(const char *text, int len, phloat *res) {
                 neg_mant = !neg_mant;
             } else if (c >= '0' && c <= '9') {
                 buf[buf_pos++] = c;
+                have_mant_digits = true;
             } else if (c == '.') {
                 if (!have_radix) {
                     buf[buf_pos++] = c;
                     have_radix = true;
                 }
             } else if (c == 'E' || c == 'e' || c == 24) {
+                if (!have_mant_digits)
+                    goto retry;
                 buf[buf_pos++] = 'e';
                 exp_pos = buf_pos;
                 buf[buf_pos++] = '+';
@@ -701,7 +708,7 @@ int anum(const char *text, int len, phloat *res) {
             }
         }
     }
-    if (!have_mant)
+    if (!have_mant_digits)
         return false;
     if (neg_mant)
         buf[0] = '-';
