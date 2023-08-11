@@ -42,6 +42,8 @@ int docmd_col_plus(arg_struct *arg);
 int docmd_col_minus(arg_struct *arg);
 int docmd_getds(arg_struct *arg);
 int docmd_setds(arg_struct *arg);
+int docmd_1line(arg_struct *arg);
+int docmd_nline(arg_struct *arg);
 
 int docmd_dirs(arg_struct *arg);
 int docmd_dir_fcn(arg_struct *arg);

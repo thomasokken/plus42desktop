@@ -1590,6 +1590,10 @@ bool should_highlight(int cmd) {
             return get_base() == 16;
         case CMD_HEADER:
             return mode_header;
+        case CMD_1LINE:
+            return !mode_multi_line;
+        case CMD_NLINE:
+            return mode_multi_line;
         case CMD_TBEGIN: {
             vartype *v = recall_var("BEGIN", 5);
             return v != NULL && v->type == TYPE_REAL && ((vartype_real *) v)->x == 1;
@@ -2031,7 +2035,7 @@ static void full_complex_matrix_to_string(vartype *v, std::string *buf, int line
 }
 
 static int display_x(int row, int lines_available) {
-    if (disp_r == 2 && !mode_number_entry) {
+    if ((disp_r == 2 || !mode_multi_line) && !mode_number_entry) {
         display_level(0, row);
         return 1;
     }
@@ -2627,8 +2631,8 @@ static int ext_dir_cat[] = {
 };
 
 static int ext_disp_cat[] = {
-    CMD_COL_PLUS,  CMD_COL_MINUS, CMD_GETDS, CMD_HEADER, CMD_HEIGHT, CMD_ROW_PLUS,
-    CMD_ROW_MINUS, CMD_SETDS,     CMD_WIDTH, CMD_NULL,   CMD_NULL,   CMD_NULL
+    CMD_COL_PLUS, CMD_COL_MINUS, CMD_GETDS, CMD_HEADER, CMD_HEIGHT, CMD_NLINE,
+    CMD_ROW_PLUS, CMD_ROW_MINUS, CMD_SETDS, CMD_WIDTH,  CMD_1LINE,  CMD_NULL
 };
 
 #if defined(ANDROID) || defined(IPHONE)

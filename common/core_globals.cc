@@ -317,8 +317,8 @@ const menu_spec menus[] = {
     { /* MENU_DISP3 */ MENU_NONE, MENU_DISP1, MENU_DISP2,
                       { { 0x2000 + CMD_HEADER, 0, "" },
                         { 0x1000 + CMD_NULL,   0, "" },
-                        { 0x1000 + CMD_NULL,   0, "" },
-                        { 0x1000 + CMD_NULL,   0, "" },
+                        { 0x2000 + CMD_1LINE,  0, "" },
+                        { 0x2000 + CMD_NLINE,  0, "" },
                         { 0x1000 + CMD_WIDTH,  0, "" },
                         { 0x1000 + CMD_HEIGHT, 0, "" } } },
     { /* MENU_CLEAR1 */ MENU_NONE, MENU_CLEAR2, MENU_CLEAR2,
@@ -953,6 +953,7 @@ int mode_plot_key;
 int mode_plot_sp;
 vartype *mode_plot_inv;
 int mode_plot_result_width;
+bool mode_multi_line;
 
 phloat entered_number;
 int entered_string_length;
@@ -1060,10 +1061,11 @@ bool no_keystrokes_yet;
  * Version 22: 1.0    UNITS skip-top in equation editor
  * Version 23: 1.0    Interactive XSTR max length raised to 50
  * Version 24: 1.0.3  SOLVE secant impatience
- * Version 25: 1.1    Saved equation error position
- * Version 26: 1.1    Second row for UNIT.FCN menu
+ * Version 25: 1.0.20 Saved equation error position
+ * Version 26: 1.0.20 Second row for UNIT.FCN menu
+ * Version 27: 1.0.20 1LINE/NLINE
  */
-#define PLUS42_VERSION 26
+#define PLUS42_VERSION 27
 
 
 /*******************/
@@ -1957,6 +1959,8 @@ static bool persist_globals() {
         goto done;
     if (!write_int(mode_plot_result_width))
         goto done;
+    if (!write_bool(mode_multi_line))
+        goto done;
     if (!persist_vartype(varmenu_eqn))
         goto done;
     if (!write_int(varmenu_length))
@@ -2238,6 +2242,15 @@ static bool unpersist_globals() {
         }
     } else {
         mode_plot_result_width = 0;
+    }
+
+    if (ver >= 27) {
+        if (!read_bool(&mode_multi_line)) {
+            mode_multi_line = true;
+            goto done;
+        }
+    } else {
+        mode_multi_line = true;
     }
 
     if (!unpersist_vartype(&varmenu_eqn)) {
@@ -5166,6 +5179,7 @@ void hard_reset(int reason) {
     mode_plot_sp = 0;
     mode_plot_inv = NULL;
     mode_plot_result_width = 0;
+    mode_multi_line = true;
 
     reset_math();
     reset_eqn();

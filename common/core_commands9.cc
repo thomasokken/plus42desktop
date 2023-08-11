@@ -996,6 +996,16 @@ int docmd_setds(arg_struct *arg) {
     return ERR_NONE;
 }
 
+int docmd_1line(arg_struct *arg) {
+    mode_multi_line = false;
+    return ERR_NONE;
+}
+
+int docmd_nline(arg_struct *arg) {
+    mode_multi_line = true;
+    return ERR_NONE;
+}
+
 int docmd_dirs(arg_struct *arg) {
     set_menu(MENULEVEL_AUX, MENU_CATALOG);
     set_cat_section_no_top(CATSECT_DIRS);

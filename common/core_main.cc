@@ -2167,24 +2167,7 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
                 if (byte2 == EOF)
                     goto done;
                 code = (((unsigned int) byte1) << 8) | byte2;
-                if (code >= 0x0A7DB && code <= 0x0A7DD) {
-                    /* FUNC0, FUNC1, FUNC2: translate to FUNC nn */
-                    cmd = CMD_FUNC;
-                    arg.type = ARGTYPE_NUM;
-                    if (code == 0x0A7DB)
-                        arg.val.num = 0;
-                    else if (code == 0x0A7DC)
-                        arg.val.num = 11;
-                    else // code == 0x0A7DD
-                        arg.val.num = 21;
-                    goto store;
-                } else if (code == 0x0A7E0) {
-                    /* Unparameterized RTNERR: translate to RTNERR IND ST X */
-                    cmd = CMD_RTNERR;
-                    arg.type = ARGTYPE_IND_STK;
-                    arg.val.stk = 'X';
-                    goto store;
-                } else if (code >= 0x0a679 && code <= 0x0a67e) {
+                if (code >= 0x0a679 && code <= 0x0a67e) {
                     /* HP-41CX: X=NN? etc. */
                     switch (code & 0xf) {
                         case 0x9: cmd = CMD_X_EQ_NN; break;
@@ -3745,20 +3728,25 @@ static void paste_programs(const char *buf) {
                 arg.type = ARGTYPE_DOUBLE;
                 goto store;
             } else {
-                // Check for 1/X, 10^X, 4STK, and generalized comparisons with 0
+                // Check for 1/X, 10^X, 1LINE, 4STK, and generalized comparisons with 0
                 int len = hpend - prev_hppos;
-                if ((len == 3 || len > 3 && hpbuf[3] == ' ')
+                if ((len == 3 || len > 3 && hpbuf[prev_hppos + 3] == ' ')
                         && strncmp(hpbuf + prev_hppos, "1/X", 3) == 0) {
                     cmd = CMD_INV;
                     arg.type = ARGTYPE_NONE;
                     goto store;
-                } else if ((len == 4 || len > 4 && hpbuf[4] == ' ')
+                } else if ((len == 4 || len > 4 && hpbuf[prev_hppos + 4] == ' ')
                         && (strncmp(hpbuf + prev_hppos, "10^X", 4) == 0
                          || strncmp(hpbuf + prev_hppos, "10\36X", 4) == 0)) {
                     cmd = CMD_10_POW_X;
                     arg.type = ARGTYPE_NONE;
                     goto store;
-                } else if ((len == 4 || len > 4 && hpbuf[4] == ' ')
+                } else if ((len == 5 || len > 5 && hpbuf[prev_hppos + 5] == ' ')
+                        && strncmp(hpbuf + prev_hppos, "1LINE", 5) == 0) {
+                    cmd = CMD_1LINE;
+                    arg.type = ARGTYPE_NONE;
+                    goto store;
+                } else if ((len == 4 || len > 4 && hpbuf[prev_hppos + 4] == ' ')
                         && strncmp(hpbuf + prev_hppos, "4STK", 4) == 0) {
                     cmd = CMD_4STK;
                     arg.type = ARGTYPE_NONE;
