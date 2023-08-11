@@ -1,3 +1,32 @@
+2023-08-11: release 1.0.20
+
+* Added 1LINE and NLINE functions, to select 1-line or n-line mode. 1-line mode
+  forces matrices and lists to be displayed in compact format, even if the
+  display has more than 2 lines; n-line mode is the multi-line matrix and list
+  display that was introduced in 1.0.17. The latter remains the default.
+* INPUT would crash if R/S was pressed while the stack was empty, in NSTK mode.
+  Fixed.
+* ANUM would consider a decimal point or comma by itself as zero, instead of
+  ignoring it. Fixed.
+* Added UNIT? to the UNIT.FCN menu.
+* If an error occurs while evaluating an equation, which does not exist in the
+  EQN list, going to EQN mode and pressing R/S will now add the equation to the
+  EQN list, and then start editing with the cursor on the site of the error.
+  This used to work only for equations that were in the EQN list beforehand.
+* Added LASTX for equations, to work alongside REGX/REGY/REGZ/REGT, for
+  read-only access to the RPN stack.
+* EDIT, EDITN, and INDEX didn't clear flags 76 and 77 (matrix edge wrap and end
+  wrap), while they should. Fixed.
+* Decimal version: In HMS+ and HMS-, fixed handling of cases where either or
+  both of the arguments has a number of minutes or seconds >= 60. (The binary
+  version did not have this bug.)
+* Binary version: max digits for SHOW increased to 17. This was necessary
+  because 16 digits was actually never enough to begin with. For example, 5 1/X
+  and 5 SQRT X^2 1/X both returned a result that looked like 0.2 in SHOW, even
+  though they are different, as can be easily verified with X=Y? or by
+  subtracting them. It takes 17 decimal digits to ensure that different binary
+  numbers will always be rendered as different decimal numbers.
+
 2023-05-05: release 1.0.19
 
 * Fixed the definition of the 'ton' unit (U.S. short ton). It was 10^10 times
