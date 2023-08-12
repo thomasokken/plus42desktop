@@ -1685,7 +1685,7 @@ int unit_pow(vartype *x, phloat e, vartype **r) {
         up->pow(ie);
         goto finish;
     } else {
-        ie = to_int4(1 / e + 0.5);
+        ie = to_int4(e > 0 ? 1 / e + 0.5 : 1 / e - 0.5);
         e1 = 1 / ((phloat) ie);
         if (e1 != e && e1 != nextafter(e, POS_HUGE_PHLOAT) && e1 != nextafter(e, NEG_HUGE_PHLOAT))
             // Not close enough to the reciprocal of an integer
