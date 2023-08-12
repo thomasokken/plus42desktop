@@ -4511,7 +4511,7 @@ bool read_phloat(phloat *d) {
                 char *dst = (char *) &dbl;
                 for (int i = 0; i < 8; i++)
                     dst[i] = buf[7 - i];
-                *d = dbl;
+                d->assign17digits(dbl);
                 return true;
             #else
                 char buf[16], data[16];
@@ -4527,7 +4527,7 @@ bool read_phloat(phloat *d) {
                 double dbl;
                 if (fread(&dbl, 1, 8, gfile) != 8)
                     return false;
-                *d = dbl;
+                d->assign17digits(dbl);
                 return true;
             #else
                 char data[16];
