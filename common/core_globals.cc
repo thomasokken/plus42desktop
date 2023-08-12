@@ -4093,7 +4093,7 @@ int pop_func_state(bool error) {
 int get_frame_depth(int *depth) {
     if (!flags.f.big_stack)
         return ERR_INVALID_CONTEXT;
-    vartype *fd = recall_private_var("FD", 2);
+    vartype *fd = recall_private_var("FD", 2, true);
     if (fd == NULL)
         return ERR_INVALID_CONTEXT;
     int d = to_int(((vartype_real *) ((vartype_list *) fd)->array->data[1])->x);
@@ -4109,7 +4109,7 @@ int get_frame_depth(int *depth) {
 int get_saved_lastx(vartype **lastx) {
     if (!flags.f.big_stack)
         return ERR_INVALID_CONTEXT;
-    vartype *fd = recall_private_var("FD", 2);
+    vartype *fd = recall_private_var("FD", 2, true);
     if (fd == NULL)
         return ERR_INVALID_CONTEXT;
     vartype *res = ((vartype_list *) fd)->array->data[3];

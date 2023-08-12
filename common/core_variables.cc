@@ -1157,14 +1157,14 @@ int matrix_copy(vartype *dst, const vartype *src) {
         return ERR_INVALID_TYPE;
 }
 
-static vloc lookup_private_var(const char *name, int namelength) {
+static vloc lookup_private_var(const char *name, int namelength, bool allow_calling_frames) {
     int level = get_rtn_level();
     int i, j;
     for (i = local_vars_count - 1; i >= 0; i--) {
         int vlevel = local_vars[i].level;
         if (vlevel == -1)
             continue;
-        if (vlevel < level)
+        if (!allow_calling_frames && vlevel < level)
             break;
         if ((local_vars[i].flags & VAR_PRIVATE) == 0)
             continue;
@@ -1179,12 +1179,12 @@ static vloc lookup_private_var(const char *name, int namelength) {
     return vloc();
 }
 
-vartype *recall_private_var(const char *name, int namelength) {
-    return lookup_private_var(name, namelength).value();
+vartype *recall_private_var(const char *name, int namelength, bool allow_calling_frames) {
+    return lookup_private_var(name, namelength, allow_calling_frames).value();
 }
 
 vartype *recall_and_purge_private_var(const char *name, int namelength) {
-    vloc varindex = lookup_private_var(name, namelength);
+    vloc varindex = lookup_private_var(name, namelength, false);
     if (varindex.not_found())
         return NULL;
     vartype *ret = varindex.value();
@@ -1195,7 +1195,7 @@ vartype *recall_and_purge_private_var(const char *name, int namelength) {
 }
 
 int store_private_var(const char *name, int namelength, vartype *value) {
-    vloc varindex = lookup_private_var(name, namelength);
+    vloc varindex = lookup_private_var(name, namelength, false);
     int i;
     if (varindex.not_found()) {
         if (local_vars_count == local_vars_capacity) {

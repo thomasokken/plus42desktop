@@ -236,7 +236,7 @@ bool vars_exist(int section);
 bool named_eqns_exist();
 bool contains_strings(const vartype_realmatrix *rm);
 int matrix_copy(vartype *dst, const vartype *src);
-vartype *recall_private_var(const char *name, int namelength);
+vartype *recall_private_var(const char *name, int namelength, bool allow_calling_frames = false);
 vartype *recall_and_purge_private_var(const char *name, int namelength);
 int store_private_var(const char *name, int namelength, vartype *value);
 int store_stack_reference(vartype *value);
