@@ -128,15 +128,14 @@ static int rep_key = -1;
 #define EQCMD_REGY     1017
 #define EQCMD_REGZ     1018
 #define EQCMD_REGT     1019
-#define EQCMD_LASTX    1020
-#define EQCMD_STACK    1021
-#define EQCMD_MEANX    1022
-#define EQCMD_MEANY    1023
-#define EQCMD_SDEVX    1024
-#define EQCMD_SDEVY    1025
-#define EQCMD_SIZEC    1026
-#define EQCMD_FLOW     1027
-#define EQCMD_NUM_T    1028
+#define EQCMD_STACK    1020
+#define EQCMD_MEANX    1021
+#define EQCMD_MEANY    1022
+#define EQCMD_SDEVX    1023
+#define EQCMD_SDEVY    1024
+#define EQCMD_SIZEC    1025
+#define EQCMD_FLOW     1026
+#define EQCMD_NUM_T    1027
 
 struct eqn_cmd_spec {
     const char *name;
@@ -165,7 +164,6 @@ const eqn_cmd_spec eqn_cmds[] = {
     { /* REGY */     "REGY",        4, true  },
     { /* REGZ */     "REGZ",        4, true  },
     { /* REGT */     "REGT",        4, true  },
-    { /* LASTX */    "LASTX",       4, true  },
     { /* STACK */    "ST\301\303K\333", 6, true  },
     { /* MEANX */    "M\305\301NX", 5, true  },
     { /* MEANY */    "M\305\301NY", 5, true  },
@@ -287,7 +285,7 @@ const menu_spec eqn_menus[] = {
                         { 0x1000 + EQCMD_REGY,  0, "" },
                         { 0x1000 + EQCMD_REGZ,  0, "" },
                         { 0x1000 + EQCMD_REGT,  0, "" },
-                        { 0x1000 + EQCMD_LASTX, 0, "" },
+                        { 0x1000 + CMD_LASTX,   0, "" },
                         { 0x1000 + EQCMD_STACK, 0, "" } } },
     { /* EQMN_STAT1 */ MENU_NONE, EQMN_STAT2, EQMN_STAT4,
                       { { 0x1000 + EQCMD_MEANX,   0, "" },
