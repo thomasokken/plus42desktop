@@ -661,6 +661,54 @@ class Angle : public BinaryEvaluator {
     }
 };
 
+////////////////////
+/////  Append  /////
+////////////////////
+
+class Append : public Evaluator {
+
+    private:
+
+    std::vector<Evaluator *> *evs;
+
+    public:
+
+    Append(int pos, std::vector<Evaluator *> *evs) : Evaluator(pos), evs(evs) {}
+
+    ~Append() {
+        for (int i = 0; i < evs->size(); i++)
+            delete (*evs)[i];
+        delete evs;
+    }
+
+    Evaluator *clone(For *f) {
+        std::vector<Evaluator *> *evs2 = new std::vector<Evaluator *>;
+        for (int i = 0; i < evs->size(); i++)
+            evs2->push_back((*evs)[i]->clone(f));
+        return new Append(tpos, evs2);
+    }
+
+    void generateCode(GeneratorContext *ctx) {
+        (*evs)[0]->generateCode(ctx);
+        for (int i = 1; i < evs->size(); i++) {
+            (*evs)[i]->generateCode(ctx);
+            ctx->addLine(tpos, CMD_APPEND);
+        }
+    }
+
+    void collectVariables(std::vector<std::string> *vars, std::vector<std::string> *locals) {
+        for (int i = 0; i < evs->size(); i++)
+            (*evs)[i]->collectVariables(vars, locals);
+    }
+
+    int howMany(const std::string &name) {
+        for (int i = 0; i < evs->size(); i++)
+            if ((*evs)[i]->howMany(name) != 0)
+                return -1;
+        return 0;
+    }
+};
+
 ///////////////////
 /////  Array  /////
 ///////////////////
@@ -1633,6 +1681,40 @@ class Gee : public Evaluator {
 
     int howMany(const std::string &name) {
         return 0;
+    }
+};
+
+////////////////////////
+/////  HeadOrTail  /////
+////////////////////////
+
+class HeadOrTail : public UnaryEvaluator {
+
+    private:
+
+    bool head;
+
+    public:
+
+    HeadOrTail(int pos, Evaluator *ev, bool head) : UnaryEvaluator(pos, ev, false), head(head) {}
+
+    Evaluator *clone(For *f) {
+        return new HeadOrTail(tpos, ev->clone(f), head);
+    }
+
+    void generateCode(GeneratorContext *ctx) {
+        ev->generateCode(ctx);
+        ctx->addLine(tpos, CMD_HEAD, 'X');
+        if (head) {
+            int lbl = ctx->nextLabel();
+            ctx->addLine(tpos, CMD_SKIP);
+            ctx->addLine(tpos, CMD_GTOL, lbl);
+            ctx->addLine(tpos, CMD_SWAP);
+            ctx->addLine(tpos, CMD_DROP);
+            ctx->addLine(tpos, CMD_LBL, lbl);
+        } else {
+            ctx->addLine(tpos, CMD_DROP);
+        }
     }
 };
 
@@ -2779,6 +2861,54 @@ class String : public Evaluator {
     }
 
     int howMany(const std::string &name) {
+        return 0;
+    }
+};
+
+////////////////////
+/////  Substr  /////
+////////////////////
+
+class Substr : public Evaluator {
+
+    private:
+
+    std::vector<Evaluator *> *evs;
+
+    public:
+
+    Substr(int pos, std::vector<Evaluator *> *evs) : Evaluator(pos), evs(evs) {}
+
+    ~Substr() {
+        for (int i = 0; i < evs->size(); i++)
+            delete (*evs)[i];
+        delete evs;
+    }
+
+    Evaluator *clone(For *f) {
+        std::vector<Evaluator *> *evs2 = new std::vector<Evaluator *>;
+        for (int i = 0; i < evs->size(); i++)
+            evs2->push_back((*evs)[i]->clone(f));
+        return new Substr(tpos, evs2);
+    }
+
+    void generateCode(GeneratorContext *ctx) {
+        (*evs)[0]->generateCode(ctx);
+        (*evs)[1]->generateCode(ctx);
+        if (evs->size() > 2)
+            (*evs)[2]->generateCode(ctx);
+        ctx->addLine(tpos, CMD_SUBSTR);
+    }
+
+    void collectVariables(std::vector<std::string> *vars, std::vector<std::string> *locals) {
+        for (int i = 0; i < evs->size(); i++)
+            (*evs)[i]->collectVariables(vars, locals);
+    }
+
+    int howMany(const std::string &name) {
+        for (int i = 0; i < evs->size(); i++)
+            if ((*evs)[i]->howMany(name) != 0)
+                return -1;
         return 0;
     }
 };
@@ -4312,7 +4442,9 @@ Evaluator *Parser::parseThing() {
                     || t == "LIST?" || t == "EQN?" || t == "UNIT?"
                     || t == "TYPE?"
                     || t == "UBASE" || t == "UVAL" || t == "STOP"
-                    || t == "FCSTX" || t == "FCSTY") {
+                    || t == "FCSTX" || t == "FCSTY"
+                    || t == "HEAD" || t == "TAIL" || t == "LENGTH"
+                    || t == "REV") {
                 min_args = max_args = 1;
                 mode = EXPR_LIST_EXPR;
             } else if (t == "COMB" || t == "PERM"
@@ -4324,7 +4456,7 @@ Evaluator *Parser::parseThing() {
                     || t == "NEWMAT" || t == "DOT" || t == "CROSS"
                     || t == "RCOMPLX" || t == "PCOMPLX" || t == "SPPV"
                     || t == "SPFV" || t == "USPV" || t == "USFV"
-                    || t == "UNIT") {
+                    || t == "UNIT" || t == "EXTEND" || t == "POS") {
                 min_args = max_args = 2;
                 mode = EXPR_LIST_EXPR;
             } else if (t == "ANGLE" || t == "RADIUS" || t == "XCOORD"
@@ -4337,6 +4469,10 @@ Evaluator *Parser::parseThing() {
                 mode = EXPR_LIST_EXPR;
             } else if (t == "MIN" || t == "MAX") {
                 min_args = 0;
+                max_args = INT_MAX;
+                mode = EXPR_LIST_EXPR;
+            } else if (t == "APPEND") {
+                min_args = 2;
                 max_args = INT_MAX;
                 mode = EXPR_LIST_EXPR;
             } else if (t == "IF") {
@@ -4352,6 +4488,10 @@ Evaluator *Parser::parseThing() {
                 min_args = 2;
                 max_args = 3;
                 mode = EXPR_LIST_NAME;
+            } else if (t == "SUBSTR") {
+                min_args = 2;
+                max_args = 3;
+                mode = EXPR_LIST_EXPR;
             } else if (t == "FLOW" || t == "#T") {
                 min_args = max_args = 2;
                 mode = EXPR_LIST_NAME;
@@ -4430,7 +4570,9 @@ Evaluator *Parser::parseThing() {
                     || t == "LIST?" || t == "EQN?" || t == "UNIT?"
                     || t == "TYPE?"
                     || t == "UBASE" || t == "UVAL" || t == "STOP"
-                    || t == "FCSTX" || t == "FCSTY") {
+                    || t == "FCSTX" || t == "FCSTY"
+                    || t == "HEAD" || t == "TAIL" || t == "LENGTH"
+                    || t == "REV") {
                 Evaluator *ev = (*evs)[0];
                 delete evs;
                 if (t == "SIN")
@@ -4555,6 +4697,14 @@ Evaluator *Parser::parseThing() {
                     return new InvertibleUnaryFunction(tpos, ev, CMD_FCSTX, CMD_FCSTY);
                 else if (t == "FCSTY")
                     return new InvertibleUnaryFunction(tpos, ev, CMD_FCSTY, CMD_FCSTX);
+                else if (t == "HEAD")
+                    return new HeadOrTail(tpos, ev, true);
+                else if (t == "TAIL")
+                    return new HeadOrTail(tpos, ev, false);
+                else if (t == "LENGTH")
+                    return new UnaryFunction(tpos, ev, CMD_LENGTH);
+                else if (t == "REV")
+                    return new UnaryFunction(tpos, ev, CMD_REV);
                 else
                     // Shouldn't get here
                     return NULL;
@@ -4567,7 +4717,7 @@ Evaluator *Parser::parseThing() {
                     || t == "NEWMAT" || t == "DOT" || t == "CROSS"
                     || t == "RCOMPLX" || t == "PCOMPLX" || t == "SPPV"
                     || t == "SPFV" || t == "USPV" || t == "USFV"
-                    || t == "UNIT") {
+                    || t == "UNIT" || t == "EXTEND" || t == "POS") {
                 Evaluator *left = (*evs)[0];
                 Evaluator *right = (*evs)[1];
                 delete evs;
@@ -4623,6 +4773,10 @@ Evaluator *Parser::parseThing() {
                     return new BinaryFunction(tpos, left, right, CMD_USFV);
                 else if (t == "UNIT")
                     return new Unit(tpos, left, right);
+                else if (t == "EXTEND")
+                    return new BinaryFunction(tpos, left, right, CMD_EXTEND);
+                else if (t == "POS")
+                    return new BinaryFunction(tpos, left, right, CMD_POS);
                 else
                     // Shouldn't get here
                     return NULL;
@@ -4653,6 +4807,8 @@ Evaluator *Parser::parseThing() {
                     return new Max(tpos, evs);
                 else // t == "MIN"
                     return new Min(tpos, evs);
+            } else if (t == "APPEND") {
+                return new Append(tpos, evs);
             } else if (t == "N" || t == "I%YR" || t == "PV"
                     || t == "PMT" || t == "FV") {
                 if (t == "N")
@@ -4712,6 +4868,8 @@ Evaluator *Parser::parseThing() {
                 std::string n = name->name();
                 delete name;
                 return new Item(tpos, n, ev1, ev2);
+            } else if (t == "SUBSTR") {
+                return new Substr(tpos, evs);
             } else if (t == "FLOW" || t == "#T") {
                 Evaluator *name = (*evs)[0];
                 Evaluator *ev = (*evs)[1];
