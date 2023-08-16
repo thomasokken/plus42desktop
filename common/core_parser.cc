@@ -4523,7 +4523,8 @@ Evaluator *Parser::parseThing() {
                     || t == "UBASE" || t == "UVAL" || t == "STOP"
                     || t == "FCSTX" || t == "FCSTY"
                     || t == "HEAD" || t == "TAIL" || t == "LENGTH"
-                    || t == "REV") {
+                    || t == "REV" || t == "S\17N" || t == "N\17S"
+                    || t == "NN\17S" || t == "C\17N" || t == "N\17C") {
                 min_args = max_args = 1;
                 mode = EXPR_LIST_EXPR;
             } else if (t == "COMB" || t == "PERM"
@@ -4651,7 +4652,8 @@ Evaluator *Parser::parseThing() {
                     || t == "UBASE" || t == "UVAL" || t == "STOP"
                     || t == "FCSTX" || t == "FCSTY"
                     || t == "HEAD" || t == "TAIL" || t == "LENGTH"
-                    || t == "REV") {
+                    || t == "REV" || t == "S\17N" || t == "N\17S"
+                    || t == "NN\17S" || t == "C\17N" || t == "N\17C") {
                 Evaluator *ev = (*evs)[0];
                 delete evs;
                 if (t == "SIN")
@@ -4784,6 +4786,16 @@ Evaluator *Parser::parseThing() {
                     return new UnaryFunction(tpos, ev, CMD_LENGTH);
                 else if (t == "REV")
                     return new UnaryFunction(tpos, ev, CMD_REV);
+                else if (t == "S\17N")
+                    return new UnaryFunction(tpos, ev, CMD_S_TO_N);
+                else if (t == "N\17S")
+                    return new UnaryFunction(tpos, ev, CMD_N_TO_S);
+                else if (t == "NN\17S")
+                    return new UnaryFunction(tpos, ev, CMD_NN_TO_S);
+                else if (t == "C\17N")
+                    return new UnaryFunction(tpos, ev, CMD_C_TO_N);
+                else if (t == "N\17C")
+                    return new UnaryFunction(tpos, ev, CMD_N_TO_C);
                 else
                     // Shouldn't get here
                     return NULL;
