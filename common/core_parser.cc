@@ -2047,7 +2047,7 @@ class List : public Evaluator {
         } else {
             for (int i = 0; i < data.size(); i++)
                 data[i]->generateCode(ctx);
-            ctx->addLine(tpos, (phloat) data.size());
+            ctx->addLine(tpos, (phloat) (int) data.size());
             ctx->addLine(tpos, CMD_TO_LIST);
         }
     }
