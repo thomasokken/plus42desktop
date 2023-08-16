@@ -2068,6 +2068,7 @@ int docmd_to_list(arg_struct *arg) {
         }
     }
     stack[sp] = (vartype *) list;
+    print_trace();
     return ERR_NONE;
 }
 
@@ -2117,5 +2118,6 @@ int docmd_from_list(arg_struct *arg) {
     free(list->array->data);
     free(list->array);
     free(list);
+    print_trace();
     return ERR_NONE;
 }
