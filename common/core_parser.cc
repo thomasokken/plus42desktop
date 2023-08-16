@@ -2015,6 +2015,56 @@ class Item : public Evaluator {
     }
 };
 
+//////////////////
+/////  List  /////
+//////////////////
+
+class List : public Evaluator {
+
+    private:
+
+    std::vector<Evaluator *> data;
+
+    public:
+
+    List(int pos, std::vector<Evaluator *> data) : Evaluator(pos), data(data) {}
+
+    ~List() {
+        for (int i = 0; i < data.size(); i++)
+            delete data[i];
+    }
+
+    Evaluator *clone(For *) {
+        std::vector<Evaluator *> data_copy;
+        for (int i = 0; i < data.size(); i++)
+            data_copy.push_back(data[i]->clone(NULL));
+        return new List(tpos, data_copy);
+    }
+
+    void generateCode(GeneratorContext *ctx) {
+        if (data.size() == 0) {
+            ctx->addLine(tpos, CMD_NEWLIST);
+        } else {
+            for (int i = 0; i < data.size(); i++)
+                data[i]->generateCode(ctx);
+            ctx->addLine(tpos, (phloat) data.size());
+            ctx->addLine(tpos, CMD_TO_LIST);
+        }
+    }
+
+    void collectVariables(std::vector<std::string> *vars, std::vector<std::string> *locals) {
+        for (int i = 0; i < data.size(); i++)
+            data[i]->collectVariables(vars, locals);
+    }
+
+    int howMany(const std::string &name) {
+        for (int i = 0; i < data.size(); i++)
+            if (data[i]->howMany(name) != 0)
+                return -1;
+        return 0;
+    }
+};
+
 /////////////////////
 /////  Literal  /////
 /////////////////////
@@ -3563,7 +3613,7 @@ class Lexer {
                 && c != '>' && c != '=' && c != ':'
                 && c != '.' && c != ',' && (c < '0' || c > '9') && c != 24
                 && (compatMode
-                        || c != '*' && c != '/' && c != '[' && c != ']' && c != '!' && c != '_');
+                        || c != '*' && c != '/' && c != '[' && c != ']' && c != '{' && c != '}' && c != '!' && c != '_');
     }
 
     bool isIdentifierContinuationChar(char c) {
@@ -3649,7 +3699,7 @@ class Lexer {
         // One-character symbols
         if (c == '+' || c == '-' || c == '(' || c == ')'
                 || c == '^' || c == '\36' || c == ':' || c == '='
-                || !compatMode && (c == '*' || c == '/' || c == '[' || c == ']' || c == '_')) {
+                || !compatMode && (c == '*' || c == '/' || c == '[' || c == ']' || c == '{' || c == '}' || c == '_')) {
             *tok = text.substr(start, 1);
             return true;
         }
@@ -4352,6 +4402,35 @@ Evaluator *Parser::parseThing() {
             return NULL;
         }
         return ev;
+    } else if (!lex->compatMode && t == "{") {
+        // List literal
+        int lpos = tpos;
+        if (!nextToken(&t, &tpos))
+            return NULL;
+        std::vector<Evaluator *> list;
+        if (t == "}")
+            return new List(lpos, list);
+        pushback(t, tpos);
+        forStack.push_back(new For(-1));
+        while (true) {
+            Evaluator *ev = parseExpr(CTX_VALUE);
+            if (ev == NULL) {
+                list_fail:
+                for (int i = 0; i < list.size(); i++)
+                    delete list[i];
+                forStack.pop_back();
+                return NULL;
+            }
+            list.push_back(ev);
+            if (!nextToken(&t, &tpos))
+                goto list_fail;
+            if (t == "}") {
+                forStack.pop_back();
+                return new List(lpos, list);
+            }
+            if (t != ":")
+                goto list_fail;
+        }
     } else if (!lex->compatMode && t == "[" && context != CTX_ARRAY) {
         // Array literal
         int apos = tpos;
