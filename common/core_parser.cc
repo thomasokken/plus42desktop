@@ -4411,7 +4411,8 @@ Evaluator *Parser::parseThing() {
         if (t == "}")
             return new List(lpos, list);
         pushback(t, tpos);
-        forStack.push_back(new For(-1));
+        For f(-1);
+        forStack.push_back(&f);
         while (true) {
             Evaluator *ev = parseExpr(CTX_VALUE);
             if (ev == NULL) {
@@ -4442,7 +4443,8 @@ Evaluator *Parser::parseThing() {
         int width = 0;
         std::vector<std::vector<Evaluator *> > data;
         std::vector<Evaluator *> row;
-        forStack.push_back(new For(-1));
+        For f(-1);
+        forStack.push_back(&f);
         while (true) {
             if (!nextToken(&t, &tpos))
                 goto array_fail;
@@ -4611,8 +4613,10 @@ Evaluator *Parser::parseThing() {
                 mode = EXPR_LIST_EXPR;
             }
             std::vector<Evaluator *> *evs = parseExprList(min_args, max_args, mode);
-            if (t == "\5" || t == "\3")
+            if (t == "\5" || t == "\3") {
+                delete forStack.back();
                 forStack.pop_back();
+            }
             For *f = NULL;
             if (t == "FOR") {
                 f = forStack.back();
