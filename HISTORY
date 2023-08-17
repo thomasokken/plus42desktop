@@ -1,3 +1,14 @@
+2023-08-17: release 1.0.21
+
+* Added string and list functions to the equation language. The new functions
+  have been added to the FLAGS menu and CATALOG->FCN in the equation editor.
+  List literals have the format {A:B:C}. List elements may be any type,
+  including lists or matrices.
+* Equations: Fixed stack access within matrix literals.
+* Fixed LASTX option in the equation editor's stack menu (R↓ key).
+* Fixed Y^X with units where X is a negative reciprocal.
+* →LIST and LIST→ didn't print in TRACE mode. Fixed.
+
 2023-08-11: release 1.0.20
 
 * Added 1LINE and NLINE functions, to select 1-line or n-line mode. 1-line mode
