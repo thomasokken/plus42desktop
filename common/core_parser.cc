@@ -2413,6 +2413,55 @@ class Perm : public BinaryEvaluator {
     }
 };
 
+/////////////////////////
+/////  PosOrSubstr  /////
+/////////////////////////
+
+class PosOrSubstr : public Evaluator {
+
+    private:
+
+    std::vector<Evaluator *> *evs;
+    bool do_pos;
+
+    public:
+
+    PosOrSubstr(int pos, std::vector<Evaluator *> *evs, bool do_pos) : Evaluator(pos), evs(evs), do_pos(do_pos) {}
+
+    ~PosOrSubstr() {
+        for (int i = 0; i < evs->size(); i++)
+            delete (*evs)[i];
+        delete evs;
+    }
+
+    Evaluator *clone(For *f) {
+        std::vector<Evaluator *> *evs2 = new std::vector<Evaluator *>;
+        for (int i = 0; i < evs->size(); i++)
+            evs2->push_back((*evs)[i]->clone(f));
+        return new PosOrSubstr(tpos, evs2, do_pos);
+    }
+
+    void generateCode(GeneratorContext *ctx) {
+        (*evs)[0]->generateCode(ctx);
+        (*evs)[1]->generateCode(ctx);
+        if (evs->size() > 2)
+            (*evs)[2]->generateCode(ctx);
+        ctx->addLine(tpos, do_pos ? CMD_POS : CMD_SUBSTR);
+    }
+
+    void collectVariables(std::vector<std::string> *vars, std::vector<std::string> *locals) {
+        for (int i = 0; i < evs->size(); i++)
+            (*evs)[i]->collectVariables(vars, locals);
+    }
+
+    int howMany(const std::string &name) {
+        for (int i = 0; i < evs->size(); i++)
+            if ((*evs)[i]->howMany(name) != 0)
+                return -1;
+        return 0;
+    }
+};
+
 ///////////////////
 /////  Power  /////
 ///////////////////
@@ -2911,54 +2960,6 @@ class String : public Evaluator {
     }
 
     int howMany(const std::string &name) {
-        return 0;
-    }
-};
-
-////////////////////
-/////  Substr  /////
-////////////////////
-
-class Substr : public Evaluator {
-
-    private:
-
-    std::vector<Evaluator *> *evs;
-
-    public:
-
-    Substr(int pos, std::vector<Evaluator *> *evs) : Evaluator(pos), evs(evs) {}
-
-    ~Substr() {
-        for (int i = 0; i < evs->size(); i++)
-            delete (*evs)[i];
-        delete evs;
-    }
-
-    Evaluator *clone(For *f) {
-        std::vector<Evaluator *> *evs2 = new std::vector<Evaluator *>;
-        for (int i = 0; i < evs->size(); i++)
-            evs2->push_back((*evs)[i]->clone(f));
-        return new Substr(tpos, evs2);
-    }
-
-    void generateCode(GeneratorContext *ctx) {
-        (*evs)[0]->generateCode(ctx);
-        (*evs)[1]->generateCode(ctx);
-        if (evs->size() > 2)
-            (*evs)[2]->generateCode(ctx);
-        ctx->addLine(tpos, CMD_SUBSTR);
-    }
-
-    void collectVariables(std::vector<std::string> *vars, std::vector<std::string> *locals) {
-        for (int i = 0; i < evs->size(); i++)
-            (*evs)[i]->collectVariables(vars, locals);
-    }
-
-    int howMany(const std::string &name) {
-        for (int i = 0; i < evs->size(); i++)
-            if ((*evs)[i]->howMany(name) != 0)
-                return -1;
         return 0;
     }
 };
@@ -4538,7 +4539,7 @@ Evaluator *Parser::parseThing() {
                     || t == "NEWMAT" || t == "DOT" || t == "CROSS"
                     || t == "RCOMPLX" || t == "PCOMPLX" || t == "SPPV"
                     || t == "SPFV" || t == "USPV" || t == "USFV"
-                    || t == "UNIT" || t == "EXTEND" || t == "POS") {
+                    || t == "UNIT" || t == "EXTEND") {
                 min_args = max_args = 2;
                 mode = EXPR_LIST_EXPR;
             } else if (t == "ANGLE" || t == "RADIUS" || t == "XCOORD"
@@ -4570,7 +4571,7 @@ Evaluator *Parser::parseThing() {
                 min_args = 2;
                 max_args = 3;
                 mode = EXPR_LIST_NAME;
-            } else if (t == "SUBSTR") {
+            } else if (t == "POS" || t == "SUBSTR") {
                 min_args = 2;
                 max_args = 3;
                 mode = EXPR_LIST_EXPR;
@@ -4812,7 +4813,7 @@ Evaluator *Parser::parseThing() {
                     || t == "NEWMAT" || t == "DOT" || t == "CROSS"
                     || t == "RCOMPLX" || t == "PCOMPLX" || t == "SPPV"
                     || t == "SPFV" || t == "USPV" || t == "USFV"
-                    || t == "UNIT" || t == "EXTEND" || t == "POS") {
+                    || t == "UNIT" || t == "EXTEND") {
                 Evaluator *left = (*evs)[0];
                 Evaluator *right = (*evs)[1];
                 delete evs;
@@ -4870,8 +4871,6 @@ Evaluator *Parser::parseThing() {
                     return new Unit(tpos, left, right);
                 else if (t == "EXTEND")
                     return new BinaryFunction(tpos, left, right, CMD_EXTEND);
-                else if (t == "POS")
-                    return new BinaryFunction(tpos, left, right, CMD_POS);
                 else
                     // Shouldn't get here
                     return NULL;
@@ -4963,8 +4962,8 @@ Evaluator *Parser::parseThing() {
                 std::string n = name->name();
                 delete name;
                 return new Item(tpos, n, ev1, ev2);
-            } else if (t == "SUBSTR") {
-                return new Substr(tpos, evs);
+            } else if (t == "POS" || t == "SUBSTR") {
+                return new PosOrSubstr(tpos, evs, t == "POS");
             } else if (t == "FLOW" || t == "#T") {
                 Evaluator *name = (*evs)[0];
                 Evaluator *ev = (*evs)[1];
