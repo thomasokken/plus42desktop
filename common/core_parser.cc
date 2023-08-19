@@ -2445,14 +2445,9 @@ class PosOrSubstr : public Evaluator {
         (*evs)[0]->generateCode(ctx);
         (*evs)[1]->generateCode(ctx);
         if (evs->size() == 3) {
-            // Prevent POS/SUBSTR from thinking they got only 2 parameters,
-            // which they will do if there is a list or string in level 2.
-            ctx->addLine(tpos, CMD_LIST_T);
+            ctx->addLine(tpos, CMD_REAL_T);
+            ctx->addLine(tpos, CMD_SKIP);
             ctx->addLine(tpos, CMD_RAISE, ERR_INVALID_DATA);
-            ctx->addLine(tpos, CMD_STR_T);
-            ctx->addLine(tpos, CMD_RAISE, ERR_INVALID_DATA);
-            // OK, proceed; any other parameter problems can be left to
-            // POS/SUBSTR themselves to detect.
             (*evs)[2]->generateCode(ctx);
         }
         ctx->addLine(tpos, do_pos ? CMD_POS : CMD_SUBSTR);
