@@ -4876,6 +4876,17 @@ static bool load_state2(bool *clear, bool *too_new) {
     if (version != ver)
         return false;
 
+    // When parser or code generator bugs are fixed, or when the semantics of
+    // generated code are changed, re-parse all equations so all equation code
+    // is re-generated.
+    if (ver < 28) {
+        set_running(false);
+        clear_all_rtns();
+        pc = -1;
+        // TODO: Exit PRGM mode?
+        reparse_all_equations();
+    }
+
     return true;
 }
 

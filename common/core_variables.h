@@ -240,5 +240,6 @@ vartype *recall_private_var(const char *name, int namelength, bool allow_calling
 vartype *recall_and_purge_private_var(const char *name, int namelength);
 int store_private_var(const char *name, int namelength, vartype *value);
 int store_stack_reference(vartype *value);
+void reparse_all_equations();
 
 #endif

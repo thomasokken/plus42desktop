@@ -194,22 +194,24 @@ vartype *new_list(int4 size) {
     return (vartype *) list;
 }
 
-vartype *new_equation(const char *text, int4 len, bool compat_mode, int *errpos) {
-    int eqn_index = new_eqn_idx();
-    if (eqn_index == -1)
-        return NULL;
+static equation_data *new_equation_data(const char *text, int4 length, bool compat_mode, int *errpos, int eqn_index) {
+    *errpos = -1;
+    if (eqn_index == -1) {
+        eqn_index = new_eqn_idx();
+        if (eqn_index == -1)
+            return NULL;
+    }
     equation_data *eqd = new (std::nothrow) equation_data;
     if (eqd == NULL)
         return NULL;
-    *errpos = -1;
-    eqd->length = len;
-    eqd->text = (char *) malloc(len);
-    if (eqd->text == NULL && len != 0) {
+    eqd->length = length;
+    eqd->text = (char *) malloc(length);
+    if (eqd->text == NULL && length != 0) {
         delete eqd;
         return NULL;
     }
-    memcpy(eqd->text, text, len);
-    eqd->ev = Parser::parse(std::string(text, len), &compat_mode, &eqd->compatModeEmbedded, errpos);
+    memcpy(eqd->text, text, length);
+    eqd->ev = Parser::parse(std::string(text, length), &compat_mode, &eqd->compatModeEmbedded, errpos);
     if (eqd->ev == NULL) {
         delete eqd;
         return NULL;
@@ -217,14 +219,6 @@ vartype *new_equation(const char *text, int4 len, bool compat_mode, int *errpos)
     eqd->eqn_index = eqn_index;
     eqd->compatMode = compat_mode;
 
-    vartype_equation *eq = (vartype_equation *) malloc(sizeof(vartype_equation));
-    if (eq == NULL) {
-        delete eqd;
-        return NULL;
-    }
-    eq->type = TYPE_EQUATION;
-    eq->data = eqd;
-    eqd->refcount = 1;
     CodeMap *map = new (std::nothrow) CodeMap;
     eq_dir->prgms[eqn_index].eq_data = eqd;
     Parser::generateCode(eqd->ev, eq_dir->prgms + eqn_index, map);
@@ -235,11 +229,29 @@ vartype *new_equation(const char *text, int4 len, bool compat_mode, int *errpos)
     eqd->map = map;
     if (eq_dir->prgms[eqn_index].text == NULL) {
         // Code generator failure
-        free_vartype((vartype *) eq);
+        eq_dir->prgms[eqn_index].eq_data = NULL;
+        delete eqd;
         return NULL;
     }
 
-    return (vartype *) eq;
+    return eqd;
+}
+
+vartype *new_equation(const char *text, int4 len, bool compat_mode, int *errpos) {
+    *errpos = -1;
+    vartype_equation *eq = (vartype_equation *) malloc(sizeof(vartype_equation));
+    if (eq == NULL)
+        return NULL;
+    equation_data *eqd = new_equation_data(text, len, compat_mode, errpos, -1);
+    if (eqd == NULL) {
+        free(eq);
+        return NULL;
+    } else {
+        eq->type = TYPE_EQUATION;
+        eq->data = eqd;
+        eqd->refcount = 1;
+        return (vartype *) eq;
+    }
 }
 
 vartype *new_equation(equation_data *eqd) {
@@ -1228,4 +1240,47 @@ int store_stack_reference(vartype *v) {
     if (err != ERR_NONE)
         free_vartype(v2);
     return err;
+}
+
+void reparse_all_equations() {
+    // NOTE: We can safely assume that re-parsing all equations will succeed,
+    // because we re-parse all equations anyway when the state file is loaded,
+    // in order to re-create their parse trees. (The generated code and the
+    // code map are loaded from the state file.) This means that parser changes
+    // that cause formerly valid equations to become invalid will be caught by
+    // unpersist_vartype(), and those equations will be converted to strings,
+    // before we even get here. The re-parsing we're doing here is in order to
+    // re-generate the code, in cases when code generator bugs have been fixed
+    // or the semantics of generated code have changed.
+    for (int4 i = 0; i < eq_dir->prgms_capacity; i++) {
+        prgm_struct *prgm = eq_dir->prgms + i;
+        if (prgm->text == NULL)
+            continue;
+        prgm_struct old_prgm = *prgm;
+        equation_data *old_eqd = old_prgm.eq_data;
+        prgm->size = prgm->capacity = 0;
+        prgm->text = NULL;
+        prgm->eq_data = NULL;
+        int errpos = -1;
+        equation_data *new_eqd = new_equation_data(old_eqd->text, old_eqd->length, flags.f.eqn_compat, &errpos, i);
+        if (new_eqd == NULL) {
+            // Should never happen, but now that we're here, let's at least
+            // try to handle it gracefully, by keeping the old equation.
+            *prgm = old_prgm;
+        } else {
+            // I can't just replace the old equation_data object, because of
+            // all the vartype_equation objects referencing it. Hence, we
+            // copy the parse tree and code map from the new equation_data
+            // into the old one, and then delete the new one.
+            delete old_eqd->ev;
+            delete old_eqd->map;
+            old_eqd->ev = new_eqd->ev;
+            old_eqd->map = new_eqd->map;
+            new_eqd->ev = NULL;
+            new_eqd->map = NULL;
+            delete new_eqd;
+            free(old_prgm.text);
+            prgm->eq_data = old_prgm.eq_data;
+        }
+    }
 }
