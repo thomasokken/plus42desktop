@@ -4883,8 +4883,9 @@ static bool load_state2(bool *clear, bool *too_new) {
         set_running(false);
         clear_all_rtns();
         pc = -1;
-        // TODO: Exit PRGM mode?
         reparse_all_equations();
+        if (flags.f.prgm_mode && current_prgm.dir == 1)
+            force_redisplay = true;
     }
 
     return true;
