@@ -814,7 +814,8 @@ static void pixel_helper(phloat dx, phloat dy) {
     dy = dy < 0 ? -floor(-dy + 0.5) : floor(dy + 0.5);
     int w1 = disp_w + 1;
     int x = dx < -w1 ? -w1 : dx > w1 ? w1 : to_int(dx);
-    int y = dy < -w1 ? -w1 : dy > w1 ? w1 : to_int(dy);
+    int h1 = disp_h + 1;
+    int y = dy < -h1 ? -h1 : dy > h1 ? h1 : to_int(dy);
     int i;
     int dot = 1;
     if (x < 0) {
