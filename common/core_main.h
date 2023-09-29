@@ -318,6 +318,15 @@ char *core_copy();
  */
 void core_paste(const char *s);
 
+/* core_shake()
+ *
+ * For iOS only. This is called when a shake gesture is detected. It is up to
+ * the core to decide whether and how to handle it.
+ */
+#ifdef IPHONE
+void core_shake();
+#endif
+
 /* core_settings
  *
  * This is a struct that stores user-configurable core settings. The shell
