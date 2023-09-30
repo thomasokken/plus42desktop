@@ -472,6 +472,7 @@ extern bool mode_getkey;
 extern bool mode_getkey1;
 extern bool mode_pause;
 extern bool mode_disable_stack_lift;
+extern bool mode_caller_stack_lift_disabled;
 extern bool mode_varmenu;
 extern int mode_varmenu_whence;
 extern bool mode_updown;

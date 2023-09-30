@@ -938,6 +938,7 @@ bool mode_getkey;
 bool mode_getkey1;
 bool mode_pause = false;
 bool mode_disable_stack_lift; /* transient */
+bool mode_caller_stack_lift_disabled;
 bool mode_varmenu;
 int mode_varmenu_whence;
 bool mode_updown;
@@ -1064,8 +1065,9 @@ bool no_keystrokes_yet;
  * Version 25: 1.0.20 Saved equation error position
  * Version 26: 1.0.20 Second row for UNIT.FCN menu
  * Version 27: 1.0.20 1LINE/NLINE
+ * Version 28: 1.1    CSLD?
  */
-#define PLUS42_VERSION 27
+#define PLUS42_VERSION 28
 
 
 /*******************/
@@ -4779,6 +4781,10 @@ static bool load_state2(bool *clear, bool *too_new) {
         if (mode_commandmenu >= 76 && mode_commandmenu <= 86) mode_commandmenu++;
     }
     if (!read_bool(&mode_running)) return false;
+    if (ver < 28)
+        mode_caller_stack_lift_disabled = false;
+    else if (!read_bool(&mode_caller_stack_lift_disabled))
+        return false;
     if (!read_bool(&mode_varmenu)) return false;
     if (ver < 19) {
         mode_varmenu_whence = CATSECT_TOP;
@@ -4938,6 +4944,7 @@ static void save_state2(bool *success) {
     if (!write_int(mode_alphamenu)) return;
     if (!write_int(mode_commandmenu)) return;
     if (!write_bool(mode_running)) return;
+    if (!write_bool(mode_caller_stack_lift_disabled)) return;
     if (!write_bool(mode_varmenu)) return;
     if (!write_int(mode_varmenu_whence)) return;
     if (!write_bool(mode_updown)) return;
@@ -5173,6 +5180,7 @@ void hard_reset(int reason) {
     mode_running = false;
     mode_getkey = false;
     mode_pause = false;
+    mode_caller_stack_lift_disabled = false;
     mode_varmenu = false;
     mode_varmenu_whence = CATSECT_TOP;
     prgm_highlight_row = 0;
