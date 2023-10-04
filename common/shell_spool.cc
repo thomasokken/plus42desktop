@@ -80,6 +80,7 @@ int hp2ascii(char *dst, const char *src, int srclen) {
             case 129:  esc = "\312\217"; break;     // small-caps y
             case 130:  esc = "\316\251"; break;     // uppercase omega
             case 131:  esc = "\341\264\233"; break; // small-caps t
+            case 132:  esc = "\312\237"; break;     // small-caps l
             case 134:  esc = "\342\226\271"; break; // hollow right-pointing triangle
             case 138:  esc = "[LF]"; break;         // LF symbol
             default: dst[d++] = c; continue;
