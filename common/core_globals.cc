@@ -316,7 +316,7 @@ const menu_spec menus[] = {
                         { 0x1000 + CMD_SETDS,     0, "" } } },
     { /* MENU_DISP3 */ MENU_NONE, MENU_DISP1, MENU_DISP2,
                       { { 0x2000 + CMD_HEADER, 0, "" },
-                        { 0x1000 + CMD_NULL,   0, "" },
+                        { 0x2000 + CMD_LTOP,   0, "" },
                         { 0x2000 + CMD_1LINE,  0, "" },
                         { 0x2000 + CMD_NLINE,  0, "" },
                         { 0x1000 + CMD_WIDTH,  0, "" },
@@ -955,6 +955,7 @@ int mode_plot_sp;
 vartype *mode_plot_inv;
 int mode_plot_result_width;
 bool mode_multi_line;
+bool mode_lastx_top;
 
 phloat entered_number;
 int entered_string_length;
@@ -1066,8 +1067,9 @@ bool no_keystrokes_yet;
  * Version 26: 1.0.20 Second row for UNIT.FCN menu
  * Version 27: 1.0.20 1LINE/NLINE
  * Version 28: 1.1    CSLD?
+ * Version 29: 1.1    LTOP
  */
-#define PLUS42_VERSION 28
+#define PLUS42_VERSION 29
 
 
 /*******************/
@@ -1963,6 +1965,8 @@ static bool persist_globals() {
         goto done;
     if (!write_bool(mode_multi_line))
         goto done;
+    if (!write_bool(mode_lastx_top))
+        goto done;
     if (!persist_vartype(varmenu_eqn))
         goto done;
     if (!write_int(varmenu_length))
@@ -2253,6 +2257,15 @@ static bool unpersist_globals() {
         }
     } else {
         mode_multi_line = true;
+    }
+
+    if (ver >= 29) {
+        if (!read_bool(&mode_lastx_top)) {
+            mode_lastx_top = false;
+            goto done;
+        }
+    } else {
+        mode_lastx_top = false;
     }
 
     if (!unpersist_vartype(&varmenu_eqn)) {
@@ -5200,6 +5213,7 @@ void hard_reset(int reason) {
     mode_plot_inv = NULL;
     mode_plot_result_width = 0;
     mode_multi_line = true;
+    mode_lastx_top = false;
 
     reset_math();
     reset_eqn();

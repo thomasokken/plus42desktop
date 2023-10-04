@@ -489,6 +489,7 @@ extern int mode_plot_sp;
 extern vartype *mode_plot_inv;
 extern int mode_plot_result_width;
 extern bool mode_multi_line;
+extern bool mode_lastx_top;
 
 extern phloat entered_number;
 extern int entered_string_length;

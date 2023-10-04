@@ -1597,6 +1597,8 @@ bool should_highlight(int cmd) {
             return !mode_multi_line;
         case CMD_NLINE:
             return mode_multi_line;
+        case CMD_LTOP:
+            return mode_lastx_top;
         case CMD_TBEGIN: {
             vartype *v = recall_var("BEGIN", 5);
             return v != NULL && v->type == TYPE_REAL && ((vartype_real *) v)->x == 1;
@@ -1931,6 +1933,8 @@ static void display_level(int level, int row) {
     } else if (level == 0 && input_length > 0) {
         string2buf(buf, len, &bufptr, input_name, input_length);
         char2buf(buf, len, &bufptr, '?');
+    } else if (level == -1) {
+        string2buf(buf, len, &bufptr, "\204\200", 2);
     } else if (flags.f.big_stack) {
         bufptr = int2string(level + 1, buf, len);
         char2buf(buf, len, &bufptr, '\200');
@@ -1938,7 +1942,9 @@ static void display_level(int level, int row) {
         char2buf(buf, len, &bufptr, "x\201z\203"[level]);
         char2buf(buf, len, &bufptr, '\200');
     }
-    if (level <= sp)
+    if (level == -1)
+        bufptr += vartype2string(lastx, buf + bufptr, len - bufptr);
+    else if (level <= sp)
         bufptr += vartype2string(stack[sp - level], buf + bufptr, len - bufptr);
     if (bufptr > disp_c) {
         buf[disp_c - 1] = 26;
@@ -2634,8 +2640,8 @@ static int ext_dir_cat[] = {
 };
 
 static int ext_disp_cat[] = {
-    CMD_COL_PLUS, CMD_COL_MINUS, CMD_GETDS, CMD_HEADER, CMD_HEIGHT, CMD_NLINE,
-    CMD_ROW_PLUS, CMD_ROW_MINUS, CMD_SETDS, CMD_WIDTH,  CMD_1LINE,  CMD_NULL
+    CMD_COL_PLUS, CMD_COL_MINUS, CMD_GETDS,     CMD_HEADER, CMD_HEIGHT, CMD_LTOP,
+    CMD_NLINE,    CMD_ROW_PLUS,  CMD_ROW_MINUS, CMD_SETDS,  CMD_WIDTH,  CMD_1LINE
 };
 
 #if defined(ANDROID) || defined(IPHONE)
@@ -3854,6 +3860,14 @@ void redisplay(int mode) {
             pos += seg;
         }
     } else {
+        if (mode_lastx_top) {
+            int lastx_line = mode_header && disp_r >= 4 ? 1 : 0;
+            if (lastx_line >= headers && available > 1) {
+                display_level(-1, lastx_line);
+                headers++;
+                available--;
+            }
+        }
         int space = disp_r - headers - footers;
         space -= display_x(disp_r - footers - 1, space);
         for (int i = headers; i < headers + space; i++)

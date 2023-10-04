@@ -62,7 +62,7 @@
 // XROM 30,37-63 (a7a5-a7bf) (Card Reader)
 // XROM 31,00-63 (a7c0-a7ff) (Data Logger)
 
-// Available XROMs: a7dc
+// Available XROMs: a7dc, a7dd, a7e0
 // Unavailable XROMs (used by Free42): a7fa (CAPS), a7fb (Mixed)
 
 const command_spec cmd_array[] =
@@ -633,8 +633,9 @@ const command_spec cmd_array[] =
     { /* COL_MINUS */  docmd_col_minus,   "COL-",                0x42, 0x00, 0x00, 0x00,  4, ARG_NONE,   0, NA_T },
     { /* GETDS */      docmd_getds,       "GETDS",               0x00, 0x00, 0xa2, 0x7c,  5, ARG_NONE,   0, NA_T },
     { /* SETDS */      docmd_setds,       "SETDS",               0x00, 0x00, 0xa2, 0x7d,  5, ARG_NONE,   2, 0x01 },
-    { /* 1LINE */      docmd_1line,       "1LINE",               0x00, 0x00, 0xa7, 0xdd,  5, ARG_NONE,   0, NA_T },
-    { /* NLINE */      docmd_nline,       "NLINE",               0x00, 0x00, 0xa7, 0xe0,  5, ARG_NONE,   0, NA_T },
+    { /* 1LINE */      docmd_1line,       "1LINE",               0x42, 0x00, 0x00, 0x00,  5, ARG_NONE,   0, NA_T },
+    { /* NLINE */      docmd_nline,       "NLINE",               0x42, 0x00, 0x00, 0x00,  5, ARG_NONE,   0, NA_T },
+    { /* LTOP */       docmd_ltop,        "LTOP",                0x42, 0x00, 0x00, 0x00,  4, ARG_NONE,   0, NA_T },
 
     /* Menus */
     { /* DIRS */       docmd_dirs,        "DIRS",                0x42, 0x00, 0x00, 0x00,  4, ARG_NONE,   0, NA_T },
