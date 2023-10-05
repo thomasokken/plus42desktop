@@ -1962,6 +1962,25 @@ static void full_list_to_string(vartype *v, std::string *buf, int maxlen) {
         vartype *v2 = list->array->data[i];
         if (v2->type == TYPE_LIST) {
             full_list_to_string(v2, buf, maxlen);
+        } else if (v2->type == TYPE_STRING || v2->type == TYPE_EQUATION) {
+            const char *text;
+            int length;
+            char delim;
+            if (v2->type == TYPE_STRING) {
+                vartype_string *s = (vartype_string *) v2;
+                text = s->txt();
+                length = s->length;
+                delim = '"';
+            } else {
+                vartype_equation *eq = (vartype_equation *) v2;
+                text = eq->data->text;
+                length = eq->data->length;
+                delim = eq->data->compatMode ? '`' : '\'';
+            }
+            *buf += delim;
+            *buf += std::string(text, length);
+            *buf += delim;
+            *buf += " ";
         } else {
             char b[100];
             int len = vartype2string(v2, b, 100);
