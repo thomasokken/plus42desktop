@@ -47,7 +47,7 @@
 #endif
 
 
-static const char bigchars[134][5] =
+static const char bigchars[135][5] =
     {
         { 0x08, 0x08, 0x2a, 0x08, 0x08 },
         { 0x22, 0x14, 0x08, 0x14, 0x22 },
@@ -182,10 +182,11 @@ static const char bigchars[134][5] =
         { 0x5e, 0x61, 0x01, 0x61, 0x5e },
         { 0x04, 0x04, 0x7c, 0x04, 0x04 },
         { 0x7c, 0x40, 0x40, 0x40, 0x40 },
+        { 0x78, 0x14, 0x14, 0x14, 0x78 },
         { 0x7f, 0x41, 0x22, 0x14, 0x08 }
     };
 
-static const char smallchars[437] =
+static const char smallchars[440] =
     {
         0x00, 0x00, 0x00,
         0x5c,
@@ -319,9 +320,10 @@ static const char smallchars[437] =
         0x20, 0x70, 0x20, 0x3c,
         0x7c, 0x54, 0x00, 0x78, 0x48,
         0x78, 0x40, 0x40,
+        0x70, 0x28, 0x70,
     };
 
-static short smallchars_offset[133] =
+static short smallchars_offset[134] =
     {
           0,
           3,
@@ -456,6 +458,7 @@ static short smallchars_offset[133] =
         429,
         434,
         437,
+        440,
     };
 
 static unsigned char smallchars_map[135] =
@@ -593,7 +596,7 @@ static unsigned char smallchars_map[135] =
         /* 130 */ 126,
         /* 131 */ 128,
         /* 132 */ 131,
-        /* 133 */  74,
+        /* 133 */ 132,
         /* 134 */ 127,
     };
 
@@ -1151,9 +1154,7 @@ void draw_char(int x, int y, char c) {
     unsigned char uc = (unsigned char) c;
     if (x < 0 || x >= disp_c || y < 0 || y >= disp_r)
         return;
-    if (uc == 134)
-        uc = 133;
-    else if (uc > 132)
+    if (uc > 134)
         uc -= 128;
     X = x * 6;
     Y = y * 8;
@@ -1193,9 +1194,7 @@ void draw_block(int x, int y) {
 
 const char *get_char(char c) {
     unsigned char uc = (unsigned char) c;
-    if (uc == 134)
-        uc = 133;
-    else if (uc > 132)
+    if (uc > 134)
         uc -= 128;
     return bigchars[uc];
 }
@@ -1220,7 +1219,7 @@ int draw_small_string(int x, int y, const char *s, int length, int max_width, bo
 
     while (n < length) {
         int c = (left_trunc ? s[length - n - 1] : s[n]) & 255;
-        if (c > 132 && c != 134)
+        if (c > 134)
             c &= 127;
         m = smallchars_map[c];
         int cw = smallchars_offset[m + 1] - smallchars_offset[m];
@@ -1281,7 +1280,7 @@ int small_string_width(const char *s, int length) {
     int w = 0;
     for (int n = 0; n < length; n++) {
         int c = s[n] & 255;
-        if (c > 132 && c != 134)
+        if (c > 134)
             c &= 127;
         int m = smallchars_map[c];
         int cw = smallchars_offset[m + 1] - smallchars_offset[m];

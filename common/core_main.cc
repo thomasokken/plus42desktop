@@ -3199,6 +3199,7 @@ int ascii2hp(char *dst, int dstlen, const char *src, int srclen /* = -1 */) {
             case 0x03a9: code = 130; break; // Uppercase omega
             case 0x1d1b: code = 131; break; // small-caps t
             case 0x029f: code = 132; break; // small-caps l
+            case 0x1d00: code = 133; break; // small-caps a
             case 0x25b9: code = 134; break; // hollow right-pointing triangle
             case 0x240a: code = 138; break; // LF symbol
             // Combining accents: apply them if they fit,
