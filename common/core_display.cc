@@ -1257,6 +1257,7 @@ int draw_small_string(int x, int y, const char *s, int length, int max_width, bo
             c = ellipsis ? i == 0 ? 26 : s[length - n - 1 + i] : s[length - n + i];
         else
             c = i == n ? 26 : s[i];
+        c &= 255;
         int m = smallchars_map[c];
         int o = smallchars_offset[m];
         int cw = smallchars_offset[m + 1] - o;
