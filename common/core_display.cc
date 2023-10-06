@@ -1599,6 +1599,8 @@ bool should_highlight(int cmd) {
             return mode_multi_line;
         case CMD_LTOP:
             return mode_lastx_top;
+        case CMD_ATOP:
+            return mode_alpha_top;
         case CMD_TBEGIN: {
             vartype *v = recall_var("BEGIN", 5);
             return v != NULL && v->type == TYPE_REAL && ((vartype_real *) v)->x == 1;
@@ -2659,8 +2661,9 @@ static int ext_dir_cat[] = {
 };
 
 static int ext_disp_cat[] = {
-    CMD_COL_PLUS, CMD_COL_MINUS, CMD_GETDS,     CMD_HEADER, CMD_HEIGHT, CMD_LTOP,
-    CMD_NLINE,    CMD_ROW_PLUS,  CMD_ROW_MINUS, CMD_SETDS,  CMD_WIDTH,  CMD_1LINE
+    CMD_ATOP,  CMD_COL_PLUS, CMD_COL_MINUS, CMD_GETDS,     CMD_HEADER, CMD_HEIGHT,
+    CMD_LTOP,  CMD_NLINE,    CMD_ROW_PLUS,  CMD_ROW_MINUS, CMD_SETDS,  CMD_WIDTH,
+    CMD_1LINE, CMD_NULL,     CMD_NULL,      CMD_NULL,      CMD_NULL,   CMD_NULL
 };
 
 #if defined(ANDROID) || defined(IPHONE)
@@ -2925,7 +2928,7 @@ static void draw_catalog() {
             case CATSECT_EXT_UNIT: subcat = ext_unit_cat; subcat_rows = 2; break;
             case CATSECT_EXT_STAT: subcat = ext_stat_cat; subcat_rows = 3; break;
             case CATSECT_EXT_DIR: subcat = ext_dir_cat; subcat_rows = 2; break;
-            case CATSECT_EXT_DISP: subcat = ext_disp_cat; subcat_rows = 2; break;
+            case CATSECT_EXT_DISP: subcat = ext_disp_cat; subcat_rows = 3; break;
             case CATSECT_EXT_MISC: subcat = ext_misc_cat; subcat_rows = MISC_CAT_ROWS; break;
             case CATSECT_EXT_0_CMP: subcat = ext_0_cmp_cat; subcat_rows = 1; break;
             case CATSECT_EXT_X_CMP: subcat = ext_x_cmp_cat; subcat_rows = 1; break;
@@ -3879,10 +3882,31 @@ void redisplay(int mode) {
             pos += seg;
         }
     } else {
+        bool lastx_shown = false;
         if (mode_lastx_top) {
             int lastx_line = mode_header && disp_r >= 4 ? 1 : 0;
             if (lastx_line >= headers && available > 1) {
                 display_level(-1, lastx_line);
+                headers++;
+                available--;
+                lastx_shown = true;
+            }
+        }
+        if (mode_alpha_top) {
+            int alpha_line = mode_header && disp_r >= 4 ? 1 : 0;
+            if (lastx_shown)
+                alpha_line++;
+            if (alpha_line >= headers && available > 1) {
+                clear_row(alpha_line);
+                draw_string(0, alpha_line, "\205\200\"", 3);
+                int len = reg_alpha_length;
+                bool ellipsis = false;
+                if (len > disp_c - 4) {
+                    len = disp_c - 4;
+                    ellipsis = true;
+                }
+                draw_string(3, alpha_line, reg_alpha, len);
+                draw_char(len + 3, alpha_line, ellipsis ? 26 : '"');
                 headers++;
                 available--;
             }

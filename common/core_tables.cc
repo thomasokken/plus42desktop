@@ -636,6 +636,7 @@ const command_spec cmd_array[] =
     { /* 1LINE */      docmd_1line,       "1LINE",               0x42, 0x00, 0x00, 0x00,  5, ARG_NONE,   0, NA_T },
     { /* NLINE */      docmd_nline,       "NLINE",               0x42, 0x00, 0x00, 0x00,  5, ARG_NONE,   0, NA_T },
     { /* LTOP */       docmd_ltop,        "LTOP",                0x42, 0x00, 0x00, 0x00,  4, ARG_NONE,   0, NA_T },
+    { /* ATOP */       docmd_atop,        "ATOP",                0x42, 0x00, 0x00, 0x00,  4, ARG_NONE,   0, NA_T },
 
     /* Menus */
     { /* DIRS */       docmd_dirs,        "DIRS",                0x42, 0x00, 0x00, 0x00,  4, ARG_NONE,   0, NA_T },

@@ -300,7 +300,7 @@ const menu_spec menus[] = {
                         { 0x2000 + CMD_COMP,    0, "" },
                         { 0x2000 + CMD_DIRECT,  0, "" },
                         { 0x2000 + CMD_NUMERIC, 0, "" } } },
-    { /* MENU_DISP1 */ MENU_NONE, MENU_DISP2, MENU_DISP3,
+    { /* MENU_DISP1 */ MENU_NONE, MENU_DISP2, MENU_DISP4,
                       { { 0x2000 + CMD_FIX,      0, "" },
                         { 0x2000 + CMD_SCI,      0, "" },
                         { 0x2000 + CMD_ENG,      0, "" },
@@ -314,13 +314,20 @@ const menu_spec menus[] = {
                         { 0x1000 + CMD_COL_MINUS, 0, "" },
                         { 0x1000 + CMD_GETDS,     0, "" },
                         { 0x1000 + CMD_SETDS,     0, "" } } },
-    { /* MENU_DISP3 */ MENU_NONE, MENU_DISP1, MENU_DISP2,
+    { /* MENU_DISP3 */ MENU_NONE, MENU_DISP4, MENU_DISP2,
                       { { 0x2000 + CMD_HEADER, 0, "" },
+                        { 0x1000 + CMD_NULL,   0, "" },
                         { 0x2000 + CMD_LTOP,   0, "" },
+                        { 0x2000 + CMD_ATOP,   0, "" },
                         { 0x2000 + CMD_1LINE,  0, "" },
-                        { 0x2000 + CMD_NLINE,  0, "" },
-                        { 0x1000 + CMD_WIDTH,  0, "" },
-                        { 0x1000 + CMD_HEIGHT, 0, "" } } },
+                        { 0x2000 + CMD_NLINE,  0, "" } } },
+    { /* MENU_DISP4 */ MENU_NONE, MENU_DISP1, MENU_DISP3,
+                      { { 0x1000 + CMD_WIDTH,  0, "" },
+                        { 0x1000 + CMD_HEIGHT, 0, "" },
+                        { 0x1000 + CMD_NULL,   0, "" },
+                        { 0x1000 + CMD_NULL,   0, "" },
+                        { 0x1000 + CMD_NULL,   0, "" },
+                        { 0x1000 + CMD_NULL,   0, "" } } },
     { /* MENU_CLEAR1 */ MENU_NONE, MENU_CLEAR2, MENU_CLEAR2,
                       { { 0x1000 + CMD_CLSIGMA, 0, "" },
                         { 0x1000 + CMD_CLP,     0, "" },
@@ -956,6 +963,7 @@ vartype *mode_plot_inv;
 int mode_plot_result_width;
 bool mode_multi_line;
 bool mode_lastx_top;
+bool mode_alpha_top;
 
 phloat entered_number;
 int entered_string_length;
@@ -1068,8 +1076,9 @@ bool no_keystrokes_yet;
  * Version 27: 1.0.20 1LINE/NLINE
  * Version 28: 1.1    CSLD?
  * Version 29: 1.1    LTOP
+ * Version 30: 1.1    ATOP
  */
-#define PLUS42_VERSION 29
+#define PLUS42_VERSION 30
 
 
 /*******************/
@@ -1967,6 +1976,8 @@ static bool persist_globals() {
         goto done;
     if (!write_bool(mode_lastx_top))
         goto done;
+    if (!write_bool(mode_alpha_top))
+        goto done;
     if (!persist_vartype(varmenu_eqn))
         goto done;
     if (!write_int(varmenu_length))
@@ -2266,6 +2277,15 @@ static bool unpersist_globals() {
         }
     } else {
         mode_lastx_top = false;
+    }
+
+    if (ver >= 30) {
+        if (!read_bool(&mode_alpha_top)) {
+            mode_alpha_top = false;
+            goto done;
+        }
+    } else {
+        mode_alpha_top = false;
     }
 
     if (!unpersist_vartype(&varmenu_eqn)) {
@@ -4793,6 +4813,15 @@ static bool load_state2(bool *clear, bool *too_new) {
         if (mode_alphamenu >= 76 && mode_alphamenu <= 86) mode_alphamenu++;
         if (mode_commandmenu >= 76 && mode_commandmenu <= 86) mode_commandmenu++;
     }
+    if (ver < 30) {
+        // inserted MENU_DISP4
+        if (mode_appmenu >= 31 && mode_appmenu <= 87) mode_appmenu++;
+        if (mode_auxmenu >= 31 && mode_auxmenu <= 87) mode_auxmenu++;
+        if (mode_plainmenu >= 31 && mode_plainmenu <= 87) mode_plainmenu++;
+        if (mode_transientmenu >= 31 && mode_transientmenu <= 87) mode_transientmenu++;
+        if (mode_alphamenu >= 31 && mode_alphamenu <= 87) mode_alphamenu++;
+        if (mode_commandmenu >= 31 && mode_commandmenu <= 87) mode_commandmenu++;
+    }
     if (!read_bool(&mode_running)) return false;
     if (ver < 28)
         mode_caller_stack_lift_disabled = false;
@@ -5214,6 +5243,7 @@ void hard_reset(int reason) {
     mode_plot_result_width = 0;
     mode_multi_line = true;
     mode_lastx_top = false;
+    mode_alpha_top = false;
 
     reset_math();
     reset_eqn();
