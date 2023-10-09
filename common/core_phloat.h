@@ -152,6 +152,8 @@ Phloat floor(Phloat x);
 Phloat ceil(Phloat x);
 Phloat fma(Phloat x, Phloat y, Phloat z);
 Phloat nextafter(Phloat x, Phloat y);
+int ilogb(Phloat x);
+Phloat scalbn(Phloat x, int y);
 
 Phloat operator*(int x, Phloat y);
 Phloat operator/(int x, Phloat y);

@@ -751,6 +751,18 @@ Phloat nextafter(Phloat x, Phloat y) {
     return Phloat(res);
 }
 
+int ilogb(Phloat x) {
+    int res;
+    bid128_ilogb(&res, &x.val);
+    return res;
+}
+
+Phloat scalbn(Phloat x, int y) {
+    BID_UINT128 res;
+    bid128_scalbn(&res, &x.val, &y);
+    return Phloat(res);
+}
+
 Phloat operator*(int x, Phloat y) {
     BID_UINT128 xx, res;
     bid128_from_int32(&xx, &x);
