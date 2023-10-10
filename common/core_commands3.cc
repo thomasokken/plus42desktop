@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #include "core_commands1.h"
 #include "core_commands2.h"
