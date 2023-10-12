@@ -623,9 +623,10 @@ int docmd_size(arg_struct *arg) {
         return ERR_INVALID_TYPE;
     vloc idx = lookup_var("REGS", 4);
     if (arg->val.num == 0) {
-        if (!idx.not_found())
-            purge_var("REGS", 4, true);
-        return ERR_NONE;
+        if (!idx.not_found() && !purge_var("REGS", 4, true))
+            return ERR_RESTRICTED_OPERATION;
+        else
+            return ERR_NONE;
     }
     if (idx.not_found()) {
         vartype *regs = new_realmatrix(arg->val.num, 1);
