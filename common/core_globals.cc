@@ -4927,7 +4927,7 @@ static bool load_state2(bool *clear, bool *too_new) {
     // When parser or code generator bugs are fixed, or when the semantics of
     // generated code are changed, re-parse all equations so all equation code
     // is re-generated.
-    if (ver < 28) {
+    if (false /* TODO */) {
         set_running(false);
         clear_all_rtns();
         pc = -1;
