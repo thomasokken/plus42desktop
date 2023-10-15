@@ -46,6 +46,8 @@ int docmd_1line(arg_struct *arg);
 int docmd_nline(arg_struct *arg);
 int docmd_ltop(arg_struct *arg);
 int docmd_atop(arg_struct *arg);
+int docmd_hflags(arg_struct *arg);
+int docmd_hpolar(arg_struct *arg);
 
 int docmd_dirs(arg_struct *arg);
 int docmd_dir_fcn(arg_struct *arg);

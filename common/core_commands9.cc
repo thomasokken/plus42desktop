@@ -1016,6 +1016,16 @@ int docmd_atop(arg_struct *arg) {
     return ERR_NONE;
 }
 
+int docmd_hflags(arg_struct *arg) {
+    mode_header_flags = !mode_header_flags;
+    return ERR_NONE;
+}
+
+int docmd_hpolar(arg_struct *arg) {
+    mode_header_polar = !mode_header_polar;
+    return ERR_NONE;
+}
+
 int docmd_dirs(arg_struct *arg) {
     set_menu(MENULEVEL_AUX, MENU_CATALOG);
     set_cat_section_no_top(CATSECT_DIRS);

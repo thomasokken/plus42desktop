@@ -637,6 +637,8 @@ const command_spec cmd_array[] =
     { /* NLINE */      docmd_nline,       "NLINE",               0x42, 0x00, 0x00, 0x00,  5, ARG_NONE,   0, NA_T },
     { /* LTOP */       docmd_ltop,        "LTOP",                0x42, 0x00, 0x00, 0x00,  4, ARG_NONE,   0, NA_T },
     { /* ATOP */       docmd_atop,        "ATOP",                0x42, 0x00, 0x00, 0x00,  4, ARG_NONE,   0, NA_T },
+    { /* HFLAGS */     docmd_hflags,      "HFL\301G\323",        0x42, 0x00, 0x00, 0x00,  6, ARG_NONE,   0, NA_T },
+    { /* HPOLAR */     docmd_hpolar,      "HPOL\301\322",        0x42, 0x00, 0x00, 0x00,  6, ARG_NONE,   0, NA_T },
 
     /* Menus */
     { /* DIRS */       docmd_dirs,        "DIRS",                0x42, 0x00, 0x00, 0x00,  4, ARG_NONE,   0, NA_T },

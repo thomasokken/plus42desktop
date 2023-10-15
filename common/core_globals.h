@@ -492,6 +492,8 @@ extern int mode_plot_result_width;
 extern bool mode_multi_line;
 extern bool mode_lastx_top;
 extern bool mode_alpha_top;
+extern bool mode_header_flags;
+extern bool mode_header_polar;
 
 extern phloat entered_number;
 extern int entered_string_length;

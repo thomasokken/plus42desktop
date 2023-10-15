@@ -316,17 +316,17 @@ const menu_spec menus[] = {
                         { 0x1000 + CMD_SETDS,     0, "" } } },
     { /* MENU_DISP3 */ MENU_NONE, MENU_DISP4, MENU_DISP2,
                       { { 0x2000 + CMD_HEADER, 0, "" },
+                        { 0x2000 + CMD_HFLAGS, 0, "" },
+                        { 0x2000 + CMD_HPOLAR, 0, "" },
                         { 0x1000 + CMD_NULL,   0, "" },
                         { 0x2000 + CMD_LTOP,   0, "" },
-                        { 0x2000 + CMD_ATOP,   0, "" },
-                        { 0x2000 + CMD_1LINE,  0, "" },
-                        { 0x2000 + CMD_NLINE,  0, "" } } },
+                        { 0x2000 + CMD_ATOP,   0, "" } } },
     { /* MENU_DISP4 */ MENU_NONE, MENU_DISP1, MENU_DISP3,
-                      { { 0x1000 + CMD_WIDTH,  0, "" },
+                      { { 0x2000 + CMD_1LINE,  0, "" },
+                        { 0x2000 + CMD_NLINE,  0, "" },
+                        { 0x1000 + CMD_NULL,   0, "" },
+                        { 0x1000 + CMD_WIDTH,  0, "" },
                         { 0x1000 + CMD_HEIGHT, 0, "" },
-                        { 0x1000 + CMD_NULL,   0, "" },
-                        { 0x1000 + CMD_NULL,   0, "" },
-                        { 0x1000 + CMD_NULL,   0, "" },
                         { 0x1000 + CMD_NULL,   0, "" } } },
     { /* MENU_CLEAR1 */ MENU_NONE, MENU_CLEAR2, MENU_CLEAR2,
                       { { 0x1000 + CMD_CLSIGMA, 0, "" },
@@ -964,6 +964,8 @@ int mode_plot_result_width;
 bool mode_multi_line;
 bool mode_lastx_top;
 bool mode_alpha_top;
+bool mode_header_flags;
+bool mode_header_polar;
 
 phloat entered_number;
 int entered_string_length;
@@ -1077,8 +1079,9 @@ bool no_keystrokes_yet;
  * Version 28: 1.1    CSLD?
  * Version 29: 1.1    LTOP
  * Version 30: 1.1    ATOP
+ * Version 31: 1.1    Flags & Polar header indicators
  */
-#define PLUS42_VERSION 30
+#define PLUS42_VERSION 31
 
 
 /*******************/
@@ -1978,6 +1981,10 @@ static bool persist_globals() {
         goto done;
     if (!write_bool(mode_alpha_top))
         goto done;
+    if (!write_bool(mode_header_flags))
+        goto done;
+    if (!write_bool(mode_header_polar))
+        goto done;
     if (!persist_vartype(varmenu_eqn))
         goto done;
     if (!write_int(varmenu_length))
@@ -2286,6 +2293,17 @@ static bool unpersist_globals() {
         }
     } else {
         mode_alpha_top = false;
+    }
+
+    if (ver >= 31) {
+        if (!read_bool(&mode_header_flags) || !read_bool(&mode_header_polar)) {
+            mode_header_flags = false;
+            mode_header_polar = false;
+            goto done;
+        }
+    } else {
+        mode_header_flags = false;
+        mode_header_polar = false;
     }
 
     if (!unpersist_vartype(&varmenu_eqn)) {
@@ -5244,6 +5262,8 @@ void hard_reset(int reason) {
     mode_multi_line = true;
     mode_lastx_top = false;
     mode_alpha_top = false;
+    mode_header_flags = false;
+    mode_header_polar = false;
 
     reset_math();
     reset_eqn();

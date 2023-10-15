@@ -1601,6 +1601,10 @@ bool should_highlight(int cmd) {
             return mode_lastx_top;
         case CMD_ATOP:
             return mode_alpha_top;
+        case CMD_HFLAGS:
+            return mode_header_flags;
+        case CMD_HPOLAR:
+            return mode_header_polar;
         case CMD_TBEGIN: {
             vartype *v = recall_var("BEGIN", 5);
             return v != NULL && v->type == TYPE_REAL && ((vartype_real *) v)->x == 1;
@@ -2661,9 +2665,9 @@ static int ext_dir_cat[] = {
 };
 
 static int ext_disp_cat[] = {
-    CMD_ATOP,  CMD_COL_PLUS, CMD_COL_MINUS, CMD_GETDS,     CMD_HEADER, CMD_HEIGHT,
-    CMD_LTOP,  CMD_NLINE,    CMD_ROW_PLUS,  CMD_ROW_MINUS, CMD_SETDS,  CMD_WIDTH,
-    CMD_1LINE, CMD_NULL,     CMD_NULL,      CMD_NULL,      CMD_NULL,   CMD_NULL
+    CMD_ATOP,   CMD_COL_PLUS, CMD_COL_MINUS, CMD_GETDS, CMD_HEADER,   CMD_HEIGHT,
+    CMD_HFLAGS, CMD_HPOLAR,   CMD_LTOP,      CMD_NLINE, CMD_ROW_PLUS, CMD_ROW_MINUS,
+    CMD_SETDS,  CMD_WIDTH,    CMD_1LINE,     CMD_NULL,  CMD_NULL,     CMD_NULL
 };
 
 #if defined(ANDROID) || defined(IPHONE)
@@ -3650,26 +3654,36 @@ bool display_header() {
     for (int x = 0; x < disp_w; x++)
         draw_pixel(x, 6);
 
+    char buf[50];
+    int pos = 0;
+    if (mode_header_flags) {
+        for (int i = 0; i <= 10; i++)
+            if (flags.farray[i])
+                pos += int2string(i, buf + pos, 50 - pos);
+    }
+    if (mode_header_polar && flags.f.polar) {
+        if (pos != 0)
+            char2buf(buf, 50, &pos, ' ');
+        char2buf(buf, 50, &pos, '\27');
+    }
     int app_w = 0;
     if (mode_appmenu >= MENU_BASE && mode_appmenu <= MENU_BASE_LOGIC || mode_plainmenu == MENU_MODES3) {
-        char buf[50];
-        int pos = 0;
+        if (pos != 0)
+            char2buf(buf, 50, &pos, ' ');
         string2buf(buf, 50, &pos, "WS: ", 4);
         pos += int2string(mode_wsize, buf + pos, 50 - pos);
         char2buf(buf, 50, &pos, ' ');
         char2buf(buf, 50, &pos, flags.f.base_signed ? 'S' : 'U');
         if (flags.f.base_wrap)
             string2buf(buf, 50, &pos, " WRAP", 5);
-        app_w = draw_small_string(0, -2, buf, pos, disp_w, true);
-        if (app_w != 0)
-            app_w += 2;
     } else if (mode_appmenu >= MENU_TVM_APP1 && mode_appmenu <= MENU_TVM_TABLE) {
-        char buf[50];
-        int pos = tvm_message(buf, 50);
-        app_w = draw_small_string(0, -2, buf, pos, disp_w, true);
-        if (app_w != 0)
-            app_w += 2;
+        if (pos != 0)
+            char2buf(buf, 50, &pos, ' ');
+        pos += tvm_message(buf + pos, 50);
     }
+    app_w = draw_small_string(0, -2, buf, pos, disp_w, true);
+    if (app_w != 0)
+        app_w += 2;
 
     try {
         std::string path("}", 1);
