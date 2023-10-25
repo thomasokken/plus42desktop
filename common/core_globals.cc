@@ -1080,8 +1080,9 @@ bool no_keystrokes_yet;
  * Version 29: 1.1    LTOP
  * Version 30: 1.1    ATOP
  * Version 31: 1.1    Flags & Polar header indicators
+ * Version 32: 1.1    FSTACK replacing FDEPTH/FLASTX; requires eqn reparse
  */
-#define PLUS42_VERSION 31
+#define PLUS42_VERSION 32
 
 
 /*******************/
@@ -4162,33 +4163,23 @@ int pop_func_state(bool error) {
     return err;
 }
 
-int get_frame_depth(int *depth) {
-    if (!flags.f.big_stack)
+int get_saved_stack_level(int level, vartype **res) {
+    vartype_list *stk = (vartype_list *) recall_private_var("STK", 3, true);
+    if (stk == NULL || ((vartype_real *) stk->array->data[0])->x == -1)
         return ERR_INVALID_CONTEXT;
-    vartype *fd = recall_private_var("FD", 2, true);
-    if (fd == NULL)
-        return ERR_INVALID_CONTEXT;
-    int d = to_int(((vartype_real *) ((vartype_list *) fd)->array->data[1])->x);
-    if (d == -1)
-        d = 4;
-    d = sp + 1 - d;
-    if (d < 0)
-        return ERR_INVALID_CONTEXT;
-    *depth = d;
-    return ERR_NONE;
-}
-
-int get_saved_lastx(vartype **lastx) {
-    if (!flags.f.big_stack)
-        return ERR_INVALID_CONTEXT;
-    vartype *fd = recall_private_var("FD", 2, true);
-    if (fd == NULL)
-        return ERR_INVALID_CONTEXT;
-    vartype *res = ((vartype_list *) fd)->array->data[3];
-    res = dup_vartype(res);
-    if (res == NULL)
+    vartype *v;
+    if (level == 0)
+        v = stk->array->data[3];
+    else {
+        vartype_list *sstack = (vartype_list *) stk->array->data[2];
+        if (level > sstack->size)
+            return ERR_STACK_DEPTH_ERROR;
+        v = sstack->array->data[sstack->size - level];
+    }
+    v = dup_vartype(v);
+    if (v == NULL)
         return ERR_INSUFFICIENT_MEMORY;
-    *lastx = res;
+    *res = v;
     return ERR_NONE;
 }
 
@@ -4964,7 +4955,7 @@ static bool load_state2(bool *clear, bool *too_new) {
     // When parser or code generator bugs are fixed, or when the semantics of
     // generated code are changed, re-parse all equations so all equation code
     // is re-generated.
-    if (false /* TODO */) {
+    if (ver < 32) {
         set_running(false);
         clear_all_rtns();
         pc = -1;

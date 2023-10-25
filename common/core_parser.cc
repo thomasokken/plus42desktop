@@ -2632,20 +2632,11 @@ class Register : public Evaluator {
     }
 
     void generateCode(GeneratorContext *ctx) {
-        if (ev == NULL && index == 0) {
-            ctx->addLine(tpos, CMD_FLASTX);
-            return;
-        }
         if (ev == NULL)
             ctx->addLine(tpos, (phloat) index);
         else
             ev->generateCode(ctx);
-        // TODO: Range check?
-        ctx->addLine(tpos, CMD_FDEPTH);
-        ctx->addLine(tpos, CMD_ADD);
-        ctx->addLine(tpos, CMD_PICK, 'X', true);
-        ctx->addLine(tpos, CMD_SWAP);
-        ctx->addLine(tpos, CMD_DROP);
+        ctx->addLine(tpos, CMD_FSTACK);
     }
 
     void collectVariables(std::vector<std::string> *vars, std::vector<std::string> *locals) {

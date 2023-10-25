@@ -62,7 +62,7 @@
 // XROM 30,37-63 (a7a5-a7bf) (Card Reader)
 // XROM 31,00-63 (a7c0-a7ff) (Data Logger)
 
-// Available XROMs: a7dc, a7dd, a7e0
+// Available XROMs: a71c, a7dc, a7dd, a7e0
 // Unavailable XROMs (used by Free42): a7fa (CAPS), a7fb (Mixed)
 
 const command_spec cmd_array[] =
@@ -575,8 +575,7 @@ const command_spec cmd_array[] =
     { /* DDAYSC */     docmd_ddaysc,      "DD\301YSC",           0x00, 0x00, 0xa7, 0xb5,  6, ARG_NONE,   3, 0x01 },
     { /* GETEQN */     docmd_geteqn,      "GETEQN",              0x00, 0x00, 0xa7, 0xb6,  6, ARG_NONE,   1, 0x10 },
     { /* TO_PAR */     docmd_to_par,      "\017PAR",             0x00, 0x00, 0xa7, 0xb7,  4, ARG_NONE,   2, FUNC },
-    { /* FDEPTH */     docmd_fdepth,      "FDEPTH",              0x00, 0x00, 0xa7, 0xb8,  6, ARG_NONE,   0, NA_T },
-    { /* FLASTX */     docmd_flastx,      "FLASTX",              0x00, 0x00, 0xa7, 0x1c,  6, ARG_NONE,   0, NA_T },
+    { /* FSTACK */     docmd_fstack,      "FST\301\303K",        0x00, 0x00, 0xa7, 0xb8,  6, ARG_NONE,   1, 0x01 },
     { /* PUTITEM */    docmd_putitem,     "PUTITEM",             0x00, 0x00, 0xa7, 0xb9,  7, ARG_NONE,   3, FUNC },
     { /* EVALN */      docmd_evaln,       "EV\301LN",            0x00, 0x43, 0xf2, 0x36,  5, ARG_EQN,    0, NA_T },
     { /* EVALNi */     docmd_evalni,      "EV\301LN",            0x44, 0x00, 0x00, 0x00,  5, ARG_EQN,    0, NA_T },

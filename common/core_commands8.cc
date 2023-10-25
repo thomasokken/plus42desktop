@@ -527,23 +527,20 @@ int docmd_to_par(arg_struct *arg) {
     return store_params();
 }
 
-int docmd_fdepth(arg_struct *arg) {
-    int depth;
-    int err = get_frame_depth(&depth);
-    if (err != ERR_NONE)
-        return err;
-    vartype *v = new_real(depth);
-    if (v == NULL)
-        return ERR_INSUFFICIENT_MEMORY;
-    return recall_result(v);
-}
-
-int docmd_flastx(arg_struct *arg) {
-    vartype *v;
-    int err = get_saved_lastx(&v);
-    if (err != ERR_NONE)
-        return err;
-    return recall_result(v);
+int docmd_fstack(arg_struct *arg) {
+    phloat plevel = ((vartype_real *) stack[sp])->x;
+    if (plevel < 0)
+        plevel = -plevel;
+    int4 level;
+    if (plevel >= 2147483648.0)
+        level = 2147483647;
+    else
+        level = to_int4(plevel);
+    vartype *res;
+    int err = get_saved_stack_level(level, &res);
+    if (err == ERR_NONE)
+        unary_result(res);
+    return err;
 }
 
 static int get_sum(int n) {

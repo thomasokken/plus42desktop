@@ -53,8 +53,7 @@ int docmd_gen_not(arg_struct *arg);
 int docmd_if_t(arg_struct *arg);
 int docmd_geteqn(arg_struct *arg);
 int docmd_to_par(arg_struct *arg);
-int docmd_fdepth(arg_struct *arg);
-int docmd_flastx(arg_struct *arg);
+int docmd_fstack(arg_struct *arg);
 
 int docmd_sn(arg_struct *arg);
 int docmd_sx(arg_struct *arg);
