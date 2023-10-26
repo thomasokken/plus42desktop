@@ -1028,12 +1028,12 @@ class Call : public Evaluator {
         // stepping on any alread-existing locals with the
         // same name.
         int lbl = ctx->nextLabel();
-        for (int i = 0; i < evs->size(); i++)
-            (*evs)[i]->generateCode(ctx);
-        ctx->addLine(tpos, (phloat) (int) evs->size());
         ctx->addLine(tpos, CMD_XEQL, lbl);
         ctx->pushSubroutine();
         ctx->addLine(tpos, CMD_LBL, lbl);
+        for (int i = 0; i < evs->size(); i++)
+            (*evs)[i]->generateCode(ctx);
+        ctx->addLine(tpos, (phloat) (int) evs->size());
         ctx->addLine(tpos, CMD_XSTR, name);
         ctx->addLine(tpos, CMD_GETEQN);
         ctx->addLine(tpos, CMD_TO_PAR);
@@ -3235,12 +3235,18 @@ class Xeq : public Evaluator {
         // stepping on any already-existing locals with the
         // same name.
         int lbl = ctx->nextLabel();
-        for (int i = 0; i < evs->size(); i++)
-            (*evs)[i]->generateCode(ctx);
-        ctx->addLine(tpos, (phloat) (int) evs->size());
         ctx->addLine(tpos, CMD_XEQL, lbl);
         ctx->pushSubroutine();
         ctx->addLine(tpos, CMD_LBL, lbl);
+        if (!evaln)
+            // Start with FUNC 01, so the RPN function can abuse the stack
+            // to their heart's content. We only do this for XEQ, not EVALN,
+            // because we should be able to assume that generated code is
+            // always well-behaved.
+            ctx->addLine(tpos, CMD_FUNC, 1);
+        for (int i = 0; i < evs->size(); i++)
+            (*evs)[i]->generateCode(ctx);
+        ctx->addLine(tpos, (phloat) (int) evs->size());
         if (evaln) {
             ctx->addLine(tpos, CMD_RCL, name);
             ctx->addLine(tpos, CMD_TO_PAR);
