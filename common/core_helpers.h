@@ -127,7 +127,7 @@ int real2buf(char *buf, phloat x, const char *format = NULL, bool force_decimal 
 int ip2revstring(phloat d, char *buf, int buflen);
 
 vartype_list *get_path();
-vartype *matedit_get();
+int matedit_get(vartype **res);
 void leave_matrix_editor();
 
 

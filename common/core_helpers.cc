@@ -513,6 +513,8 @@ bool vartype_equals(const vartype *v1, const vartype *v2) {
         case TYPE_REALMATRIX: {
             const vartype_realmatrix *x = (const vartype_realmatrix *) v1;
             const vartype_realmatrix *y = (const vartype_realmatrix *) v2;
+            if (x->array == y->array)
+                return true;
             int4 sz, i;
             if (x->rows != y->rows || x->columns != y->columns)
                 return false;
@@ -539,6 +541,8 @@ bool vartype_equals(const vartype *v1, const vartype *v2) {
         case TYPE_COMPLEXMATRIX: {
             const vartype_complexmatrix *x = (const vartype_complexmatrix *) v1;
             const vartype_complexmatrix *y = (const vartype_complexmatrix *) v2;
+            if (x->array == y->array)
+                return true;
             int4 sz, i;
             if (x->rows != y->rows || x->columns != y->columns)
                 return false;
@@ -556,6 +560,8 @@ bool vartype_equals(const vartype *v1, const vartype *v2) {
         case TYPE_LIST: {
             const vartype_list *x = (const vartype_list *) v1;
             const vartype_list *y = (const vartype_list *) v2;
+            if (x->array == y->array)
+                return true;
             if (x->size != y->size)
                 return false;
             int4 sz = x->size;
@@ -2229,11 +2235,14 @@ vartype_list *get_path() {
     return NULL;
 }
 
-vartype *matedit_get() {
-    if (matedit_mode != 1 && matedit_mode != 3)
-        return NULL;
+int matedit_get(vartype **res) {
+    if (matedit_mode == 0)
+        return ERR_NONEXISTENT;
+
     vartype *m = NULL;
-    if (matedit_dir <= 0) {
+    if (matedit_mode == 2) {
+        m = matedit_x;
+    } else if (matedit_dir <= 0) {
         int level = -matedit_dir;
         for (int i = local_vars_count - 1; i >= 0; i--) {
             var_struct *lv = local_vars + i;
@@ -2258,14 +2267,35 @@ vartype *matedit_get() {
             }
         }
     }
-    // Apart from the check for m == NULL, the following checks *should* be unnecessary,
-    // we're already preventing those scenarios. Or that's what we're trying, anyway...
+    int err = ERR_NONEXISTENT;
     if (m == NULL) {
         bad_matrix:
-        if (matedit_mode == 3)
+        if (matedit_mode == 2 || matedit_mode == 3)
             leave_matrix_editor();
-        return NULL;
-    } else if (m->type == TYPE_REALMATRIX) {
+        return err;
+    }
+
+    for (int i = 0; i < matedit_stack_depth; i++) {
+        if (m->type != TYPE_LIST) {
+            err = i == 0 ? ERR_INVALID_TYPE : ERR_INVALID_DATA;
+            goto bad_matrix;
+        }
+        vartype_list *list = (vartype_list *) m;
+        if (matedit_stack[i] >= list->size) {
+            err = ERR_INVALID_DATA;
+            goto bad_matrix;
+        }
+        m = list->array->data[matedit_stack[i]];
+    }
+
+    if (m->type != TYPE_REALMATRIX && m->type != TYPE_COMPLEXMATRIX && m->type != TYPE_LIST) {
+        err = matedit_stack_depth == 0 ? ERR_INVALID_TYPE : ERR_INVALID_DATA;
+        goto bad_matrix;
+    }
+
+    // The following checks *should* be unnecessary, we're already preventing
+    // those scenarios. Or that's what we're trying, anyway...
+    if (m->type == TYPE_REALMATRIX) {
         vartype_realmatrix *rm = (vartype_realmatrix *) m;
         if (matedit_i >= rm->rows || matedit_j >= rm->columns)
             matedit_i = matedit_j = 0;
@@ -2273,13 +2303,22 @@ vartype *matedit_get() {
         vartype_complexmatrix *cm = (vartype_complexmatrix *) m;
         if (matedit_i >= cm->rows || matedit_j >= cm->columns)
             matedit_i = matedit_j = 0;
-    } else
-        goto bad_matrix;
-    return m;
+    } else { // m->type == TYPE_LIST
+        vartype_list *list = (vartype_list *) m;
+        if (matedit_i >= list->size)
+            matedit_i = 0;
+        matedit_j = 0;
+    }
+
+    *res = m;
+    return ERR_NONE;
 }
 
 void leave_matrix_editor() {
     set_appmenu_exitcallback(0);
     set_menu(MENULEVEL_APP, MENU_NONE);
     matedit_mode = 0;
+    free(matedit_stack);
+    matedit_stack = NULL;
+    matedit_stack_depth = 0;
 }

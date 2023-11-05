@@ -356,21 +356,9 @@ int docmd_delr(arg_struct *arg) {
     int err, refcount;
     int interactive;
 
-    switch (matedit_mode) {
-        case 0:
-            return ERR_NONEXISTENT;
-        case 1:
-        case 3:
-            m = matedit_get();
-            break;
-        case 2:
-            m = matedit_x;
-            break;
-        default:
-            return ERR_INTERNAL_ERROR;
-    }
-    if (m == NULL)
-        return ERR_NONEXISTENT;
+    err = matedit_get(&m);
+    if (err != ERR_NONE)
+        return err;
 
     if (m->type == TYPE_REALMATRIX) {
         rm = (vartype_realmatrix *) m;
@@ -794,25 +782,12 @@ int docmd_dot(arg_struct *arg) {
     return binary_result(v);
 }
 
-int matedit_get_dim(int4 *rows, int4 *columns) {
+int matedit_get_dim(int4 *rows, int4 *columns, vartype **res) {
     vartype *m;
 
-    switch (matedit_mode) {
-        case 0:
-            return ERR_NONEXISTENT;
-        case 1:
-        case 3:
-            m = matedit_get();
-            break;
-        case 2:
-            m = matedit_x;
-            break;
-        default:
-            return ERR_INTERNAL_ERROR;
-    }
-
-    if (m == NULL)
-        return ERR_NONEXISTENT;
+    int err = matedit_get(&m);
+    if (err != ERR_NONE)
+        return err;
 
     if (m->type == TYPE_REALMATRIX) {
         vartype_realmatrix *rm = (vartype_realmatrix *) m;
@@ -822,11 +797,13 @@ int matedit_get_dim(int4 *rows, int4 *columns) {
         vartype_complexmatrix *cm = (vartype_complexmatrix *) m;
         *rows = cm->rows;
         *columns = cm->columns;
-    } else {
+    } else { // TYPE_LIST
         vartype_list *list = (vartype_list *) m;
         *rows = list->size;
         *columns = 1;
     }
+    if (res != NULL)
+        *res = m;
     return ERR_NONE;
 }
 
@@ -867,6 +844,9 @@ int appmenu_exitcallback_1(int menuid, bool exitall) {
             matedit_x = NULL;
         }
         matedit_mode = 0;
+        free(matedit_stack);
+        matedit_stack = NULL;
+        matedit_stack_depth = 0;
         flags.f.grow = 0;
         flags.f.stack_lift_disable = 0;
         /* Note: no need to check the value returned by set_menu() here:
@@ -932,6 +912,7 @@ int docmd_edit(arg_struct *arg) {
     stack[sp] = v;
     matedit_i = 0;
     matedit_j = 0;
+    matedit_is_list = stack[sp]->type == TYPE_LIST;
     flags.f.matrix_edge_wrap = 0;
     flags.f.matrix_end_wrap = 0;
     if (mode_appmenu >= MENU_MATRIX1 && mode_appmenu <= MENU_MATRIX_SIMQ)
@@ -1020,6 +1001,7 @@ int docmd_editn(arg_struct *arg) {
     stack[sp] = v;
     matedit_i = 0;
     matedit_j = 0;
+    matedit_is_list = m->type == TYPE_LIST;
     flags.f.matrix_edge_wrap = 0;
     flags.f.matrix_end_wrap = 0;
     if (mode_appmenu >= MENU_MATRIX1 && mode_appmenu <= MENU_MATRIX_SIMQ)
@@ -1114,22 +1096,11 @@ int docmd_getm(arg_struct *arg) {
     phloat xx, yy;
     int4 x, y;
 
-    switch (matedit_mode) {
-        case 0:
-            return ERR_NONEXISTENT;
-        case 1:
-        case 3:
-            m = matedit_get();
-            break;
-        case 2:
-            m = matedit_x;
-            break;
-        default:
-            return ERR_INTERNAL_ERROR;
-    }
-
-    if (m == NULL)
-        return ERR_NONEXISTENT;
+    int err = matedit_get(&m);
+    if (err != ERR_NONE)
+        return err;
+    if (m->type == TYPE_LIST)
+        return ERR_INVALID_TYPE;
 
     if (stack[sp]->type == TYPE_STRING)
         return ERR_ALPHA_DATA_IS_INVALID;
@@ -1465,6 +1436,7 @@ int docmd_index(arg_struct *arg) {
     matedit_mode = 1;
     matedit_i = 0;
     matedit_j = 0;
+    matedit_is_list = m->type == TYPE_LIST;
     flags.f.matrix_edge_wrap = 0;
     flags.f.matrix_end_wrap = 0;
     string_copy(matedit_name, &matedit_length, arg->val.text, arg->length);

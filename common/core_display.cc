@@ -2079,11 +2079,19 @@ static int display_x(int row, int lines_available) {
         char buf[100];
 
         if (matedit_mode == 2 || matedit_mode == 3) {
-            int len = int2string(matedit_i + 1, buf, 100);
-            line = std::string(buf, len);
-            line += ':';
-            len = int2string(matedit_j + 1, buf, 100);
+            int len;
+            for (int i = 0; i < matedit_stack_depth; i++) {
+                len = int2string(matedit_stack[i] + 1, buf, 100);
+                line += std::string(buf, len);
+                line += '.';
+            }
+            len = int2string(matedit_i + 1, buf, 100);
             line += std::string(buf, len);
+            if (!matedit_is_list) {
+                line += ':';
+                len = int2string(matedit_j + 1, buf, 100);
+                line += std::string(buf, len);
+            }
             line += '=';
         } else if (input_length > 0) {
             line = std::string(input_name, input_length);
