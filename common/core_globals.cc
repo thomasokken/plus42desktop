@@ -1085,8 +1085,9 @@ bool no_keystrokes_yet;
  * Version 31: 1.1    Flags & Polar header indicators
  * Version 32: 1.1    FSTACK replacing FDEPTH/FLASTX; requires eqn reparse
  * Version 33: 1.1    Matrix editor nested lists
+ * Version 34: 1.1    No more redundant FUNC 01 and LNSTK in generated code
  */
-#define PLUS42_VERSION 33
+#define PLUS42_VERSION 34
 
 
 /*******************/
@@ -5025,7 +5026,7 @@ static bool load_state2(bool *clear, bool *too_new) {
     // When parser or code generator bugs are fixed, or when the semantics of
     // generated code are changed, re-parse all equations so all equation code
     // is re-generated.
-    if (ver < 32) {
+    if (ver < 34) {
         set_running(false);
         clear_all_rtns();
         pc = -1;
