@@ -164,8 +164,16 @@ class GeneratorContext {
         lines = new std::vector<Line *>;
         lbl = 0;
         assertTwoRealsLbl = -1;
-        // FUNC 01: 0 inputs, 1 output
-        addLine(0, CMD_FUNC, 1);
+        // We used to generate a FUNC 01 here, but that really shouldn't be
+        // necessary, because generated code obeys those semantics anyway.
+        // Getting rid of the FUNC 01 makes generated-to-generated calls more
+        // efficient, and that is particularly significant with the new
+        // stack-saving FUNC semantics in NSTK mode that were introduced in
+        // version 1.1, where we're creating a new stack for every FUNC.
+        // Note: when calling RPN functions, also as of 1.1, we're now
+        // generating a FUNC 01 before evaluating the parameters and calling
+        // into user code, and that should be all that's needed to protect
+        // the stack from ill-behaved code.
         addLine(0, CMD_LNSTK);
     }
 
