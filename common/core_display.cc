@@ -2085,9 +2085,18 @@ static int display_x(int row, int lines_available) {
                 line += std::string(buf, len);
                 line += '.';
             }
-            len = int2string(matedit_i + 1, buf, 100);
-            line += std::string(buf, len);
-            if (!matedit_is_list) {
+            if (matedit_is_list) {
+                vartype *m;
+                int err = matedit_get(&m);
+                if (err != ERR_NONE || ((vartype_list *) m)->size == 0) {
+                    line += 'E';
+                } else {
+                    len = int2string(matedit_i + 1, buf, 100);
+                    line += std::string(buf, len);
+                }
+            } else {
+                len = int2string(matedit_i + 1, buf, 100);
+                line += std::string(buf, len);
                 line += ':';
                 len = int2string(matedit_j + 1, buf, 100);
                 line += std::string(buf, len);

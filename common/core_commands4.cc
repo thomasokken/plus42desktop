@@ -50,7 +50,8 @@ int docmd_insr(arg_struct *arg) {
     interactive = matedit_mode == 2 || matedit_mode == 3;
     if (interactive && sp != -1) {
         err = docmd_stoel(NULL);
-        if (err != ERR_NONE)
+        if (err != ERR_NONE && err != ERR_NONEXISTENT)
+            // Nonexistent happens with empty lists
             return err;
     }
 
@@ -87,7 +88,7 @@ int docmd_insr(arg_struct *arg) {
     }
 
     if (matedit_i >= rows)
-        matedit_i = rows - 1;
+        matedit_i = rows == 0 ? 0 : rows - 1;
     if (matedit_j >= columns)
         matedit_j = columns - 1;
 
@@ -478,6 +479,8 @@ int docmd_rclel(arg_struct *arg) {
                         cm->array->data[2 * n + 1]);
     } else {
         vartype_list *list = (vartype_list *) m;
+        if (list->size == 0)
+            return ERR_NONEXISTENT;
         v = dup_vartype(list->array->data[matedit_i]);
     }
     if (v == NULL)
@@ -798,6 +801,8 @@ int docmd_stoel(arg_struct *arg) {
             return ERR_INVALID_TYPE;
     } else /* m->type == TYPE_LIST */ {
         vartype_list *list = (vartype_list *) m;
+        if (list->size == 0)
+            return ERR_NONEXISTENT;
         vartype *v = dup_vartype(stack[sp]);
         if (v == NULL)
             return ERR_INSUFFICIENT_MEMORY;
@@ -1004,7 +1009,7 @@ static int matedit_move_list(vartype_list *list, int direction) {
     }
 
     // Prepare for storing X, but don't actually store it yet
-    if (sp != -1 && !vartype_equals(list->array->data[matedit_i], stack[sp])) {
+    if (sp != -1 && list->size > 0 && !vartype_equals(list->array->data[matedit_i], stack[sp])) {
         if (!disentangle((vartype *) list))
             return ERR_INSUFFICIENT_MEMORY;
         old_x = dup_vartype(stack[sp]);
@@ -1013,7 +1018,12 @@ static int matedit_move_list(vartype_list *list, int direction) {
         old_loc = list->array->data + matedit_i;
     }
 
-    if (direction == DIR_UP || direction == DIR_DOWN) {
+    if (list->size == 0 && direction != DIR_LEFT) {
+        if (!program_running())
+            squeak();
+        new_i = 0;
+        end_flag = direction != DIR_RIGHT;
+    } else if (direction == DIR_UP || direction == DIR_DOWN) {
         if (direction == DIR_DOWN) {
             if (++new_i >= list->size) {
                 new_i = 0;

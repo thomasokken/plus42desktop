@@ -2249,7 +2249,7 @@ int matedit_get(vartype **res) {
             if ((lv->flags & VAR_PRIVATE) != 0)
                 continue;
             if (lv->level < level)
-                return NULL;
+                return ERR_NONEXISTENT;
             if (lv->level == level && string_equals(matedit_name, matedit_length, lv->name, lv->length)) {
                 m = lv->value;
                 break;
@@ -2258,7 +2258,7 @@ int matedit_get(vartype **res) {
     } else {
         directory *dir = get_dir(matedit_dir);
         if (dir == NULL)
-            return NULL;
+            return ERR_NONEXISTENT;
         for (int i = dir->vars_count - 1; i >= 0; i--) {
             var_struct *gv = dir->vars + i;
             if (string_equals(matedit_name, matedit_length, gv->name, gv->length)) {
