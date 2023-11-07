@@ -4351,7 +4351,18 @@ int rtn_with_error(int err) {
 }
 
 bool need_fstart() {
-    return rtn_level == 0 || rtn_stack[rtn_level - 1].dir != 1;
+    int level = rtn_level;
+    while (true) {
+        if (level == 0)
+            return true;
+        int4 dir = rtn_stack[level - 1].dir;
+        if (dir == 1)
+            return false;
+        if (dir > 1)
+            return true;
+        // dir == 0 implies is_special() == true; ignore and try the next one
+        level--;
+    }
 }
 
 void pop_rtn_addr(pgm_index *prgm, int4 *pc, bool *stop) {
