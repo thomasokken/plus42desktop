@@ -825,6 +825,9 @@ int appmenu_exitcallback_1(int menuid, bool exitall) {
             err = ERR_NONE;
         else
             err = docmd_stoel(NULL);
+        if (err == ERR_NONEXISTENT)
+            /* This can happen when editing an empty list; ignore. */
+            err = ERR_NONE;
         if (err != ERR_NONE && err != ERR_INSUFFICIENT_MEMORY) {
             /* Reinstate the callback so we'll get called again when
              * the user tries to leave again.
