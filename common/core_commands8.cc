@@ -527,6 +527,20 @@ int docmd_to_par(arg_struct *arg) {
     return store_params();
 }
 
+int docmd_fstart(arg_struct *arg) {
+    if (!program_running())
+        return ERR_RESTRICTED_OPERATION;
+    if (!need_fstart())
+        return ERR_NONE;
+    int err = push_func_state(1);
+    if (err != ERR_NONE)
+        return err;
+    if (flags.f.big_stack)
+        return ERR_NONE;
+    else
+        return push_stack_state(true);
+}
+
 int docmd_fstack(arg_struct *arg) {
     phloat plevel = ((vartype_real *) stack[sp])->x;
     if (plevel < 0)

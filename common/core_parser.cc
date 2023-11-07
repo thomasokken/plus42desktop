@@ -164,8 +164,7 @@ class GeneratorContext {
         lines = new std::vector<Line *>;
         lbl = 0;
         assertTwoRealsLbl = -1;
-        addLine(0, CMD_FC_T, 80);
-        addLine(0, CMD_LNSTK);
+        addLine(0, CMD_FSTART);
     }
 
     ~GeneratorContext() {

@@ -1086,8 +1086,9 @@ bool no_keystrokes_yet;
  * Version 32: 1.1    FSTACK replacing FDEPTH/FLASTX; requires eqn reparse
  * Version 33: 1.1    Matrix editor nested lists
  * Version 34: 1.1    No more redundant FUNC 01 and LNSTK in generated code
+ * Version 35: 1.1    FSTART
  */
-#define PLUS42_VERSION 34
+#define PLUS42_VERSION 35
 
 
 /*******************/
@@ -4349,6 +4350,10 @@ int rtn_with_error(int err) {
     return err;
 }
 
+bool need_fstart() {
+    return rtn_level == 0 || rtn_stack[rtn_level - 1].dir != 1;
+}
+
 void pop_rtn_addr(pgm_index *prgm, int4 *pc, bool *stop) {
     if (rtn_level == 0 ? rtn_level_0_has_matrix_entry : rtn_stack[rtn_level - 1].has_matrix()) {
         vartype_list *list = (vartype_list *) recall_and_purge_private_var("MAT", 3);
@@ -5026,7 +5031,7 @@ static bool load_state2(bool *clear, bool *too_new) {
     // When parser or code generator bugs are fixed, or when the semantics of
     // generated code are changed, re-parse all equations so all equation code
     // is re-generated.
-    if (ver < 34) {
+    if (ver < 35) {
         set_running(false);
         clear_all_rtns();
         pc = -1;

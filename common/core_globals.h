@@ -672,6 +672,7 @@ void unwind_after_eqn_error();
 bool should_i_stop_at_this_level();
 int rtn(int err);
 int rtn_with_error(int err);
+bool need_fstart();
 void pop_rtn_addr(pgm_index *prgm, int4 *pc, bool *stop);
 void clear_all_rtns();
 int get_rtn_level();
