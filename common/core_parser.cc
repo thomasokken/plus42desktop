@@ -2720,6 +2720,14 @@ class Seq : public Evaluator {
         return new Seq(tpos, evs2);
     }
 
+    Evaluator *invert(const std::string &name, Evaluator *rhs) {
+        std::vector<Evaluator *> *evs2 = new std::vector<Evaluator *>;
+        for (int i = 0; i < evs->size() - 1; i++)
+            evs2->push_back((*evs)[i]->clone(NULL));
+        evs2->push_back(rhs);
+        return (*evs)[evs->size() - 1]->invert(name, new Seq(0, evs2));
+    }
+
     void generateCode(GeneratorContext *ctx) {
         for (int i = 0; i < evs->size() - 1; i++) {
             (*evs)[i]->generateCode(ctx);
@@ -2734,10 +2742,10 @@ class Seq : public Evaluator {
     }
 
     int howMany(const std::string &name) {
-        for (int i = 0; i < evs->size(); i++)
+        for (int i = 0; i < evs->size() - 1; i++)
             if ((*evs)[i]->howMany(name) != 0)
                 return -1;
-        return 0;
+        return (*evs)[evs->size() - 1]->howMany(name);
     }
 };
 
