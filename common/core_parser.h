@@ -46,6 +46,8 @@ class Evaluator {
     virtual bool isBool() { return false; }
     virtual bool makeLvalue() { return false; }
     virtual std::string name() { return ""; }
+    virtual std::string name2() { return ""; }
+    virtual bool isString() { return false; }
     virtual std::string eqnName() { return ""; }
     virtual std::vector<std::string> *eqnParamNames() { return NULL; }
     virtual std::string getText() { return ""; }

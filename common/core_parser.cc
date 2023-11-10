@@ -1412,6 +1412,8 @@ class Ell : public Evaluator {
             return new Ell(tpos, left->clone(f), right->clone(f), compatMode);
     }
 
+    std::string name2() { return name; }
+
     void generateCode(GeneratorContext *ctx) {
         if (name != "") {
             right->generateCode(ctx);
@@ -1668,6 +1670,8 @@ class Gee : public Evaluator {
     Evaluator *clone(For *f) {
         return new Gee(tpos, name, compatMode);
     }
+
+    std::string name2() { return name; }
 
     void generateCode(GeneratorContext *ctx) {
         ctx->addLine(tpos, compatMode ? CMD_GRCL : CMD_RCL, name);
@@ -2702,10 +2706,11 @@ class Seq : public Evaluator {
     private:
 
     std::vector<Evaluator *> *evs;
+    bool view;
 
     public:
 
-    Seq(int pos, std::vector<Evaluator *> *evs) : Evaluator(pos), evs(evs) {}
+    Seq(int pos, bool view, std::vector<Evaluator *> *evs) : Evaluator(pos), view(view), evs(evs) {}
 
     ~Seq() {
         for (int i = 0; i < evs->size(); i++)
@@ -2717,7 +2722,7 @@ class Seq : public Evaluator {
         std::vector<Evaluator *> *evs2 = new std::vector<Evaluator *>;
         for (int i = 0; i < evs->size(); i++)
             evs2->push_back((*evs)[i]->clone(f));
-        return new Seq(tpos, evs2);
+        return new Seq(tpos, view, evs2);
     }
 
     Evaluator *invert(const std::string &name, Evaluator *rhs) {
@@ -2725,15 +2730,36 @@ class Seq : public Evaluator {
         for (int i = 0; i < evs->size() - 1; i++)
             evs2->push_back((*evs)[i]->clone(NULL));
         evs2->push_back(rhs);
-        return (*evs)[evs->size() - 1]->invert(name, new Seq(0, evs2));
+        return evs->back()->invert(name, new Seq(0, view, evs2));
     }
 
     void generateCode(GeneratorContext *ctx) {
-        for (int i = 0; i < evs->size() - 1; i++) {
+        bool first = true;
+        for (int i = 0; i < evs->size(); i++) {
+            if (first)
+                first = false;
+            else
+                ctx->addLine(tpos, CMD_DROP);
             (*evs)[i]->generateCode(ctx);
-            ctx->addLine(tpos, CMD_DROP);
+            if (view) {
+                std::string name = (*evs)[i]->name2();
+                if (name != "") {
+                    ctx->addLine(tpos, CMD_VIEW, name);
+                } else if ((*evs)[i]->isString()) {
+                    ctx->addLine(tpos, CMD_XVIEW);
+                } else {
+                    int lbl1 = ctx->nextLabel();
+                    int lbl2 = ctx->nextLabel();
+                    ctx->addLine(tpos, CMD_STR_T);
+                    ctx->addLine(tpos, CMD_GTOL, lbl1);
+                    ctx->addLine(tpos, CMD_VIEW, 'X');
+                    ctx->addLine(tpos, CMD_GTOL, lbl2);
+                    ctx->addLine(tpos, CMD_LBL, lbl1);
+                    ctx->addLine(tpos, CMD_XVIEW);
+                    ctx->addLine(tpos, CMD_LBL, lbl2);
+                }
+            }
         }
-        evs->back()->generateCode(ctx);
     }
 
     void collectVariables(std::vector<std::string> *vars, std::vector<std::string> *locals) {
@@ -2745,7 +2771,7 @@ class Seq : public Evaluator {
         for (int i = 0; i < evs->size() - 1; i++)
             if ((*evs)[i]->howMany(name) != 0)
                 return -1;
-        return (*evs)[evs->size() - 1]->howMany(name);
+        return evs->back()->howMany(name);
     }
 };
 
@@ -2952,6 +2978,8 @@ class String : public Evaluator {
         return new String(tpos, value);
     }
 
+    bool isString() { return true; }
+
     void generateCode(GeneratorContext *ctx) {
         ctx->addLine(tpos, CMD_XSTR, value);
     }
@@ -3147,6 +3175,7 @@ class Variable : public Evaluator {
     }
 
     std::string name() { return nam; }
+    std::string name2() { return nam; }
 
     Evaluator *invert(const std::string &name, Evaluator *rhs) {
         if (nam == name) {
@@ -4610,7 +4639,7 @@ Evaluator *Parser::parseThing() {
                 min_args = 1;
                 max_args = INT_MAX;
                 mode = EXPR_LIST_NAME;
-            } else if (t == "SEQ") {
+            } else if (t == "SEQ" || t == "VIEW") {
                 min_args = 1;
                 max_args = INT_MAX;
                 mode = EXPR_LIST_EXPR;
@@ -4930,8 +4959,8 @@ Evaluator *Parser::parseThing() {
                 std::string n = name->name();
                 evs->erase(evs->begin());
                 return new Xeq(tpos, n, evs, t == "EVALN");
-            } else if (t == "SEQ") {
-                return new Seq(tpos, evs);
+            } else if (t == "SEQ" || t == "VIEW") {
+                return new Seq(tpos, t == "VIEW", evs);
             } else if (t == "IF") {
                 Evaluator *condition = (*evs)[0];
                 Evaluator *trueEv = (*evs)[1];
