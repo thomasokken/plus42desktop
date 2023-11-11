@@ -2710,7 +2710,7 @@ class Seq : public Evaluator {
 
     public:
 
-    Seq(int pos, bool view, std::vector<Evaluator *> *evs) : Evaluator(pos), view(view), evs(evs) {}
+    Seq(int pos, bool view, std::vector<Evaluator *> *evs) : Evaluator(pos), evs(evs), view(view) {}
 
     ~Seq() {
         for (int i = 0; i < evs->size(); i++)
