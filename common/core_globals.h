@@ -621,6 +621,8 @@ struct matedit_stack_entry {
 extern matedit_stack_entry *matedit_stack;
 extern int matedit_stack_depth;
 extern bool matedit_is_list;
+extern int4 matedit_view_i;
+extern int4 matedit_view_j;
 
 /* INPUT */
 extern char input_name[11];

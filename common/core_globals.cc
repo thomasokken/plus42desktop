@@ -1005,6 +1005,8 @@ int matedit_prev_appmenu;
 matedit_stack_entry *matedit_stack = NULL;
 int matedit_stack_depth = 0;
 bool matedit_is_list;
+int4 matedit_view_i;
+int4 matedit_view_j;
 
 /* INPUT */
 char input_name[11];
@@ -1088,8 +1090,9 @@ bool no_keystrokes_yet;
  * Version 34: 1.1    No more redundant FUNC 01 and LNSTK in generated code
  * Version 35: 1.1    FSTART; requires eqn reparse
  * Version 36: 1.1    Matrix editor full screen: save offsets
+ * Version 37: 1.1    Matrix editor full screen: globals for offsets
  */
-#define PLUS42_VERSION 36
+#define PLUS42_VERSION 37
 
 
 /*******************/
@@ -5018,6 +5021,13 @@ static bool load_state2(bool *clear, bool *too_new) {
                 }
         }
         if (!read_bool(&matedit_is_list)) return false;
+        if (ver < 37) {
+            matedit_view_i = -1;
+            matedit_view_j = -1;
+        } else {
+            if (!read_int4(&matedit_view_i)) goto nomem;
+            if (!read_int4(&matedit_view_j)) goto nomem;
+        }
     }
 
     if (fread(input_name, 1, 11, gfile) != 11) return false;
@@ -5167,6 +5177,8 @@ static void save_state2(bool *success) {
     for (int i = 0; i < matedit_stack_depth; i++)
         if (!write_int8(matedit_stack[i].as_int8())) return;
     if (!write_bool(matedit_is_list)) return;
+    if (!write_int4(matedit_view_i)) return;
+    if (!write_int4(matedit_view_j)) return;
 
     if (fwrite(input_name, 1, 11, gfile) != 11) return;
     if (!write_int(input_length)) return;
