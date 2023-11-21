@@ -144,7 +144,6 @@ int4 CodeMap::lookup(int4 line) {
             return -1;
         cline += read(&index);
         if (line < cline)
-            // TODO: Handle pos = -1 by going up the RTN stack?
             return pos;
     }
 }
