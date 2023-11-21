@@ -248,6 +248,8 @@ class GeneratorContext {
             Line *line = (*lines)[i];
             if (line->cmd == CMD_LBL)
                 label2line[line->arg.val.num] = lineno;
+            else if (line->cmd == CMD_N_PLUS_U)
+                lineno--;
             else
                 lineno++;
         }
@@ -283,7 +285,10 @@ class GeneratorContext {
             Line *line = (*lines)[i];
             if (line->cmd == CMD_LBL)
                 continue;
-            lineno++;
+            if (line->cmd == CMD_N_PLUS_U)
+                lineno--;
+            else
+                lineno++;
             store_command_after(&pc, line->cmd, &line->arg, NULL);
             if (map != NULL)
                 map->add(line->pos, lineno);
@@ -2085,6 +2090,8 @@ class Literal : public Evaluator {
         return new Literal(tpos, value);
     }
 
+    bool isLiteral() { return true; }
+
     void generateCode(GeneratorContext *ctx) {
         ctx->addLine(tpos, value);
     }
@@ -3141,11 +3148,13 @@ class Unit : public BinaryEvaluator {
             ctx->addLine(tpos, CMD_UNIT_T);
             ctx->addLine(tpos, CMD_RAISE, ERR_INVALID_DATA);
         } else {
-            // TODO: It would be nice to generate an N+U instead if we know that
-            // 'left' is a Literal and 'right' is a String, but this will do for now.
+            bool n_plus_u = left->isLiteral() && right->isString();
+            if (n_plus_u)
+                ctx->addLine(tpos, CMD_N_PLUS_U);
             left->generateCode(ctx);
             right->generateCode(ctx);
-            ctx->addLine(tpos, CMD_TO_UNIT);
+            if (!n_plus_u)
+                ctx->addLine(tpos, CMD_TO_UNIT);
         }
     }
 

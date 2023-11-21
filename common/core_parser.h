@@ -48,6 +48,7 @@ class Evaluator {
     virtual std::string name() { return ""; }
     virtual std::string name2() { return ""; }
     virtual bool isString() { return false; }
+    virtual bool isLiteral() { return false; }
     virtual std::string eqnName() { return ""; }
     virtual std::vector<std::string> *eqnParamNames() { return NULL; }
     virtual std::string getText() { return ""; }
