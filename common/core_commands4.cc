@@ -1035,7 +1035,6 @@ static int matedit_move_list(vartype_list *list, int direction) {
         if (old_x == NULL)
             return ERR_INSUFFICIENT_MEMORY;
         delete_old = true;
-        old_loc = list->array->data + matedit_i;
     }
 
     if (list->size == 0 && direction != DIR_LEFT) {

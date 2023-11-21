@@ -3755,13 +3755,13 @@ void maybe_pop_indexed_matrix(const char *name, int len) {
     vartype_list *list = (vartype_list *) recall_and_purge_private_var("MAT", 3);
     if (list == NULL)
         return;
-    int newdepth = list->size - 4;
-    matedit_stack_entry *newstack = newdepth == 0 ? NULL : (matedit_stack_entry *) malloc(newdepth * sizeof(matedit_stack_entry));
-    // TODO Handle memory allocation failure
-    if (list->size == 4) {
-        // Ignoring older MAT lists. Those have only 3 elements, and do
-        // not include the directory id, and we can't reliably reconstruct
-        // what the indexed variable's directory would have been.
+    // Ignoring older MAT lists. Those have only 3 elements, and do
+    // not include the directory id, and we can't reliably reconstruct
+    // what the indexed variable's directory would have been.
+    if (list->size >= 4) {
+        int newdepth = list->size - 4;
+        matedit_stack_entry *newstack = newdepth == 0 ? NULL : (matedit_stack_entry *) malloc(newdepth * sizeof(matedit_stack_entry));
+        // TODO Handle memory allocation failure
         vartype_string *s = (vartype_string *) list->array->data[0];
         string_copy(matedit_name, &matedit_length, s->txt(), s->length);
         matedit_dir = to_int4(((vartype_real *) list->array->data[1])->x);
@@ -3776,6 +3776,11 @@ void maybe_pop_indexed_matrix(const char *name, int len) {
         for (int i = 0; i < newdepth; i++)
             matedit_stack[i].set(((vartype_real *) list->array->data[i + 4])->x);
         matedit_mode = 1;
+    } else {
+        free(matedit_stack);
+        matedit_stack = NULL;
+        matedit_stack_depth = 0;
+        matedit_mode = 0;
     }
     free_vartype((vartype *) list);
     if (rtn_level == 0)
@@ -4370,10 +4375,10 @@ void pop_rtn_addr(pgm_index *prgm, int4 *pc, bool *stop) {
     if (rtn_level == 0 ? rtn_level_0_has_matrix_entry : rtn_stack[rtn_level - 1].has_matrix()) {
         vartype_list *list = (vartype_list *) recall_and_purge_private_var("MAT", 3);
         if (list != NULL) {
+            // Ignoring older MAT lists. Those have only 3 elements, and do
+            // not include the directory id, and we can't reliably reconstruct
+            // what the indexed variable's directory would have been.
             if (list->size >= 4) {
-                // Ignoring older MAT lists. Those have only 3 elements, and do
-                // not include the directory id, and we can't reliably reconstruct
-                // what the indexed variable's directory would have been.
                 int newdepth = list->size - 4;
                 matedit_stack_entry *newstack = newdepth == 0 ? NULL : (matedit_stack_entry *) malloc(newdepth * sizeof(matedit_stack_entry));
                 // TODO: Handle memory allocation failure
@@ -4391,6 +4396,11 @@ void pop_rtn_addr(pgm_index *prgm, int4 *pc, bool *stop) {
                 for (int i = 0; i < matedit_stack_depth; i++)
                     matedit_stack[i].set(((vartype_real *) list->array->data[i + 4])->x);
                 matedit_mode = 1;
+            } else {
+                free(matedit_stack);
+                matedit_stack = NULL;
+                matedit_stack_depth = 0;
+                matedit_mode = 0;
             }
             free_vartype((vartype *) list);
         }
