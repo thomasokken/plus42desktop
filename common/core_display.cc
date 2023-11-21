@@ -3747,6 +3747,7 @@ void redisplay(int mode) {
 
     int headers = mode_message_lines;
     int footers = 0;
+    bool showing_hdr = false;
 
     if (mode_message_lines != ALL_LINES)
         for (int i = 0; i < mode_message_lines && i < disp_r; i++) {
@@ -3864,6 +3865,7 @@ void redisplay(int mode) {
     if (headers == 0 && display_header()) {
         headers = 1;
         available = disp_r - headers - footers;
+        showing_hdr = true;
     }
 
     if (available <= 0)
@@ -3912,7 +3914,42 @@ void redisplay(int mode) {
             ellipsis = 0;
             pos += seg;
         }
+    } else if ((matedit_mode & 2) != 0 && disp_r >= 4) {
+        int msg_lines = showing_hdr ? 0 : headers;
+        if (showing_hdr)
+            clear_row(0);
+        vartype *m;
+        int err = matedit_get(&m);
+        if (err != ERR_NONE)
+            goto do_run_mode;
+        int mrows;
+        switch (m->type) {
+            case TYPE_REALMATRIX: mrows = ((vartype_realmatrix *) m)->rows + 1; break;
+            case TYPE_COMPLEXMATRIX: mrows = ((vartype_complexmatrix *) m)->rows + 1; break;
+            default: /* TYPE_LIST */ mrows = ((vartype_list *) m)->size; break;
+        }
+        int xlines = disp_r - footers - mrows;
+        if (xlines <= 1)
+            xlines = disp_r >= 5 ? 2 : 1;
+        xlines = display_x(disp_r - footers - 1, xlines);
+        if (xlines + footers + mrows > disp_r) {
+            mrows = disp_r - footers - xlines;
+            if (mrows < 0) {
+                xlines += mrows;
+                mrows = 0;
+            }
+        }
+        int space = disp_r - footers - xlines;
+        for (int r = msg_lines; r < space; r++) {
+            if (r < mrows) {
+                draw_string(0, r, "Row ", 4);
+                draw_char(4, r, '0' + r);
+            } else {
+                display_level(space - r, r);
+            }
+        }
     } else {
+        do_run_mode:
         bool lastx_shown = false;
         if (mode_lastx_top) {
             int lastx_line = mode_header && disp_r >= 4 ? 1 : 0;
