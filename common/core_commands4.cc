@@ -274,18 +274,36 @@ int docmd_j_add(arg_struct *arg) {
         if (matedit_i >= list->size)
             return ERR_NONEXISTENT;
         vartype *m2 = list->array->data[matedit_i];
-        if (m2->type != TYPE_REALMATRIX && m2->type != TYPE_COMPLEXMATRIX && m2->type != TYPE_LIST)
-            return ERR_INVALID_TYPE;
-        matedit_stack_entry *newstack = (matedit_stack_entry *) realloc(matedit_stack,
-                                (matedit_stack_depth + 1) * sizeof(matedit_stack_entry));
-        if (newstack == NULL)
-            return ERR_INSUFFICIENT_MEMORY;
-        matedit_stack = newstack;
-        matedit_stack[matedit_stack_depth++].set(matedit_i, -1);
-        matedit_i = matedit_j = 0;
-        matedit_is_list = m2->type == TYPE_LIST;
-        flags.f.matrix_edge_wrap = 0;
-        flags.f.matrix_end_wrap = 0;
+        if (m2->type != TYPE_REALMATRIX && m2->type != TYPE_COMPLEXMATRIX && m2->type != TYPE_LIST) {
+            if (matedit_i == list->size - 1 && flags.f.grow) {
+                if (!disentangle((vartype *) list))
+                    return ERR_INSUFFICIENT_MEMORY;
+                int4 newsize = list->size + 1;
+                vartype **newdata = (vartype **) realloc(list->array->data, newsize * sizeof(vartype *));
+                if (newdata == NULL)
+                    return ERR_INSUFFICIENT_MEMORY;
+                list->array->data = newdata;
+                vartype *zero = new_real(0);
+                if (zero == NULL)
+                    return ERR_INSUFFICIENT_MEMORY;
+                list->array->data[list->size++] = zero;
+                matedit_i++;
+                flags.f.matrix_edge_wrap = 1;
+                flags.f.matrix_end_wrap = 1;
+            } else
+                return ERR_INVALID_TYPE;
+        } else {
+            matedit_stack_entry *newstack = (matedit_stack_entry *) realloc(matedit_stack,
+                                    (matedit_stack_depth + 1) * sizeof(matedit_stack_entry));
+            if (newstack == NULL)
+                return ERR_INSUFFICIENT_MEMORY;
+            matedit_stack = newstack;
+            matedit_stack[matedit_stack_depth++].set(matedit_i, -1);
+            matedit_i = matedit_j = 0;
+            matedit_is_list = m2->type == TYPE_LIST;
+            flags.f.matrix_edge_wrap = 0;
+            flags.f.matrix_end_wrap = 0;
+        }
     } else if (++matedit_j >= columns) {
         flags.f.matrix_edge_wrap = 1;
         matedit_j = 0;
@@ -994,10 +1012,11 @@ int docmd_x_swap(arg_struct *arg) {
 #define DIR_DOWN  3
 
 static int matedit_move_list(vartype_list *list, int direction) {
-    vartype **old_loc = NULL;
     vartype *old_x = NULL;
     vartype *new_x = NULL;
+    bool delete_old = false;
     int4 new_i = matedit_i;
+    bool edge_flag = false;
     bool end_flag = false;
 
     if (direction == DIR_LEFT && matedit_stack_depth == 0) {
@@ -1015,10 +1034,13 @@ static int matedit_move_list(vartype_list *list, int direction) {
         old_x = dup_vartype(stack[sp]);
         if (old_x == NULL)
             return ERR_INSUFFICIENT_MEMORY;
+        delete_old = true;
         old_loc = list->array->data + matedit_i;
     }
 
     if (list->size == 0 && direction != DIR_LEFT) {
+        if (direction == DIR_RIGHT && flags.f.grow)
+            goto grow;
         if (!program_running())
             squeak();
         new_i = 0;
@@ -1059,7 +1081,8 @@ static int matedit_move_list(vartype_list *list, int direction) {
             goto nomem;
         }
     } else { // DIR_RIGHT
-        vartype *m = new_x != NULL ? new_x : list->array->data[matedit_i];
+        vartype *m;
+        m = new_x != NULL ? new_x : list->array->data[matedit_i];
         if (m->type == TYPE_REALMATRIX || m->type == TYPE_COMPLEXMATRIX || m->type == TYPE_LIST) {
             matedit_stack_entry *newstack = (matedit_stack_entry *) realloc(matedit_stack,
                                 (matedit_stack_depth + 1) * sizeof(matedit_stack_entry));
@@ -1095,13 +1118,36 @@ static int matedit_move_list(vartype_list *list, int direction) {
                     goto nomem;
             }
             matedit_stack[matedit_stack_depth++].set(matedit_i, -1);
+        } else if (matedit_i == list->size - 1 && flags.f.grow) {
+            grow:
+            vartype *zero1 = new_real(0);
+            vartype *zero2 = new_real(0);
+            if (zero1 == NULL || zero2 == NULL) {
+                nomem2:
+                free_vartype(zero1);
+                free_vartype(zero2);
+                goto nomem;
+            }
+            if (!disentangle((vartype *) list))
+                goto nomem2;
+            int4 newsize = list->size + 1;
+            vartype **newdata = (vartype **) realloc(list->array->data, newsize * sizeof(vartype *));
+            if (newdata == NULL)
+                goto nomem2;
+            newdata[list->size] = zero1;
+            list->array->data = newdata;
+            new_i = list->size++;
+            new_x = zero2;
+            edge_flag = true;
+            end_flag = true;
         } else {
             if (!program_running())
                 squeak();
         }
     }
 
-    if (old_x != NULL) {
+    if (delete_old) {
+        vartype **old_loc = list->array->data + matedit_i;
         free_vartype(*old_loc);
         *old_loc = old_x;
     }
@@ -1115,7 +1161,7 @@ static int matedit_move_list(vartype_list *list, int direction) {
     }
 
     matedit_i = new_i;
-    flags.f.matrix_edge_wrap = false;
+    flags.f.matrix_edge_wrap = edge_flag;
     flags.f.matrix_end_wrap = end_flag;
     mode_disable_stack_lift = true;
 
