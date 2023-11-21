@@ -1002,7 +1002,7 @@ vartype *matedit_x;
 int4 matedit_i;
 int4 matedit_j;
 int matedit_prev_appmenu;
-int4 *matedit_stack = NULL;
+matedit_stack_entry *matedit_stack = NULL;
 int matedit_stack_depth = 0;
 bool matedit_is_list;
 
@@ -1086,9 +1086,10 @@ bool no_keystrokes_yet;
  * Version 32: 1.1    FSTACK replacing FDEPTH/FLASTX; requires eqn reparse
  * Version 33: 1.1    Matrix editor nested lists
  * Version 34: 1.1    No more redundant FUNC 01 and LNSTK in generated code
- * Version 35: 1.1    FSTART
+ * Version 35: 1.1    FSTART; requires eqn reparse
+ * Version 36: 1.1    Matrix editor full screen: save offsets
  */
-#define PLUS42_VERSION 35
+#define PLUS42_VERSION 36
 
 
 /*******************/
@@ -3728,7 +3729,7 @@ int push_indexed_matrix() {
     list->array->data[2] = new_real(matedit_i);
     list->array->data[3] = new_real(matedit_is_list ? -1 : matedit_j);
     for (int i = 0; i < matedit_stack_depth; i++)
-        list->array->data[4 + i] = new_real(matedit_stack[i]);
+        list->array->data[4 + i] = new_real(matedit_stack[i].as_phloat());
     for (int i = 0; i < 4 + matedit_stack_depth; i++)
         if (list->array->data[i] == NULL) {
             free_vartype((vartype *) list);
@@ -3755,7 +3756,7 @@ void maybe_pop_indexed_matrix(const char *name, int len) {
     if (list == NULL)
         return;
     int newdepth = list->size - 4;
-    int4 *newstack = newdepth == 0 ? NULL : (int4 *) malloc(newdepth * sizeof(int4));
+    matedit_stack_entry *newstack = newdepth == 0 ? NULL : (matedit_stack_entry *) malloc(newdepth * sizeof(matedit_stack_entry));
     // TODO Handle memory allocation failure
     if (list->size == 4) {
         // Ignoring older MAT lists. Those have only 3 elements, and do
@@ -3773,7 +3774,7 @@ void maybe_pop_indexed_matrix(const char *name, int len) {
         free(matedit_stack);
         matedit_stack = newstack;
         for (int i = 0; i < newdepth; i++)
-            matedit_stack[i] = to_int4(((vartype_real *) list->array->data[i + 4])->x);
+            matedit_stack[i].set(((vartype_real *) list->array->data[i + 4])->x);
         matedit_mode = 1;
     }
     free_vartype((vartype *) list);
@@ -4374,7 +4375,7 @@ void pop_rtn_addr(pgm_index *prgm, int4 *pc, bool *stop) {
                 // not include the directory id, and we can't reliably reconstruct
                 // what the indexed variable's directory would have been.
                 int newdepth = list->size - 4;
-                int4 *newstack = newdepth == 0 ? NULL : (int4 *) malloc(newdepth * sizeof(vartype *));
+                matedit_stack_entry *newstack = newdepth == 0 ? NULL : (matedit_stack_entry *) malloc(newdepth * sizeof(matedit_stack_entry));
                 // TODO: Handle memory allocation failure
                 vartype_string *s = (vartype_string *) list->array->data[0];
                 string_copy(matedit_name, &matedit_length, s->txt(), s->length);
@@ -4388,7 +4389,7 @@ void pop_rtn_addr(pgm_index *prgm, int4 *pc, bool *stop) {
                 free(matedit_stack);
                 matedit_stack = newstack;
                 for (int i = 0; i < matedit_stack_depth; i++)
-                    matedit_stack[i] = to_int4(((vartype_real *) list->array->data[i + 4])->x);
+                    matedit_stack[i].set(((vartype_real *) list->array->data[i + 4])->x);
                 matedit_mode = 1;
             }
             free_vartype((vartype *) list);
@@ -4979,17 +4980,31 @@ static bool load_state2(bool *clear, bool *too_new) {
         if (matedit_stack_depth == 0) {
             matedit_stack = NULL;
         } else {
-            matedit_stack = (int4 *) malloc(matedit_stack_depth * sizeof(int4));
+            matedit_stack = (matedit_stack_entry *) malloc(matedit_stack_depth * sizeof(matedit_stack_entry));
             if (matedit_stack == NULL) {
                 matedit_stack_depth = 0;
                 return false;
             }
-            for (int i = 0; i < matedit_stack_depth; i++)
-                if (!read_int4(matedit_stack + i)) {
-                    free(matedit_stack);
-                    matedit_stack = NULL;
-                    matedit_stack_depth = 0;
-                    return false;
+            if (false) {
+                nomem:
+                free(matedit_stack);
+                matedit_stack = NULL;
+                matedit_stack_depth = 0;
+                return false;
+            }
+            if (ver < 36)
+                for (int i = 0; i < matedit_stack_depth; i++) {
+                    int4 coord;
+                    if (!read_int4(&coord))
+                        goto nomem;
+                    matedit_stack[i].set(coord, -1);
+                }
+            else
+                for (int i = 0; i < matedit_stack_depth; i++) {
+                    int8 combined;
+                    if (!read_int8(&combined))
+                        goto nomem;
+                    matedit_stack[i].set(combined);
                 }
         }
         if (!read_bool(&matedit_is_list)) return false;
@@ -5140,7 +5155,7 @@ static void save_state2(bool *success) {
     if (!write_int(matedit_prev_appmenu)) return;
     if (!write_int(matedit_stack_depth)) return;
     for (int i = 0; i < matedit_stack_depth; i++)
-        if (!write_int4(matedit_stack[i])) return;
+        if (!write_int8(matedit_stack[i].as_int8())) return;
     if (!write_bool(matedit_is_list)) return;
 
     if (fwrite(input_name, 1, 11, gfile) != 11) return;

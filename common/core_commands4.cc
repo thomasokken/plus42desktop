@@ -276,11 +276,12 @@ int docmd_j_add(arg_struct *arg) {
         vartype *m2 = list->array->data[matedit_i];
         if (m2->type != TYPE_REALMATRIX && m2->type != TYPE_COMPLEXMATRIX && m2->type != TYPE_LIST)
             return ERR_INVALID_TYPE;
-        int4 *newstack = (int4 *) realloc(matedit_stack, (matedit_stack_depth + 1) * sizeof(int4));
+        matedit_stack_entry *newstack = (matedit_stack_entry *) realloc(matedit_stack,
+                                (matedit_stack_depth + 1) * sizeof(matedit_stack_entry));
         if (newstack == NULL)
             return ERR_INSUFFICIENT_MEMORY;
         matedit_stack = newstack;
-        matedit_stack[matedit_stack_depth++] = matedit_i;
+        matedit_stack[matedit_stack_depth++].set(matedit_i, -1);
         matedit_i = matedit_j = 0;
         matedit_is_list = m2->type == TYPE_LIST;
         flags.f.matrix_edge_wrap = 0;
@@ -320,8 +321,8 @@ int docmd_j_sub(arg_struct *arg) {
     if (m->type == TYPE_LIST) {
         if (matedit_stack_depth > 0) {
             // Range check?
-            matedit_i = matedit_stack[--matedit_stack_depth];
-            matedit_stack = (int4 *) realloc(matedit_stack, matedit_stack_depth * sizeof(int4));
+            matedit_i = matedit_stack[--matedit_stack_depth].coord;
+            matedit_stack = (matedit_stack_entry *) realloc(matedit_stack, matedit_stack_depth * sizeof(matedit_stack_entry));
             matedit_j = 0;
             matedit_is_list = true;
         }
@@ -1043,7 +1044,7 @@ static int matedit_move_list(vartype_list *list, int direction) {
             }
         }
     } else if (direction == DIR_LEFT) {
-        new_i = matedit_stack[--matedit_stack_depth];
+        new_i = matedit_stack[--matedit_stack_depth].coord;
         vartype *m;
         // Ignoring error; can't fail, because us getting here means
         // that the matedit_get() in the caller succeeded, and that
@@ -1060,7 +1061,8 @@ static int matedit_move_list(vartype_list *list, int direction) {
     } else { // DIR_RIGHT
         vartype *m = new_x != NULL ? new_x : list->array->data[matedit_i];
         if (m->type == TYPE_REALMATRIX || m->type == TYPE_COMPLEXMATRIX || m->type == TYPE_LIST) {
-            int4 *newstack = (int4 *) realloc(matedit_stack, (matedit_stack_depth + 1) * sizeof(int4));
+            matedit_stack_entry *newstack = (matedit_stack_entry *) realloc(matedit_stack,
+                                (matedit_stack_depth + 1) * sizeof(matedit_stack_entry));
             if (newstack == NULL)
                 goto nomem;
             matedit_stack = newstack;
@@ -1092,7 +1094,7 @@ static int matedit_move_list(vartype_list *list, int direction) {
                 if (new_x == NULL)
                     goto nomem;
             }
-            matedit_stack[matedit_stack_depth++] = matedit_i;
+            matedit_stack[matedit_stack_depth++].set(matedit_i, -1);
         } else {
             if (!program_running())
                 squeak();

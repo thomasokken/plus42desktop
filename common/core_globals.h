@@ -590,7 +590,35 @@ extern vartype *matedit_x;
 extern int4 matedit_i;
 extern int4 matedit_j;
 extern int matedit_prev_appmenu;
-extern int4 *matedit_stack;
+
+struct matedit_stack_entry {
+    int4 coord;
+    int4 anchor;
+    void set(int4 coord, int4 anchor) {
+        this->coord = coord;
+        this->anchor = anchor;
+    }
+    void set(int8 combined) {
+        coord = (int4) combined;
+        anchor = (int4) (combined >> 32);
+    }
+    int8 as_int8() {
+        return coord & 0x0ffffffffLL | (((int8) anchor) << 32);
+    }
+    void set(phloat combined) {
+        int8 c = to_int8(combined);
+        coord = (int4) c;
+        int2 offset = (int2) (c >> 32);
+        anchor = coord + offset;
+    }
+    phloat as_phloat() {
+        int4 offset = anchor - coord;
+        int8 combined = coord & 0x0ffffffffLL | ((offset & 0x0ffffLL) << 32);
+        return phloat(combined);
+    }
+};
+
+extern matedit_stack_entry *matedit_stack;
 extern int matedit_stack_depth;
 extern bool matedit_is_list;
 

@@ -2281,11 +2281,11 @@ int matedit_get(vartype **res) {
             goto bad_matrix;
         }
         vartype_list *list = (vartype_list *) m;
-        if (matedit_stack[i] >= list->size) {
+        if (matedit_stack[i].coord >= list->size) {
             err = ERR_INVALID_DATA;
             goto bad_matrix;
         }
-        m = list->array->data[matedit_stack[i]];
+        m = list->array->data[matedit_stack[i].coord];
     }
 
     if (m->type != TYPE_REALMATRIX && m->type != TYPE_COMPLEXMATRIX && m->type != TYPE_LIST) {

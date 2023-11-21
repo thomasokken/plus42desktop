@@ -2081,7 +2081,7 @@ static int display_x(int row, int lines_available) {
         if (matedit_mode == 2 || matedit_mode == 3) {
             int len;
             for (int i = 0; i < matedit_stack_depth; i++) {
-                len = int2string(matedit_stack[i] + 1, buf, 100);
+                len = int2string(matedit_stack[i].coord + 1, buf, 100);
                 line += std::string(buf, len);
                 line += '.';
             }
