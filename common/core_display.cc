@@ -3915,6 +3915,7 @@ void redisplay(int mode) {
             pos += seg;
         }
     } else if ((matedit_mode & 2) != 0 && disp_r >= 4) {
+        /* Figure out how to allocate screen space */
         int msg_lines = showing_hdr ? 0 : headers;
         if (showing_hdr)
             clear_row(0);
@@ -3940,14 +3941,66 @@ void redisplay(int mode) {
             }
         }
         int space = disp_r - footers - xlines;
-        for (int r = msg_lines; r < space; r++) {
-            if (r < mrows) {
+        if (mrows > space)
+            mrows = space;
+
+        char *buf = (char *) malloc(disp_c);
+        if (buf == NULL)
+            goto do_run_mode;
+        freer f(buf);
+
+        if (m->type == TYPE_LIST) {
+            /* Draw list segment */
+            vartype_list *list = (vartype_list *) m;
+            if (matedit_view_i == -1)
+                matedit_view_i = matedit_i - mrows / 2;
+            else if (matedit_i < matedit_view_i)
+                matedit_view_i = matedit_i;
+            else if (matedit_i >= matedit_view_i + mrows)
+                matedit_view_i = matedit_i - mrows + 1;
+            if (matedit_view_i < 0)
+                matedit_view_i = 0;
+            else if (matedit_view_i + mrows >= list->size)
+                matedit_view_i = list->size - mrows - 1;
+
+            int digits = to_int(log10(matedit_view_i + mrows)) + 1;
+            for (int r = msg_lines; r < mrows; r++) {
+                int rn = r + matedit_view_i + 1;
+                int d = to_int(log10(rn)) + 1;
+                int bufptr = 0;
+                for (int sp = digits - d; sp > 0; sp--)
+                    char2buf(buf, disp_c, &bufptr, ' ');
+                bufptr += int2string(rn, buf + bufptr, disp_c - bufptr);
+                rn--;
+                char2buf(buf, disp_c, &bufptr, rn == matedit_i ? 6 : ' ');
+                bufptr += vartype2string(list->array->data[rn], buf + bufptr, disp_c - bufptr);
+                draw_string(0, r, buf, bufptr);
+            }
+        } else {
+            /* Draw matrix segment */
+            vartype_realmatrix *rm;
+            vartype_complexmatrix *cm;
+            int4 rows, columns;
+            if (m->type == TYPE_REALMATRIX) {
+                rm = (vartype_realmatrix *) m;
+                cm = NULL;
+                rows = rm->rows;
+                columns = rm->columns;
+            } else {
+                rm = NULL;
+                cm = (vartype_complexmatrix *) m;
+                rows = cm->rows;
+                columns = cm->columns;
+            }
+            for (int r = msg_lines; r < mrows; r++) {
                 draw_string(0, r, "Row ", 4);
                 draw_char(4, r, '0' + r);
-            } else {
-                display_level(space - r, r);
             }
         }
+
+        /* Draw stack */
+        for (int r = mrows; r < space; r++)
+            display_level(space - r, r);
     } else {
         do_run_mode:
         bool lastx_shown = false;
