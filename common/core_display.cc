@@ -3728,6 +3728,54 @@ bool display_header() {
     return true;
 }
 
+static int column_width(vartype *m, int4 imin, int4 imax, int4 j) {
+    int pixel_width = 0;
+    vartype_realmatrix *rm;
+    vartype_complexmatrix *cm;
+    int width;
+    char buf[100], *b;
+    int4 slen;
+    if (m->type == TYPE_REALMATRIX) {
+        rm = (vartype_realmatrix *) m;
+        cm = NULL;
+        width = rm->columns;
+    } else {
+        rm = NULL;
+        cm = (vartype_complexmatrix *) m;
+        width = cm->columns;
+    }
+    int4 n = imin * width + j;
+    for (int i = imin; i <= imax; i++) {
+        int sw;
+        if (m->type == TYPE_REALMATRIX) {
+            if (rm->array->is_string[n] == 0) {
+                vartype_real r;
+                r.type = TYPE_REAL;
+                r.x = rm->array->data[n];
+                slen = vartype2string((vartype *) &r, buf, 100);
+                b = buf;
+                sw = 0;
+            } else {
+                get_matrix_string(rm, n, &b, &slen);
+                sw = small_string_width("\"\"", 2);
+            }
+        } else {
+            vartype_complex c;
+            c.type = TYPE_COMPLEX;
+            c.re = cm->array->data[2 * n];
+            c.im = cm->array->data[2 * n + 1];
+            slen = vartype2string((vartype *) &c, buf, 100);
+            b = buf;
+            sw = 0;
+        }
+        sw += small_string_width(b, slen);
+        if (sw > pixel_width)
+            pixel_width = sw;
+        n += width;
+    }
+    return pixel_width;
+}
+
 void redisplay(int mode) {
     if (eqn_draw())
         return;
