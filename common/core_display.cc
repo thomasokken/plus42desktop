@@ -3960,8 +3960,8 @@ void redisplay(int mode) {
                 matedit_view_i = matedit_i - mrows + 1;
             if (matedit_view_i < 0)
                 matedit_view_i = 0;
-            else if (matedit_view_i + mrows >= list->size)
-                matedit_view_i = list->size - mrows - 1;
+            else if (matedit_view_i + mrows > list->size)
+                matedit_view_i = list->size - mrows;
 
             int digits = to_int(log10(matedit_view_i + mrows)) + 1;
             for (int r = msg_lines; r < mrows; r++) {
