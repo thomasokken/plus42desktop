@@ -4062,14 +4062,48 @@ void redisplay(int mode) {
             else if (matedit_view_i + mrows1 > rows)
                 matedit_view_i = rows - mrows1;
 
-            int header_width = 4 * (to_int(log10(matedit_view_i + mrows1)) + 1) + 1;
-            int avail = disp_w - header_width;
-            avail -= column_width(m, matedit_view_i, matedit_view_i + mrows1 - 1, matedit_j);
-            // Now work out the widths of the columns to the left of matedit_j,
-            // until matedit_view_j; if we run out of space, adjust matedit_view_j.
-            // Next, check how many columns we can add to the right of matedit_j.
-            // If we reach the right edge before having used up all available
-            // space, add columns on the left until either full or left edge reached.
+            try {
+                std::vector<int> widths;
+                int header_width = 4 * (to_int(log10(matedit_view_i + mrows1)) + 1) + 1;
+                int avail = disp_w - header_width;
+                int w = column_width(m, matedit_view_i, matedit_view_i + mrows1 - 1, matedit_j);
+                avail -= w;
+                widths.push_back(w);
+
+                if (matedit_view_j == -1 || matedit_j < matedit_view_j)
+                    matedit_view_j = matedit_j;
+                int4 min_j = matedit_j;
+                int4 imin = matedit_view_i;
+                int4 imax = matedit_view_i + mrows1 - 1;
+
+                while (min_j > matedit_view_j) {
+                    w = column_width(m, imin, imax, min_j - 1) + 3;
+                    if (avail < w)
+                        break;
+                    widths.insert(widths.begin(), w);
+                    avail -= w;
+                    min_j--;
+                }
+                int4 max_j = matedit_j;
+                while (max_j < columns - 1) {
+                    w = column_width(m, imin, imax, max_j + 1) + 3;
+                    if (avail < w)
+                        break;
+                    widths.push_back(w);
+                    avail -= w;
+                    max_j++;
+                }
+                while (min_j > 0) {
+                    w = column_width(m, imin, imax, min_j - 1) + 3;
+                    if (avail < w)
+                        break;
+                    widths.insert(widths.begin(), w);
+                    avail -= w;
+                    min_j--;
+                }
+            } catch (std::bad_alloc &) {
+                goto do_run_mode;
+            }
 
             if (msg_lines == 0) {
                 draw_string(0, 0, "Header", 6);
