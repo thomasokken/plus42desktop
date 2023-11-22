@@ -3729,20 +3729,26 @@ bool display_header() {
 }
 
 static int column_width(vartype *m, int4 imin, int4 imax, int4 j) {
-    int pixel_width = 0;
+    int pixel_width, max_width;
     vartype_realmatrix *rm;
     vartype_complexmatrix *cm;
     int width;
     char buf[100], *b;
     int4 slen;
+
+    /* Make sure to set aside at least enough width for the column label */
+    pixel_width = to_int(log10(j + 1)) * 4 + 3;
+
     if (m->type == TYPE_REALMATRIX) {
         rm = (vartype_realmatrix *) m;
         cm = NULL;
         width = rm->columns;
+        max_width = 41;
     } else {
         rm = NULL;
         cm = (vartype_complexmatrix *) m;
         width = cm->columns;
+        max_width = 83 + (flags.f.polar ? 10 : 6);
     }
     int4 n = imin * width + j;
     for (int i = imin; i <= imax; i++) {
@@ -3769,8 +3775,11 @@ static int column_width(vartype *m, int4 imin, int4 imax, int4 j) {
             sw = 0;
         }
         sw += small_string_width(b, slen);
-        if (sw > pixel_width)
+        if (sw > pixel_width) {
             pixel_width = sw;
+            if (pixel_width > max_width)
+                return max_width;
+        }
         n += width;
     }
     return pixel_width;
@@ -4052,6 +4061,15 @@ void redisplay(int mode) {
                 matedit_view_i = 0;
             else if (matedit_view_i + mrows1 > rows)
                 matedit_view_i = rows - mrows1;
+
+            int header_width = 4 * (to_int(log10(matedit_view_i + mrows1)) + 1) + 1;
+            int avail = disp_w - header_width;
+            avail -= column_width(m, matedit_view_i, matedit_view_i + mrows1 - 1, matedit_j);
+            // Now work out the widths of the columns to the left of matedit_j,
+            // until matedit_view_j; if we run out of space, adjust matedit_view_j.
+            // Next, check how many columns we can add to the right of matedit_j.
+            // If we reach the right edge before having used up all available
+            // space, add columns on the left until either full or left edge reached.
 
             if (msg_lines == 0) {
                 draw_string(0, 0, "Header", 6);
