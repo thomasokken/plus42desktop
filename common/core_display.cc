@@ -3992,9 +3992,27 @@ void redisplay(int mode) {
                 rows = cm->rows;
                 columns = cm->columns;
             }
+            int mrows1 = mrows - 1; // need 1 line for header
+
+            if (matedit_view_i == -1)
+                matedit_view_i = matedit_i - mrows1 / 2;
+            else if (matedit_i < matedit_view_i)
+                matedit_view_i = matedit_i;
+            else if (matedit_i >= matedit_view_i + mrows1)
+                matedit_view_i = matedit_i - mrows1 + 1;
+            if (matedit_view_i < 0)
+                matedit_view_i = 0;
+            else if (matedit_view_i + mrows1 > rows)
+                matedit_view_i = rows - mrows1;
+
+            if (msg_lines == 0) {
+                draw_string(0, 0, "Header", 6);
+                msg_lines = 1;
+            }
             for (int r = msg_lines; r < mrows; r++) {
+                int rn = r + matedit_view_i;
                 draw_string(0, r, "Row ", 4);
-                draw_char(4, r, '0' + r);
+                draw_char(4, r, '0' + rn);
             }
         }
 
