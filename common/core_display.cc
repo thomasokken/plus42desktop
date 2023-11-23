@@ -4120,7 +4120,6 @@ void redisplay(int mode) {
                 /* Columns */
                 int h = header_width;
                 int4 j = min_j;
-                // TODO: Take msg_lines into account!!!
                 for (std::vector<int>::iterator iter = widths.begin(); iter < widths.end(); iter++) {
                     int cw = *iter;
                     if (msg_lines == 0) {
@@ -4132,8 +4131,48 @@ void redisplay(int mode) {
                     for (int i = 8 * (msg_lines == 0 ? 1 : msg_lines); i < mrows * 8; i += 2)
                         draw_pixel(h + cw - 1, i);
                     for (int i = msg_lines == 0 ? 1 : msg_lines; i < mrows; i++) {
-                        // TODO
-                        draw_small_string(h + 1, i * 8 - 2, "0", 1, cw - 3);
+                        int4 n = (matedit_view_i + i - 1) * columns + j;
+                        if (m->type == TYPE_REALMATRIX) {
+                            if (rm->array->is_string[n] == 0) {
+                                vartype_real r;
+                                r.type = TYPE_REAL;
+                                r.x = rm->array->data[n];
+                                char numbuf[50];
+                                int numlen = vartype2string((vartype *) &r, numbuf, 50);
+                                if (small_string_width(numbuf, numlen) + 3 > cw) {
+                                    char saved_disp[6];
+                                    memcpy(saved_disp, flags.farray + 36, 6);
+                                    memcpy(flags.farray + 36, "\0\0\1\0\0\1", 6); // ENG 02
+                                    numlen = vartype2string((vartype *) &r, numbuf, 50);
+                                    memcpy(flags.farray + 36, saved_disp, 6);
+                                }
+                                draw_small_string(h + 1, i * 8 - 2, numbuf, numlen, cw - 3, true);
+                            } else {
+                                char *txt;
+                                int4 len;
+                                get_matrix_string(rm, n, &txt, &len);
+                                std::string s("\"");
+                                s += std::string(txt, len);
+                                s += "\"";
+                                draw_small_string(h + 1, i * 8 - 2, s.c_str(), len + 2, cw - 3);
+                            }
+                        } else {
+                            vartype_complex c;
+                            c.type = TYPE_COMPLEX;
+                            c.re = cm->array->data[2 * n];
+                            c.im = cm->array->data[2 * n + 1];
+                            char numbuf[100];
+                            int numlen = vartype2string((vartype *) &c, numbuf, 100);
+                            if (small_string_width(numbuf, numlen) + 3 > cw) {
+                                char saved_disp[6];
+                                memcpy(saved_disp, flags.farray + 36, 6);
+                                memcpy(flags.farray + 36, "\0\0\1\0\0\1", 6); // ENG 02
+                                numlen = vartype2string((vartype *) &c, numbuf, 100);
+                                memcpy(flags.farray + 36, saved_disp, 6);
+                            }
+                            draw_small_string(h + 1, i * 8 - 2, numbuf, numlen, cw - 3, true);
+                        }
+                        // TODO: Draw solid lines around current cell
                     }
                     h += cw;
                     j++;
