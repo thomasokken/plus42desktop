@@ -50,7 +50,9 @@ void draw_string(int x, int y, const char *s, int length);
 void draw_message(int y, const char *s, int length, bool flush = true);
 void clear_message();
 void fill_rect(int x, int y, int width, int height, int color);
-int draw_small_string(int x, int y, const char *s, int length, int max_width, bool right_align = false, bool left_trunc = false);
+int draw_small_string(int x, int y, const char *s, int length, int max_width,
+                            bool right_align = false, bool left_trunc = false,
+                            bool reverse = false);
 int small_string_width(const char *s, int length);
 void draw_key(int n, int highlight, int hide_meta,
                             const char *s, int length, bool reverse = false);
