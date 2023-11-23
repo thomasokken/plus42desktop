@@ -4172,7 +4172,20 @@ void redisplay(int mode) {
                             }
                             draw_small_string(h + 1, i * 8 - 2, numbuf, numlen, cw - 3, true);
                         }
-                        // TODO: Draw solid lines around current cell
+                        /* Draw solid lines around current cell */
+                        if (matedit_view_i + i - 1 == matedit_i && j == matedit_j) {
+                            int x1 = h - 1;
+                            int x2 = h + cw - 1;
+                            int y1 = i * 8 - 2;
+                            int y2 = i * 8 + 6;
+                            if (i == msg_lines)
+                                y1 += 2;
+                            else
+                                draw_line(x1, y1, x2, y1);
+                            draw_line(x2, y1, x2, y2);
+                            draw_line(x2, y2, x1, y2);
+                            draw_line(x1, y2, x1, y1);
+                        }
                     }
                     h += cw;
                     j++;
