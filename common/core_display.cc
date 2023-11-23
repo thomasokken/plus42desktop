@@ -4106,14 +4106,14 @@ void redisplay(int mode) {
                 }
 
                 /* Row headers & horizontal lines */
-                // TODO: Skip if msg_lines == 0!!!
-                for (int i = 0; i < mrows1; i++) {
-                    int v = i * 8 + 7;
-                    fill_rect(0, v, header_width, 7, 1);
+                for (int i = msg_lines == 0 ? 1 : msg_lines; i < mrows; i++) {
+                    int v = i * 8 - 1;
+                    int off = i == msg_lines;
+                    fill_rect(0, v + off, header_width, 7 - off, 1);
                     char numbuf[10];
-                    int numlen = int2string(matedit_view_i + i + 1, numbuf, 10);
+                    int numlen = int2string(matedit_view_i + i, numbuf, 10);
                     draw_small_string(1, v - 1, numbuf, numlen, header_width - 2, true, false, true);
-                    for (int j = header_width; j < disp_w - avail; j += 2)
+                    for (int j = header_width + 1; j < disp_w - avail; j += 2)
                         draw_pixel(j, v + 7);
                 }
                 
@@ -4123,30 +4123,24 @@ void redisplay(int mode) {
                 // TODO: Take msg_lines into account!!!
                 for (std::vector<int>::iterator iter = widths.begin(); iter < widths.end(); iter++) {
                     int cw = *iter;
-                    fill_rect(h, 0, cw - 1, 7, 1);
-                    char numbuf[10];
-                    int numlen = int2string(j + 1, numbuf, 10);
-                    draw_small_string(h + 1, -1, numbuf, numlen, cw - 3, true, false, true);
-                    for (int i = 8; i < mrows * 8; i += 2)
+                    if (msg_lines == 0) {
+                        fill_rect(h, 0, cw - 1, 7, 1);
+                        char numbuf[10];
+                        int numlen = int2string(j + 1, numbuf, 10);
+                        draw_small_string(h + 1, -1, numbuf, numlen, cw - 3, true, false, true);
+                    }
+                    for (int i = 8 * (msg_lines == 0 ? 1 : msg_lines); i < mrows * 8; i += 2)
                         draw_pixel(h + cw - 1, i);
+                    for (int i = msg_lines == 0 ? 1 : msg_lines; i < mrows; i++) {
+                        // TODO
+                        draw_small_string(h + 1, i * 8 - 2, "0", 1, cw - 3);
+                    }
                     h += cw;
                     j++;
                 }
             } catch (std::bad_alloc &) {
                 goto do_run_mode;
             }
-
-            /*
-            if (msg_lines == 0) {
-                draw_string(0, 0, "Header", 6);
-                msg_lines = 1;
-            }
-            for (int r = msg_lines; r < mrows; r++) {
-                int rn = r + matedit_view_i;
-                draw_string(0, r, "Row ", 4);
-                draw_char(4, r, '0' + rn);
-            }
-            */
         }
 
         /* Draw stack */
