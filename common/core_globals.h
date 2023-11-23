@@ -494,6 +494,7 @@ extern bool mode_lastx_top;
 extern bool mode_alpha_top;
 extern bool mode_header_flags;
 extern bool mode_header_polar;
+extern bool mode_matedit_stk;
 
 extern phloat entered_number;
 extern int entered_string_length;

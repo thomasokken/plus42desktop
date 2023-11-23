@@ -1026,6 +1026,11 @@ int docmd_hpolar(arg_struct *arg) {
     return ERR_NONE;
 }
 
+int docmd_stk(arg_struct *arg) {
+    mode_matedit_stk = !mode_matedit_stk;
+    return ERR_NONE;
+}
+
 int docmd_dirs(arg_struct *arg) {
     set_menu(MENULEVEL_AUX, MENU_CATALOG);
     set_cat_section_no_top(CATSECT_DIRS);

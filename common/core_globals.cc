@@ -577,7 +577,7 @@ const menu_spec menus[] = {
                       { { 0x1000 + CMD_INSR, 0, "" },
                         { 0x1000 + CMD_NULL, 0, "" },
                         { 0x1000 + CMD_DELR, 0, "" },
-                        { 0x1000 + CMD_NULL, 0, "" },
+                        { 0x2000 + CMD_STK,  0, "" },
                         { 0x2000 + CMD_WRAP, 0, "" },
                         { 0x2000 + CMD_GROW, 0, "" } } },
     { /* MENU_BASE */ MENU_NONE, MENU_NONE, MENU_NONE,
@@ -966,6 +966,7 @@ bool mode_lastx_top;
 bool mode_alpha_top;
 bool mode_header_flags;
 bool mode_header_polar;
+bool mode_matedit_stk;
 
 phloat entered_number;
 int entered_string_length;
@@ -1091,8 +1092,9 @@ bool no_keystrokes_yet;
  * Version 35: 1.1    FSTART; requires eqn reparse
  * Version 36: 1.1    Matrix editor full screen: save offsets
  * Version 37: 1.1    Matrix editor full screen: globals for offsets
+ * Version 38: 1.1    Matrix editor full screen: STK toggle
  */
-#define PLUS42_VERSION 37
+#define PLUS42_VERSION 38
 
 
 /*******************/
@@ -1996,6 +1998,8 @@ static bool persist_globals() {
         goto done;
     if (!write_bool(mode_header_polar))
         goto done;
+    if (!write_bool(mode_matedit_stk))
+        goto done;
     if (!persist_vartype(varmenu_eqn))
         goto done;
     if (!write_int(varmenu_length))
@@ -2315,6 +2319,12 @@ static bool unpersist_globals() {
     } else {
         mode_header_flags = false;
         mode_header_polar = false;
+    }
+
+    if (ver >= 38) {
+        if (!read_bool(&mode_matedit_stk)) return false;
+    } else {
+        mode_matedit_stk = false;
     }
 
     if (!unpersist_vartype(&varmenu_eqn)) {
@@ -5405,6 +5415,7 @@ void hard_reset(int reason) {
     mode_alpha_top = false;
     mode_header_flags = false;
     mode_header_polar = false;
+    mode_matedit_stk = false;
 
     reset_math();
     reset_eqn();

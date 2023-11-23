@@ -1608,6 +1608,8 @@ bool should_highlight(int cmd) {
             return mode_header_flags;
         case CMD_HPOLAR:
             return mode_header_polar;
+        case CMD_STK:
+            return mode_matedit_stk;
         case CMD_TBEGIN: {
             vartype *v = recall_var("BEGIN", 5);
             return v != NULL && v->type == TYPE_REAL && ((vartype_real *) v)->x == 1;
@@ -3974,7 +3976,7 @@ void redisplay(int mode) {
             ellipsis = 0;
             pos += seg;
         }
-    } else if ((matedit_mode & 2) != 0 && disp_r >= 4) {
+    } else if (!mode_matedit_stk && (matedit_mode & 2) != 0 && disp_r >= 4) {
         /* Figure out how to allocate screen space */
         int msg_lines = showing_hdr ? 0 : headers;
         if (showing_hdr)
