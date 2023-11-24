@@ -4106,6 +4106,7 @@ void redisplay(int mode) {
                     avail -= w;
                     min_j--;
                 }
+                matedit_view_j = min_j;
 
                 /* Row headers & horizontal lines */
                 for (int i = msg_lines == 0 ? 1 : msg_lines; i < mrows; i++) {
