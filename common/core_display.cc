@@ -3790,6 +3790,46 @@ static int column_width(vartype *m, int4 imin, int4 imax, int4 j) {
     return pixel_width;
 }
 
+static int var2str_limited(vartype *v, char *buf, int buflen, int pixel_width) {
+    char saved_disp[6];
+    memcpy(saved_disp, flags.farray + 36, 6);
+    int len;
+
+    while (true) {
+        len = vartype2string(v, buf, buflen);
+        int p = small_string_width(buf, len);
+        if (p <= pixel_width)
+            goto done;
+        int digits = ((flags.f.digits_bit3 << 1 | flags.f.digits_bit2) << 1 | flags.f.digits_bit1) << 1 | flags.f.digits_bit0;
+        if (!flags.f.fix_or_all && digits <= 2)
+            // SCI or ENG with 2 or fewer digits: should always fit,
+            // because the column width calculation caps column width
+            // at 41 pixels for a real, at 89 pixels for a rectangular
+            // complex, and at 93 pixels for a polar complex, and those
+            // are enough pixels for even the longest possible real
+            // or complex numbers in SCI or ENG notation with 2 digits.
+            // (This means we should never even get here.)
+            goto done;
+        if (flags.f.fix_or_all && flags.f.eng_or_all) {
+            // Current mode is ALL; try FIX
+            memcpy(flags.farray + 36, "\1\0\1\1\1\0", 6); // FIX 11
+        } else if (digits == 0) {
+            // FIX 00 still too large; try SCI
+            memcpy(flags.farray + 36, "\1\0\1\1\0\0", 6); // SCI 11
+        } else {
+            digits--;
+            flags.f.digits_bit3 = (digits & 8) != 0;
+            flags.f.digits_bit2 = (digits & 4) != 0;
+            flags.f.digits_bit1 = (digits & 2) != 0;
+            flags.f.digits_bit0 = digits & 1;
+        }
+    }
+
+    done:
+    memcpy(flags.farray + 36, saved_disp, 6);
+    return len;
+}
+
 void redisplay(int mode) {
     if (eqn_draw())
         return;
@@ -4142,14 +4182,7 @@ void redisplay(int mode) {
                                 r.type = TYPE_REAL;
                                 r.x = rm->array->data[n];
                                 char numbuf[50];
-                                int numlen = vartype2string((vartype *) &r, numbuf, 50);
-                                if (small_string_width(numbuf, numlen) + 3 > cw) {
-                                    char saved_disp[6];
-                                    memcpy(saved_disp, flags.farray + 36, 6);
-                                    memcpy(flags.farray + 36, "\0\0\1\0\0\1", 6); // ENG 02
-                                    numlen = vartype2string((vartype *) &r, numbuf, 50);
-                                    memcpy(flags.farray + 36, saved_disp, 6);
-                                }
+                                int numlen = var2str_limited((vartype *) &r, numbuf, 50, cw - 3);
                                 draw_small_string(h + 1, i * 8 - 2, numbuf, numlen, cw - 3, true);
                             } else {
                                 char *txt;
@@ -4166,14 +4199,7 @@ void redisplay(int mode) {
                             c.re = cm->array->data[2 * n];
                             c.im = cm->array->data[2 * n + 1];
                             char numbuf[100];
-                            int numlen = vartype2string((vartype *) &c, numbuf, 100);
-                            if (small_string_width(numbuf, numlen) + 3 > cw) {
-                                char saved_disp[6];
-                                memcpy(saved_disp, flags.farray + 36, 6);
-                                memcpy(flags.farray + 36, "\0\0\1\0\0\1", 6); // ENG 02
-                                numlen = vartype2string((vartype *) &c, numbuf, 100);
-                                memcpy(flags.farray + 36, saved_disp, 6);
-                            }
+                            int numlen = var2str_limited((vartype *) &c, numbuf, 100, cw - 3);
                             draw_small_string(h + 1, i * 8 - 2, numbuf, numlen, cw - 3, true);
                         }
                         /* Draw solid lines around current cell */
