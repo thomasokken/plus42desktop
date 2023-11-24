@@ -4129,7 +4129,8 @@ void redisplay(int mode) {
                         fill_rect(h, 0, cw - 1, 7, 1);
                         char numbuf[10];
                         int numlen = int2string(j + 1, numbuf, 10);
-                        draw_small_string(h + 1, -1, numbuf, numlen, cw - 3, true, false, true);
+                        int indent = (cw - 2 - small_string_width(numbuf, numlen)) / 2;
+                        draw_small_string(h + indent + 1, -1, numbuf, numlen, cw - indent - 3, false, false, true);
                     }
                     for (int i = 8 * (msg_lines == 0 ? 1 : msg_lines); i < mrows * 8; i += 2)
                         draw_pixel(h + cw - 1, i);
