@@ -298,7 +298,7 @@ int docmd_j_add(arg_struct *arg) {
             if (newstack == NULL)
                 return ERR_INSUFFICIENT_MEMORY;
             matedit_stack = newstack;
-            matedit_stack[matedit_stack_depth++].set(matedit_i, -1);
+            matedit_stack[matedit_stack_depth++].set(matedit_i, matedit_view_i);
             matedit_i = matedit_j = 0;
             matedit_is_list = m2->type == TYPE_LIST;
             flags.f.matrix_edge_wrap = 0;
@@ -339,7 +339,9 @@ int docmd_j_sub(arg_struct *arg) {
     if (m->type == TYPE_LIST) {
         if (matedit_stack_depth > 0) {
             // Range check?
-            matedit_i = matedit_stack[--matedit_stack_depth].coord;
+            matedit_stack_depth--;
+            matedit_i = matedit_stack[matedit_stack_depth].coord;
+            matedit_view_i = matedit_stack[matedit_stack_depth].anchor;
             matedit_stack = (matedit_stack_entry *) realloc(matedit_stack, matedit_stack_depth * sizeof(matedit_stack_entry));
             matedit_j = 0;
             matedit_is_list = true;
@@ -1016,6 +1018,7 @@ static int matedit_move_list(vartype_list *list, int direction) {
     vartype *new_x = NULL;
     bool delete_old = false;
     int4 new_i = matedit_i;
+    int4 new_view_i = matedit_view_i;
     bool edge_flag = false;
     bool end_flag = false;
 
@@ -1065,7 +1068,9 @@ static int matedit_move_list(vartype_list *list, int direction) {
             }
         }
     } else if (direction == DIR_LEFT) {
-        new_i = matedit_stack[--matedit_stack_depth].coord;
+        matedit_stack_depth--;
+        new_i = matedit_stack[matedit_stack_depth].coord;
+        new_view_i = matedit_stack[matedit_stack_depth].anchor;
         vartype *m;
         // Ignoring error; can't fail, because us getting here means
         // that the matedit_get() in the caller succeeded, and that
@@ -1116,7 +1121,7 @@ static int matedit_move_list(vartype_list *list, int direction) {
                 if (new_x == NULL)
                     goto nomem;
             }
-            matedit_stack[matedit_stack_depth++].set(matedit_i, -1);
+            matedit_stack[matedit_stack_depth++].set(matedit_i, matedit_view_i);
         } else if (matedit_i == list->size - 1 && flags.f.grow) {
             grow:
             vartype *zero1 = new_real(0);
@@ -1160,6 +1165,7 @@ static int matedit_move_list(vartype_list *list, int direction) {
     }
 
     matedit_i = new_i;
+    matedit_view_i = new_view_i;
     flags.f.matrix_edge_wrap = edge_flag;
     flags.f.matrix_end_wrap = end_flag;
     mode_disable_stack_lift = true;

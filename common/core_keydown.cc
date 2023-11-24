@@ -3565,7 +3565,9 @@ void keydown_normal_mode(int shift, int key) {
                         return;
                     }
                 }
-                matedit_i = matedit_stack[--matedit_stack_depth].coord;
+                matedit_stack_depth--;
+                matedit_i = matedit_stack[matedit_stack_depth].coord;
+                matedit_view_i = matedit_stack[matedit_stack_depth].anchor;
                 matedit_j = 0;
                 matedit_is_list = true;
                 if (sp != -1)
