@@ -639,7 +639,7 @@ const command_spec cmd_array[] =
     { /* ATOP */       docmd_atop,        "ATOP",                0x42, 0x00, 0x00, 0x00,  4, ARG_NONE,   0, NA_T },
     { /* HFLAGS */     docmd_hflags,      "HFL\301G\323",        0x42, 0x00, 0x00, 0x00,  6, ARG_NONE,   0, NA_T },
     { /* HPOLAR */     docmd_hpolar,      "HPOL\301\322",        0x42, 0x00, 0x00, 0x00,  6, ARG_NONE,   0, NA_T },
-    { /* STK */        docmd_stk,         "STK",                 0x00, 0x00, 0xa7, 0xdc,  3, ARG_NONE,   0, NA_T },
+    { /* STK */        docmd_stk,         "STK",                 0x42, 0x00, 0x00, 0x00,  3, ARG_NONE,   0, NA_T },
 
     /* Menus */
     { /* DIRS */       docmd_dirs,        "DIRS",                0x42, 0x00, 0x00, 0x00,  4, ARG_NONE,   0, NA_T },
