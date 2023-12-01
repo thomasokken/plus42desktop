@@ -157,15 +157,14 @@ int docmd_xeql(arg_struct *arg) {
             bool dummy3;
             pop_rtn_addr(&dummy1, &dummy2, &dummy3);
         } else
-            mode_caller_stack_lift_disabled = flags.f.stack_lift_disable;
+            save_csld();
         return err;
     } else {
         int err = docmd_gtol(arg);
         if (err != ERR_NONE)
             return err;
-        else
-            mode_caller_stack_lift_disabled = flags.f.stack_lift_disable;
         clear_all_rtns();
+        save_csld();
         return ERR_RUN;
     }
 }

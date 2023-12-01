@@ -1106,13 +1106,13 @@ struct rtn_stack_entry {
     int4 prgm;
     int4 pc;
     int4 get_prgm() {
-        int4 p = prgm & 0x3fffffff;
-        if ((p & 0x20000000) != 0)
-            p |= 0xc0000000;
+        int4 p = prgm & 0x1fffffff;
+        if ((p & 0x10000000) != 0)
+            p |= 0xe0000000;
         return p;
     }
     void set_prgm(int4 prgm) {
-        this->prgm = prgm & 0x3fffffff;
+        this->prgm = prgm & 0x1fffffff;
     }
     bool has_matrix() {
         return (prgm & 0x80000000) != 0;
@@ -1132,8 +1132,17 @@ struct rtn_stack_entry {
         else
             prgm &= 0xbfffffff;
     }
-    bool is_special() {
+    bool is_csld() {
         return (prgm & 0x20000000) != 0;
+    }
+    void set_csld() {
+        if (flags.f.stack_lift_disable)
+            prgm |= 0x20000000;
+        else
+            prgm &= 0xdfffffff;
+    }
+    bool is_special() {
+        return (prgm & 0x10000000) != 0;
     }
 };
 
@@ -3870,7 +3879,7 @@ int push_func_state(int n) {
     vartype_string *s = (vartype_string *) slist->array->data[1];
     s->txt()[0] = flags.f.big_stack ? '1' : '0';
     s->txt()[1] = '0';
-    s->txt()[2] = mode_caller_stack_lift_disabled && sp != -1 ? '1' : '0';
+    s->txt()[2] = sp != -1 && is_csld() ? '1' : '0';
     s->txt()[3] = flags.f.error_ignore ? '1' : '0';
     s->txt()[4] = (char) lasterr;
     if (lasterr == -1)
@@ -4497,6 +4506,20 @@ void clear_all_rtns() {
 
 int get_rtn_level() {
     return rtn_level;
+}
+
+void save_csld() {
+    if (rtn_level == 0)
+        mode_caller_stack_lift_disabled = flags.f.stack_lift_disable;
+    else
+        rtn_stack[rtn_level - 1].set_csld();
+}
+
+bool is_csld() {
+    if (rtn_level == 0)
+        return mode_caller_stack_lift_disabled;
+    else
+        return rtn_stack[rtn_level - 1].is_csld();
 }
 
 bool solve_active() {
