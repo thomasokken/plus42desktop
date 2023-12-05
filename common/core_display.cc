@@ -3749,11 +3749,15 @@ static int column_width(vartype *m, int4 imin, int4 imax, int4 j) {
         cm = NULL;
         width = rm->columns;
         max_width = 41;
+        if (!flags.f.decimal_point)
+            max_width++;
     } else {
         rm = NULL;
         cm = (vartype_complexmatrix *) m;
         width = cm->columns;
         max_width = 83 + (flags.f.polar ? 10 : 6);
+        if (!flags.f.decimal_point)
+            max_width += 2;
     }
     int4 n = imin * width + j;
     for (int i = imin; i <= imax; i++) {
