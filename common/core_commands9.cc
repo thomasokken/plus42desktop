@@ -767,7 +767,7 @@ int docmd_prall(arg_struct *arg) {
         return ERR_NONE;
     if (!flags.f.printer_exists)
         return ERR_PRINTING_IS_DISABLED;
-    shell_annunciators(-1, -1, 1, -1, -1, -1);
+    set_annunciators(-1, -1, 1, -1, -1, -1);
     print_text(NULL, 0, true);
     print_text("HOME: Dir", 9, true);
     prall_dir = root;
@@ -779,7 +779,7 @@ int docmd_prall(arg_struct *arg) {
 
 static int prall_worker(bool interrupted) {
     if (interrupted) {
-        shell_annunciators(-1, -1, 0, -1, -1, -1);
+        set_annunciators(-1, -1, 0, -1, -1, -1);
         return ERR_STOP;
     }
     char buf[100];
@@ -876,7 +876,7 @@ static int prall_worker(bool interrupted) {
     } else {
         if (prall_dir->parent == NULL) {
             done:
-            shell_annunciators(-1, -1, 0, -1, -1, -1);
+            set_annunciators(-1, -1, 0, -1, -1, -1);
             return ERR_NONE;
         } else {
             for (int i = 0; i < prall_dir->parent->children_count; i++)
@@ -2098,7 +2098,7 @@ static int tgo_worker(bool interrupted) {
     int err = ERR_STOP;
     if (interrupted) {
         done:
-        shell_annunciators(-1, -1, 0, -1, -1, -1);
+        set_annunciators(-1, -1, 0, -1, -1, -1);
         free_vartype((vartype *) tgo_rm);
         return err;
     }
@@ -2145,7 +2145,7 @@ int docmd_tgo(arg_struct *arg) {
     if (!flags.f.printer_exists)
         return ERR_PRINTING_IS_DISABLED;
 
-    shell_annunciators(-1, -1, 1, -1, -1, -1);
+    set_annunciators(-1, -1, 1, -1, -1, -1);
 
     print_text(NULL, 0, true);
     char buf[50];
@@ -2165,7 +2165,7 @@ int docmd_tgo(arg_struct *arg) {
         nomem:
         err = ERR_INSUFFICIENT_MEMORY;
         done:
-        shell_annunciators(-1, -1, 0, -1, -1, -1);
+        set_annunciators(-1, -1, 0, -1, -1, -1);
         free_vartype((vartype *) rm);
         return err;
     }

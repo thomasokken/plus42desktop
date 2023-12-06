@@ -196,7 +196,7 @@ void keydown(int shift, int key) {
                 if (gm->key == 0) {
                     // Command that's not on the standard keyboard
                     squeak();
-                    shell_annunciators(-1, -1, -1, 0, -1, -1);
+                    set_annunciators(-1, -1, -1, 0, -1, -1);
                     return;
                 } else if (gm->cmd == cmd) {
                     key = gm->key;

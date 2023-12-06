@@ -59,7 +59,7 @@ int my_remove(const char *name);
 void set_shift(bool state) {
     if (mode_shift != state) {
         mode_shift = state;
-        shell_annunciators(-1, state, -1, -1, -1, -1);
+        set_annunciators(-1, state, -1, -1, -1, -1);
     }
 }
 
@@ -72,7 +72,7 @@ int repeating_shift;
 int repeating_key;
 
 static int4 oldpc;
-static bool update_annunciators = false;
+static char ann_hold = 0; // 0 = delay; 1 = flush; 2 = normal
 bool start_eqn_cursor = false;
 int skin_flags = -1;
 bool force_redisplay = false;
@@ -142,7 +142,7 @@ void core_init(int *rows, int *cols, int read_saved_state, const char *state_fil
     *cols = requested_disp_c;
     shell_set_skin_mode(eqn_alt_keys() ? flags.f.decimal_point ? 1 : 2 : 0);
 
-    update_annunciators = true;
+    ann_hold = 1;
 }
 
 void core_save_state(const char *state_file_name) {
@@ -187,8 +187,13 @@ void core_cleanup() {
     clean_vartype_pools();
 }
 
+void set_annunciators(int updn, int shf, int prt, int run, int g, int rad) {
+    if (ann_hold == 2)
+        shell_annunciators(updn, shf, prt, run, g, rad);
+}
+
 void core_repaint_display(int rows, int cols, int sflags) {
-    if (update_annunciators) {
+    if (ann_hold == 1) {
         /* This used to be at the end of core_init(), but now that we're
          * calling that function before loading the skin, the initial
          * annunciator update has to be delayed.
@@ -199,7 +204,7 @@ void core_repaint_display(int rows, int cols, int sflags) {
                            mode_running,
                            !flags.f.rad && flags.f.grad,
                            flags.f.rad || flags.f.grad);
-        update_annunciators = false;
+        ann_hold = 2;
     }
 
     if (start_eqn_cursor) {
@@ -320,7 +325,7 @@ bool core_keydown(int key, bool *enqueued, int *repeat) {
             if (!keep_running)
                 set_running(false);
         } else {
-            shell_annunciators(-1, -1, -1, 0, -1, -1);
+            set_annunciators(-1, -1, -1, 0, -1, -1);
             pending_command = CMD_NONE;
         }
         if (mode_running || keybuf_tail != keybuf_head)
@@ -369,7 +374,7 @@ bool core_keydown(int key, bool *enqueued, int *repeat) {
                  * cue that they may now type. (Actually, I'm doing it
                  * purely because the HP-42S does it, too!)
                  */
-                shell_annunciators(-1, -1, -1, 0, -1, -1);
+                set_annunciators(-1, -1, -1, 0, -1, -1);
             else if (!mode_pause)
                 redisplay();
             return 0;
@@ -396,7 +401,7 @@ bool core_keydown(int key, bool *enqueued, int *repeat) {
          * We now turn it back on since program execution resumes.
          */
         if (mode_getkey && mode_running)
-            shell_annunciators(-1, -1, -1, 1, -1, -1);
+            set_annunciators(-1, -1, -1, 1, -1, -1);
         /* Feed the dequeued key to the usual suspects */
         keydown(oldshift, oldkey);
         core_keyup();
@@ -423,7 +428,7 @@ bool core_keydown(int key, bool *enqueued, int *repeat) {
         int shift = mode_shift;
         set_shift(false);
         if (mode_getkey && mode_running)
-            shell_annunciators(-1, -1, -1, 1, -1, -1);
+            set_annunciators(-1, -1, -1, 1, -1, -1);
         keydown(shift, key);
         if (repeating != 0) {
             *repeat = repeating;
@@ -719,7 +724,7 @@ bool core_keyup() {
     }
 
     if (error == ERR_INTERRUPTIBLE) {
-        shell_annunciators(-1, -1, -1, 1, -1, -1);
+        set_annunciators(-1, -1, -1, 1, -1, -1);
         pending_command = CMD_NONE;
         return true;
     }
@@ -4948,7 +4953,7 @@ void set_alpha_entry(bool state) {
 void set_running(bool state) {
     if (mode_running != state) {
         mode_running = state;
-        shell_annunciators(-1, -1, -1, state, -1, -1);
+        set_annunciators(-1, -1, -1, state, -1, -1);
     }
     if (state) {
         /* Cancel any pending INPUT command */
@@ -5326,7 +5331,7 @@ void start_incomplete_command(int cmd_id) {
             mode_commandmenu = MENU_INTEG_PARAMS;
         else if (mode_appmenu >= MENU_TVM_APP1 && mode_appmenu <= MENU_TVM_TABLE) {
             mode_commandmenu = MENU_TVM_PARAMS;
-            shell_annunciators(0, -1, -1, -1, -1, -1);
+            set_annunciators(0, -1, -1, -1, -1, -1);
         } else
             set_catalog_menu(CATSECT_VARS_ONLY);
     } else if (argtype == ARG_NAMED)
@@ -5340,7 +5345,7 @@ void start_incomplete_command(int cmd_id) {
             mode_commandmenu = MENU_INTEG_PARAMS;
         else if (mode_appmenu >= MENU_TVM_APP1 && mode_appmenu <= MENU_TVM_TABLE) {
             mode_commandmenu = MENU_TVM_PARAMS;
-            shell_annunciators(0, -1, -1, -1, -1, -1);
+            set_annunciators(0, -1, -1, -1, -1, -1);
         } else
             set_catalog_menu(CATSECT_REAL_ONLY);
     } else if (argtype == ARG_RVAR) {
@@ -5549,7 +5554,7 @@ static void stop_interruptible() {
     if (mode_running)
         set_running(false);
     else
-        shell_annunciators(-1, -1, -1, false, -1, -1);
+        set_annunciators(-1, -1, -1, false, -1, -1);
     pending_command = CMD_NONE;
     redisplay();
 }

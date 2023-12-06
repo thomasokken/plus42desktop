@@ -27,7 +27,6 @@
 #include "core_math1.h"
 #include "core_sto_rcl.h"
 #include "core_variables.h"
-#include "shell.h"
 
 
 /********************************************************/
@@ -588,21 +587,21 @@ int docmd_cla(arg_struct *arg) {
 int docmd_deg(arg_struct *arg) {
     flags.f.grad = 0;
     flags.f.rad = 0;
-    shell_annunciators(-1, -1, -1, -1, 0, 0);
+    set_annunciators(-1, -1, -1, -1, 0, 0);
     return ERR_NONE;
 }
 
 int docmd_rad(arg_struct *arg) {
     flags.f.grad = 0;
     flags.f.rad = 1;
-    shell_annunciators(-1, -1, -1, -1, 0, 1);
+    set_annunciators(-1, -1, -1, -1, 0, 1);
     return ERR_NONE;
 }
 
 int docmd_grad(arg_struct *arg) {
     flags.f.grad = 1;
     flags.f.rad = 0;
-    shell_annunciators(-1, -1, -1, -1, 1, 1);
+    set_annunciators(-1, -1, -1, -1, 1, 1);
     return ERR_NONE;
 }
 

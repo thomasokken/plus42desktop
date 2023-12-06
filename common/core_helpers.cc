@@ -1201,7 +1201,7 @@ void print_command(int cmd, const arg_struct *arg) {
     if (cmd == CMD_NULL && !deferred_print)
         return;
 
-    shell_annunciators(-1, -1, 1, -1, -1, -1);
+    set_annunciators(-1, -1, 1, -1, -1, -1);
 
     if (cmd != CMD_NULL)
         bufptr += command2buf(buf, 100, cmd, arg);
@@ -1251,7 +1251,7 @@ void print_command(int cmd, const arg_struct *arg) {
     }
 
     deferred_print = 0;
-    shell_annunciators(-1, -1, 0, -1, -1, -1);
+    set_annunciators(-1, -1, 0, -1, -1, -1);
 }
 
 void print_trace() {
@@ -1297,7 +1297,7 @@ void print_one_var(const char *name, int length) {
 int alpha_print_helper(const char *text, int length) {
     if (!flags.f.printer_exists)
         return ERR_PRINTING_IS_DISABLED;
-    shell_annunciators(-1, -1, 1, -1, -1, -1);
+    set_annunciators(-1, -1, 1, -1, -1, -1);
     if (length == 0)
         print_text(NULL, 0, true);
     else {
@@ -1317,7 +1317,7 @@ int alpha_print_helper(const char *text, int length) {
                 || (line_start > 0 && text[line_start - 1] == 10))
             print_text(text + line_start, length - line_start, true);
     }
-    shell_annunciators(-1, -1, 0, -1, -1, -1);
+    set_annunciators(-1, -1, 0, -1, -1, -1);
     return ERR_NONE;
 }
 

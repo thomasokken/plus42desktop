@@ -469,9 +469,9 @@ int view_helper(arg_struct *arg, bool print) {
 
     if (print && (flags.f.printer_enable || !program_running())) {
         if (flags.f.printer_exists) {
-            shell_annunciators(-1, -1, 1, -1, -1, -1);
+            set_annunciators(-1, -1, 1, -1, -1, -1);
             print_wide(buf, part2, buf + part2, bufptr - part2);
-            shell_annunciators(-1, -1, 0, -1, -1, -1);
+            set_annunciators(-1, -1, 0, -1, -1, -1);
         } else
             return ERR_STOP;
     }
@@ -1029,7 +1029,7 @@ int docmd_prsigma(arg_struct *arg) {
     if (!flags.f.printer_exists)
         return ERR_PRINTING_IS_DISABLED;
 
-    shell_annunciators(-1, -1, 1, -1, -1, -1);
+    set_annunciators(-1, -1, 1, -1, -1, -1);
     print_text(NULL, 0, true);
     for (i = 0; i < nr; i++) {
         int4 j = i + mode_sigma_reg;
@@ -1052,7 +1052,7 @@ int docmd_prsigma(arg_struct *arg) {
             print_wide(sigma_labels[i].text, sigma_labels[i].length, buf, bufptr);
         }
     }
-    shell_annunciators(-1, -1, 0, -1, -1, -1);
+    set_annunciators(-1, -1, 0, -1, -1, -1);
     return ERR_NONE;
 }
 
@@ -1101,7 +1101,7 @@ int docmd_prv(arg_struct *arg) {
         if (!flags.f.printer_exists)
             return ERR_PRINTING_IS_DISABLED;
 
-        shell_annunciators(-1, -1, 1, -1, -1, -1);
+        set_annunciators(-1, -1, 1, -1, -1, -1);
         string2buf(lbuf, 8, &llen, arg->val.text, arg->length);
         char2buf(lbuf, 8, &llen, '=');
         if (v->type == TYPE_STRING || v->type == TYPE_EQUATION) {
@@ -1122,7 +1122,7 @@ int docmd_prv(arg_struct *arg) {
             }
             char *sbuf = (char *) malloc(length + 2);
             if (sbuf == NULL) {
-                shell_annunciators(-1, -1, 0, -1, -1, -1);
+                set_annunciators(-1, -1, 0, -1, -1, -1);
                 return ERR_INSUFFICIENT_MEMORY;
             }
             sbuf[0] = d;
@@ -1146,7 +1146,7 @@ int docmd_prv(arg_struct *arg) {
             mode_stoppable = true;
             return ERR_INTERRUPTIBLE;
         } else {
-            shell_annunciators(-1, -1, 0, -1, -1, -1);
+            set_annunciators(-1, -1, 0, -1, -1, -1);
             return ERR_NONE;
         }
     }
@@ -1158,7 +1158,7 @@ static int prv_worker(bool interrupted) {
     int4 i, j, sz;
 
     if (interrupted) {
-        shell_annunciators(-1, -1, 0, -1, -1, -1);
+        set_annunciators(-1, -1, 0, -1, -1, -1);
         return ERR_STOP;
     }
 
@@ -1262,7 +1262,7 @@ static int prv_worker(bool interrupted) {
     if (++prv_index < sz)
         return ERR_INTERRUPTIBLE;
     else {
-        shell_annunciators(-1, -1, 0, -1, -1, -1);
+        set_annunciators(-1, -1, 0, -1, -1, -1);
         return ERR_NONE;
     }
 }
@@ -1275,7 +1275,7 @@ int docmd_prreg(arg_struct *arg) {
         return ERR_NONE;
     if (!flags.f.printer_exists)
         return ERR_PRINTING_IS_DISABLED;
-    shell_annunciators(-1, -1, 1, -1, -1, -1);
+    set_annunciators(-1, -1, 1, -1, -1, -1);
     print_text(NULL, 0, true);
     prv_var = regs;
     prv_prreg = true;
@@ -1293,7 +1293,7 @@ int docmd_prstk(arg_struct *arg) {
         return ERR_NONE;
     if (!flags.f.printer_exists)
         return ERR_PRINTING_IS_DISABLED;
-    shell_annunciators(-1, -1, 1, -1, -1, -1);
+    set_annunciators(-1, -1, 1, -1, -1, -1);
     if (arg != NULL)
         print_text(NULL, 0, true);
     if (flags.f.big_stack) {
@@ -1345,7 +1345,7 @@ int docmd_prstk(arg_struct *arg) {
             }
         }
     }
-    shell_annunciators(-1, -1, 0, -1, -1, -1);
+    set_annunciators(-1, -1, 0, -1, -1, -1);
     return ERR_NONE;
 }
 
@@ -1364,7 +1364,7 @@ int docmd_prx(arg_struct *arg) {
     if (!flags.f.printer_exists)
         return ERR_PRINTING_IS_DISABLED;
     else {
-        shell_annunciators(-1, -1, 1, -1, -1, -1);
+        set_annunciators(-1, -1, 1, -1, -1, -1);
         if (stack[sp]->type == TYPE_STRING || stack[sp]->type == TYPE_EQUATION) {
             const char *text;
             int length;
@@ -1383,7 +1383,7 @@ int docmd_prx(arg_struct *arg) {
             }
             char *lbuf = (char *) malloc(length + 2);
             if (lbuf == NULL) {
-                shell_annunciators(-1, -1, 0, -1, -1, -1);
+                set_annunciators(-1, -1, 0, -1, -1, -1);
                 return ERR_INSUFFICIENT_MEMORY;
             }
             lbuf[0] = d;
@@ -1400,7 +1400,7 @@ int docmd_prx(arg_struct *arg) {
             u->type = TYPE_UNIT;
             char *text = (char *) malloc(len + 1 + u->length);
             if (text == NULL) {
-                shell_annunciators(-1, -1, 0, -1, -1, -1);
+                set_annunciators(-1, -1, 0, -1, -1, -1);
                 return ERR_INSUFFICIENT_MEMORY;
             }
             memcpy(text, buf, len);
@@ -1436,7 +1436,7 @@ int docmd_prx(arg_struct *arg) {
             mode_stoppable = true;
             return ERR_INTERRUPTIBLE;
         } else {
-            shell_annunciators(-1, -1, 0, -1, -1, -1);
+            set_annunciators(-1, -1, 0, -1, -1, -1);
             return ERR_NONE;
         }
     }
@@ -1452,7 +1452,7 @@ int docmd_prusr(arg_struct *arg) {
     if (!flags.f.printer_exists)
         return ERR_PRINTING_IS_DISABLED;
     else {
-        shell_annunciators(-1, -1, 1, -1, -1, -1);
+        set_annunciators(-1, -1, 1, -1, -1, -1);
         print_text(NULL, 0, true);
         prusr_state = arg == NULL ? 2 : 0;
         prusr_index = cwd->vars_count - 1;
@@ -1464,14 +1464,14 @@ int docmd_prusr(arg_struct *arg) {
 
 static int prusr_worker(bool interrupted) {
     if (interrupted) {
-        shell_annunciators(-1, -1, 0, -1, -1, -1);
+        set_annunciators(-1, -1, 0, -1, -1, -1);
         return ERR_STOP;
     }
 
     if (prusr_state != 1) {
         if (prusr_index < 0) {
             if (prusr_state == 2) {
-                shell_annunciators(-1, -1, 0, -1, -1, -1);
+                set_annunciators(-1, -1, 0, -1, -1, -1);
                 return ERR_NONE;
             } else {
                 if (cwd->vars_count > 0)
@@ -1510,7 +1510,7 @@ static int prusr_worker(bool interrupted) {
         state1:
         len = 0;
         if (prusr_index >= cwd->labels_count) {
-            shell_annunciators(-1, -1, 0, -1, -1, -1);
+            set_annunciators(-1, -1, 0, -1, -1, -1);
             return ERR_NONE;
         }
         if (cwd->labels[prusr_index].length == 0) {
@@ -1543,9 +1543,9 @@ int docmd_list(arg_struct *arg) {
 int docmd_adv(arg_struct *arg) {
     if (flags.f.printer_exists
             && (flags.f.printer_enable || !program_running())) {
-        shell_annunciators(-1, -1, 1, -1, -1, -1);
+        set_annunciators(-1, -1, 1, -1, -1, -1);
         print_text(NULL, 0, true);
-        shell_annunciators(-1, -1, 0, -1, -1, -1);
+        set_annunciators(-1, -1, 0, -1, -1, -1);
     }
     return ERR_NONE;
 }
@@ -1556,9 +1556,9 @@ int docmd_prlcd(arg_struct *arg) {
     if (!flags.f.printer_exists)
         return ERR_PRINTING_IS_DISABLED;
     else {
-        shell_annunciators(-1, -1, 1, -1, -1, -1);
+        set_annunciators(-1, -1, 1, -1, -1, -1);
         int err = print_display();
-        shell_annunciators(-1, -1, 0, -1, -1, -1);
+        set_annunciators(-1, -1, 0, -1, -1, -1);
         return err;
     }
 }

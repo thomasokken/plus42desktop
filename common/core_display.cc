@@ -2504,7 +2504,7 @@ void draw_varmenu() {
         int klen[6];
         int need_eval = varmenu_role == 1 && !is_equation(varmenu_eqn) ? 1 : varmenu_role >= 4 && varmenu_role <= 6 ? 2 : 0;
         get_varmenu_row_for_eqn(varmenu_eqn, need_eval, &varmenu_rows, &varmenu_row, ktext, klen);
-        shell_annunciators(varmenu_rows > 1, -1, -1, -1, -1, -1);
+        set_annunciators(varmenu_rows > 1, -1, -1, -1, -1, -1);
         int black, total;
         num_parameters(varmenu_eqn, &black, &total);
         for (int i = 0; i < 6; i++) {
@@ -2554,7 +2554,7 @@ void draw_varmenu() {
         varmenu_rows = (num_mvars + 5) / 6;
         if (varmenu_row >= varmenu_rows)
             varmenu_row = varmenu_rows - 1;
-        shell_annunciators(varmenu_rows > 1, -1, -1, -1, -1, -1);
+        set_annunciators(varmenu_rows > 1, -1, -1, -1, -1, -1);
 
         row = 0;
         key = 0;
@@ -2785,7 +2785,7 @@ static void draw_catalog() {
         else
             draw_key(5, 0, 0, "MEM", 3);
         mode_updown = true;
-        shell_annunciators(1, -1, -1, -1, -1, -1);
+        set_annunciators(1, -1, -1, -1, -1, -1);
     } else if (catsect == CATSECT_MORE) {
         draw_other:
         draw_key(0, 0, 0, "LIST", 4);
@@ -2801,7 +2801,7 @@ static void draw_catalog() {
         else
             draw_key(5, 0, 0, "UNITS", 5);
         mode_updown = true;
-        shell_annunciators(1, -1, -1, -1, -1, -1);
+        set_annunciators(1, -1, -1, -1, -1, -1);
     } else if (catsect == CATSECT_EXT_1) {
         draw_key(0, 0, 0, "TIME", 4);
         draw_key(1, 0, 0, "XFCN", 4);
@@ -2810,7 +2810,7 @@ static void draw_catalog() {
         draw_key(4, 0, 0, "STR", 3);
         draw_key(5, 0, 0, "STK", 3);
         mode_updown = true;
-        shell_annunciators(1, -1, -1, -1, -1, -1);
+        set_annunciators(1, -1, -1, -1, -1, -1);
     } else if (catsect == CATSECT_EXT_2) {
         draw_key(0, 0, 0, "EQNS", 4);
         draw_key(1, 0, 0, "UNIT", 4);
@@ -2819,7 +2819,7 @@ static void draw_catalog() {
         draw_key(4, 0, 0, "DISP", 4);
         draw_key(5, 0, 0, "MISC", 4);
         mode_updown = true;
-        shell_annunciators(1, -1, -1, -1, -1, -1);
+        set_annunciators(1, -1, -1, -1, -1, -1);
     } else if (catsect == CATSECT_PGM
             || catsect == CATSECT_PGM_ONLY
             || catsect == CATSECT_PGM_SOLVE
@@ -2937,7 +2937,7 @@ static void draw_catalog() {
         }
 
         mode_updown = catalogmenu_rows[catindex] > 1;
-        shell_annunciators(mode_updown, -1, -1, -1, -1, -1);
+        set_annunciators(mode_updown, -1, -1, -1, -1, -1);
     } else if (catsect == CATSECT_FCN
             || catsect >= CATSECT_EXT_TIME && catsect <= CATSECT_EXT_X_CMP) {
         int *subcat;
@@ -2976,7 +2976,7 @@ static void draw_catalog() {
         }
         catalogmenu_rows[catindex] = subcat_rows;
         mode_updown = subcat_rows > 1;
-        shell_annunciators(mode_updown ? 1 : 0, -1, -1, -1, -1, -1);
+        set_annunciators(mode_updown ? 1 : 0, -1, -1, -1, -1, -1);
     } else if (catsect == CATSECT_EQN_NAMED) {
         std::vector<std::string> eqns;
         try {
@@ -3005,7 +3005,7 @@ static void draw_catalog() {
                 draw_key(i, 0, 0, "", 0);
         }
         mode_updown = rows > 1;
-        shell_annunciators(mode_updown ? 1 : 0, -1, -1, -1, -1, -1);
+        set_annunciators(mode_updown ? 1 : 0, -1, -1, -1, -1, -1);
     } else if (catsect == CATSECT_UNITS_1) {
         draw_key(0, 0, 0, "LENG", 4);
         draw_key(1, 0, 0, "AREA", 4);
@@ -3014,7 +3014,7 @@ static void draw_catalog() {
         draw_key(4, 0, 0, "SPEED", 5);
         draw_key(5, 0, 0, "MASS", 4);
         mode_updown = true;
-        shell_annunciators(1, -1, -1, -1, -1, -1);
+        set_annunciators(1, -1, -1, -1, -1, -1);
     } else if (catsect == CATSECT_UNITS_2) {
         draw_key(0, 0, 0, "FORCE", 5);
         draw_key(1, 0, 0, "ENRG", 4);
@@ -3023,7 +3023,7 @@ static void draw_catalog() {
         draw_key(4, 0, 0, "TEMP", 4);
         draw_key(5, 0, 0, "ELEC", 4);
         mode_updown = true;
-        shell_annunciators(1, -1, -1, -1, -1, -1);
+        set_annunciators(1, -1, -1, -1, -1, -1);
     } else if (catsect == CATSECT_UNITS_3) {
         draw_key(0, 0, 0, "ANGL", 4);
         draw_key(1, 0, 0, "LIGHT", 5);
@@ -3032,7 +3032,7 @@ static void draw_catalog() {
         draw_key(4, 0, 0, "", 0);
         draw_key(5, 0, 0, "", 0);
         mode_updown = true;
-        shell_annunciators(1, -1, -1, -1, -1, -1);
+        set_annunciators(1, -1, -1, -1, -1, -1);
     } else if (catsect >= CATSECT_UNITS_LENG && catsect <= CATSECT_UNITS_VISC) {
         const char *text[6];
         int length[6];
@@ -3040,7 +3040,7 @@ static void draw_catalog() {
         for (int i = 0; i < 6; i++)
             draw_key(i, 0, 0, text[i], length[i]);
         mode_updown = catalogmenu_rows[catindex] > 1;
-        shell_annunciators(mode_updown, -1, -1, -1, -1, -1);
+        set_annunciators(mode_updown, -1, -1, -1, -1, -1);
     } else if (catsect == CATSECT_DIRS || catsect == CATSECT_DIRS_ONLY) {
         int up, lcount = 0, vcount;
         if (catsect == CATSECT_DIRS) {
@@ -3106,7 +3106,7 @@ static void draw_catalog() {
             draw_key(i, 0, 0, "", 0);
         }
         mode_updown = rows > 1;
-        shell_annunciators(mode_updown, -1, -1, -1, -1, -1);
+        set_annunciators(mode_updown, -1, -1, -1, -1, -1);
     } else {
         bool show_type[TYPE_SENTINEL];
         for (int i = 0; i < TYPE_SENTINEL; i++)
@@ -3272,7 +3272,7 @@ static void draw_catalog() {
         }
 
         mode_updown = catalogmenu_rows[catindex] > 1;
-        shell_annunciators(mode_updown, -1, -1, -1, -1, -1);
+        set_annunciators(mode_updown, -1, -1, -1, -1, -1);
     }
 }
 
@@ -3306,7 +3306,7 @@ int draw_eqn_catalog(int section, int row, int *item) {
     }
     if (section == CATSECT_TOP) {
         rows = 2;
-        shell_annunciators(1, -1, -1, -1, -1, -1);
+        set_annunciators(1, -1, -1, -1, -1, -1);
     }
     return rows;
 }
@@ -4332,7 +4332,7 @@ int print_program(pgm_index prgm, int4 pc, int4 lines, bool normal) {
     if (dat == NULL)
         return ERR_INSUFFICIENT_MEMORY;
 
-    shell_annunciators(-1, -1, 1, -1, -1, -1);
+    set_annunciators(-1, -1, 1, -1, -1, -1);
     dat->len = 0;
     dat->saved_prgm = current_prgm;
     dat->cmd = CMD_NONE;
@@ -4506,7 +4506,7 @@ static int print_program_worker(bool interrupted) {
     done:
     current_prgm = dat->saved_prgm;
     delete dat;
-    shell_annunciators(-1, -1, 0, -1, -1, -1);
+    set_annunciators(-1, -1, 0, -1, -1, -1);
     return ERR_STOP;
 }
 
@@ -4713,7 +4713,7 @@ int set_menu_return_err(int level, int menuid, bool exitall) {
         }
     } else
         mode_updown = false;
-    shell_annunciators(mode_updown, -1, -1, -1, -1, -1);
+    set_annunciators(mode_updown, -1, -1, -1, -1, -1);
     return ERR_NONE;
 }
 
@@ -4736,7 +4736,7 @@ void set_plainmenu(int menuid) {
         mode_plainmenu_sticky = 1;
         redisplay();
         mode_updown = 1;
-        shell_annunciators(1, -1, -1, -1, -1, -1);
+        set_annunciators(1, -1, -1, -1, -1, -1);
     } else {
         /* Even if it's a different menu than the current one, it should
          * still stick if it belongs to the same group.
@@ -4775,7 +4775,7 @@ void set_plainmenu(int menuid) {
         mode_updown = mode_plainmenu == MENU_CATALOG
                 || mode_plainmenu != MENU_NONE
                         && menus[mode_plainmenu].next != MENU_NONE;
-        shell_annunciators(mode_updown, -1, -1, -1, -1, -1);
+        set_annunciators(mode_updown, -1, -1, -1, -1, -1);
     }
 }
 

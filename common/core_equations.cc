@@ -812,7 +812,7 @@ static void save() {
     edit_pos = -1;
     update_skin_mode();
     edit.id = MENU_NONE;
-    shell_annunciators(0, -1, -1, -1, -1, -1);
+    set_annunciators(0, -1, -1, -1, -1, -1);
     eqn_draw();
 }
 
@@ -821,7 +821,7 @@ static bool print_eq_do_all;
 
 static int print_eq_worker(bool interrupted) {
     if (interrupted) {
-        shell_annunciators(-1, -1, 0, -1, -1, -1);
+        set_annunciators(-1, -1, 0, -1, -1, -1);
         return ERR_STOP;
     }
 
@@ -851,7 +851,7 @@ static int print_eq_worker(bool interrupted) {
         return ERR_INTERRUPTIBLE;
     } else {
         done:
-        shell_annunciators(-1, -1, 0, -1, -1, -1);
+        set_annunciators(-1, -1, 0, -1, -1, -1);
         return ERR_NONE;
     }
 }
@@ -861,20 +861,20 @@ static void print_eq(bool all) {
     print_eq_do_all = all;
     mode_interruptible = print_eq_worker;
     mode_stoppable = false;
-    shell_annunciators(-1, -1, 1, -1, -1, -1);
+    set_annunciators(-1, -1, 1, -1, -1, -1);
 }
 
 static void update_menu(int menuid, int catsect = -1, int rows = -1, int row = -1, bool skip_top = false) {
     edit.id = menuid;
     if (menuid != MENU_CATALOG) {
         int multirow = menuid != MENU_NONE && getmenu(edit.id)->next != MENU_NONE;
-        shell_annunciators(multirow, -1, -1, -1, -1, -1);
+        set_annunciators(multirow, -1, -1, -1, -1, -1);
     } else {
         edit.catsect = catsect;
         edit.catsect_rows = rows;
         edit.catalog_row = row;
         edit.skip_top = skip_top;
-        shell_annunciators(rows > 1, -1, -1, -1, -1, -1);
+        set_annunciators(rows > 1, -1, -1, -1, -1, -1);
     }
 }
 
@@ -958,7 +958,7 @@ int eqn_start(int whence) {
     edit_pos = -1;
     update_skin_mode();
     edit.id = MENU_NONE;
-    shell_annunciators(0, -1, -1, -1, -1, -1);
+    set_annunciators(0, -1, -1, -1, -1, -1);
     eqn_draw();
     return ERR_NONE;
 }
@@ -1417,7 +1417,7 @@ bool eqn_draw() {
                     draw_key(k, 0, 1, cmd_array[cmd].name, cmd_array[cmd].name_length);
             }
             edit.catsect_rows = catalog_rows;
-            shell_annunciators(1, -1, -1, -1, -1, -1);
+            set_annunciators(1, -1, -1, -1, -1, -1);
         } else if (edit.id == MENU_CATALOG) {
             edit.catsect_rows = draw_eqn_catalog(edit.catsect, edit.catalog_row, menu_item);
             if (edit.catalog_row >= edit.catsect_rows)

@@ -1351,7 +1351,7 @@ int docmd_pgmvar(arg_struct *arg) {
         if (command != CMD_MVAR)
             break;
         if (!found) {
-            shell_annunciators(-1, -1, 1, -1, -1, -1);
+            set_annunciators(-1, -1, 1, -1, -1, -1);
             print_text(NULL, 0, true);
             found = true;
         }
@@ -1359,7 +1359,7 @@ int docmd_pgmvar(arg_struct *arg) {
     }
     current_prgm = saved_prgm;
     if (found)
-        shell_annunciators(-1, -1, 0, -1, -1, -1);
+        set_annunciators(-1, -1, 0, -1, -1, -1);
     else
         return ERR_NO_MENU_VARIABLES;
     return ERR_NONE;
@@ -1379,13 +1379,13 @@ int docmd_eqnvar(arg_struct *arg) {
     std::vector<std::string> params = get_parameters(eq->data);
     if (params.size() == 0)
         return ERR_NO_MENU_VARIABLES;
-    shell_annunciators(-1, -1, 1, -1, -1, -1);
+    set_annunciators(-1, -1, 1, -1, -1, -1);
     print_text(NULL, 0, true);
     for (int i = 0; i < params.size(); i++) {
         std::string s = params[i];
         print_one_var(s.c_str(), (int) s.length());
     }
-    shell_annunciators(-1, -1, 0, -1, -1, -1);
+    set_annunciators(-1, -1, 0, -1, -1, -1);
     return ERR_NONE;
 }
 

@@ -24,7 +24,6 @@
 #include "core_phloat.h"
 #include "core_helpers.h"
 #include "core_display.h"
-#include "shell.h"
 
 #ifndef BCD_MATH
 // We need these locally for BID128->double conversion

@@ -357,6 +357,7 @@ void set_alpha_entry(bool state);
 void set_running(bool state);
 bool program_running();
 bool alpha_active();
+void set_annunciators(int updn, int shf, int prt, int run, int g, int rad);
 
 int want_to_run_again();
 void do_interactive(int command);
