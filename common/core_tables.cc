@@ -62,7 +62,8 @@
 // XROM 30,37-63 (a7a5-a7bf) (Card Reader)
 // XROM 31,00-63 (a7c0-a7ff) (Data Logger)
 
-// Available XROMs: a7dc, a7dd, a7e0, a7f5
+// Available XROMs: a7dc, a7dd, a7e0, a7f5 (*)
+// (*) Before reusing a7f5 (formerly NEWSTR), remove it from core_import_programs().
 // Unavailable XROMs (used by Free42): a7fa (CAPS), a7fb (Mixed)
 
 const command_spec cmd_array[] =
