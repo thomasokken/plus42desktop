@@ -541,7 +541,7 @@ static int ref_move_copy(bool copy) {
                     if (new_prgms[j].capacity == cwd->id && new_prgms[j].size == i)
                         goto skip3;
             }
-            if (first && cwd->prgms[i].text[0] == CMD_END) {
+            if (first && cwd->prgms[i].is_end(0)) {
                 // There is an empty program at the end of the current
                 // directory, while we are moving or copying programs in:
                 // remove the empty program, similarly to how we treat

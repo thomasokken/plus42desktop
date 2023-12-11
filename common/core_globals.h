@@ -382,6 +382,9 @@ struct prgm_struct {
     int lclbl_invalid;
     unsigned char *text;
     equation_data *eq_data;
+    inline bool is_end(int4 pc) {
+        return text[pc] == CMD_END && (text[pc + 1] & 112) == 0;
+    }
 };
 struct label_struct {
     unsigned char length;

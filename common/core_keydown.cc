@@ -2318,7 +2318,7 @@ void keydown_alpha_mode(int shift, int key) {
                 int4 line = pc2line(pc);
                 if (line != 0 && current_prgm.is_editable()
                         && (current_prgm.idx != dir_list[current_prgm.dir]->prgms_count - 1
-                            || dir_list[current_prgm.dir]->prgms[current_prgm.idx].text[pc] != CMD_END)) {
+                            || !dir_list[current_prgm.dir]->prgms[current_prgm.idx].is_end(pc))) {
                     delete_command(pc);
                     pc = line2pc(line - 1);
                 }
@@ -2482,7 +2482,7 @@ void keydown_normal_mode(int shift, int key) {
         if (flags.f.prgm_mode) {
             if (pc == -1)
                 pc = 0;
-            else if (dir_list[current_prgm.dir]->prgms[current_prgm.idx].text[pc] != CMD_END)
+            else if (!dir_list[current_prgm.dir]->prgms[current_prgm.idx].is_end(pc))
                 pc += get_command_length(current_prgm, pc);
             move_prgm_highlight(1);
 //            if (get_front_menu() == MENU_NONE)
@@ -2520,7 +2520,7 @@ void keydown_normal_mode(int shift, int key) {
         } else {
             if (current_prgm.is_editable()
                     && (current_prgm.idx != dir_list[current_prgm.dir]->prgms_count - 1
-                    || dir_list[current_prgm.dir]->prgms[current_prgm.idx].text[pc] != CMD_END))
+                    || !dir_list[current_prgm.dir]->prgms[current_prgm.idx].is_end(pc)))
                 delete_command(pc);
             pc = line2pc(line - 1);
             move_prgm_highlight(-1);

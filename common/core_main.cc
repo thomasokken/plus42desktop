@@ -5040,7 +5040,7 @@ void do_interactive(int command) {
             incomplete_saved_highlight_row = prgm_highlight_row;
             if (pc == -1)
                 pc = 0;
-            else if (dir_list[current_prgm.dir]->prgms[current_prgm.idx].text[pc] != CMD_END)
+            else if (!dir_list[current_prgm.dir]->prgms[current_prgm.idx].is_end(pc))
                 pc += get_command_length(current_prgm, pc);
             move_prgm_highlight(1);
             start_incomplete_command(command);
@@ -5519,7 +5519,7 @@ bool start_alpha_prgm_line() {
     incomplete_saved_highlight_row = prgm_highlight_row;
     if (pc == -1)
         pc = 0;
-    else if (dir_list[current_prgm.dir]->prgms[current_prgm.idx].text[pc] != CMD_END)
+    else if (!dir_list[current_prgm.dir]->prgms[current_prgm.idx].is_end(pc))
         pc += get_command_length(current_prgm, pc);
     move_prgm_highlight(1);
 //    if (get_front_menu() == MENU_NONE)
@@ -5580,7 +5580,7 @@ static int handle_error(int error) {
                 || error == ERR_STOP)
             flags.f.stack_lift_disable = mode_disable_stack_lift;
         if (error == ERR_NO) {
-            if (dir_list[current_prgm.dir]->prgms[current_prgm.idx].text[pc] != CMD_END)
+            if (!dir_list[current_prgm.dir]->prgms[current_prgm.idx].is_end(pc))
                 pc += get_command_length(current_prgm, pc);
         } else if (error == ERR_STOP) {
             if (pc >= dir_list[current_prgm.dir]->prgms[current_prgm.idx].size)
@@ -5659,7 +5659,7 @@ static int handle_error(int error) {
                 || error == ERR_STOP)
             flags.f.stack_lift_disable = mode_disable_stack_lift;
         if (error == ERR_NO) {
-            if (dir_list[current_prgm.dir]->prgms[current_prgm.idx].text[pc] != CMD_END)
+            if (!dir_list[current_prgm.dir]->prgms[current_prgm.idx].is_end(pc))
                 pc += get_command_length(current_prgm, pc);
             goto noerr;
         } else if (error == ERR_NONE || error == ERR_YES || error == ERR_STOP) {

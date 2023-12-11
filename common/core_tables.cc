@@ -492,8 +492,6 @@ const command_spec cmd_array[] =
     { /* N_TO_C */     docmd_n_to_c,      "N\017C",              0x00, 0x00, 0xa7, 0xf2,  3, ARG_NONE,   1, 0x01 },
     { /* LIST_T */     docmd_list_t,      "LIST?",               0x00, 0x00, 0xa7, 0xf3,  5, ARG_NONE,   1, ALLT },
     { /* NEWLIST */    docmd_newlist,     "NEWLIST",             0x00, 0x00, 0xa7, 0xf4,  7, ARG_NONE,   0, NA_T },
-    /* (Skipping 403 because of single-byte equality checks with CMD_END) */
-    { /* DUMMY */      NULL,              "",                    0x44, 0x00, 0x00, 0x00,  0, ARG_OTHER,  0, UNIM },
     { /* TO_LIST */    docmd_to_list,     "\017LIST",            0x00, 0x00, 0xa6, 0xfc,  5, ARG_NONE,   1, 0x01 },
     { /* FROM_LIST */  docmd_from_list,   "LIST\017",            0x00, 0x00, 0xa6, 0xfd,  5, ARG_NONE,   1, 0x20 },
 
