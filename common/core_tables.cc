@@ -62,7 +62,7 @@
 // XROM 30,37-63 (a7a5-a7bf) (Card Reader)
 // XROM 31,00-63 (a7c0-a7ff) (Data Logger)
 
-// Available XROMs: a7dc, a7dd, a7e0, a7f5 (*)
+// Available XROMs: a6ee, a6fe, a6ff, a7dc, a7dd, a7e0, a7f5 (*)
 // (*) Before reusing a7f5 (formerly NEWSTR), remove it from core_import_programs().
 // Unavailable XROMs (used by Free42): a7fa (CAPS), a7fb (Mixed)
 // Time Module: a681-a6a3, of which we're only using some; see below.
@@ -595,9 +595,9 @@ const command_spec cmd_array[] =
     { /* UPDIR */      docmd_updir,       "UPDIR",               0x00, 0x00, 0xa6, 0xf9,  5, ARG_NONE,   0, NA_T },
     { /* HOME */       docmd_home,        "HOME",                0x00, 0x00, 0xa6, 0xfa,  4, ARG_NONE,   0, NA_T },
     { /* PATH */       docmd_path,        "PATH",                0x00, 0x00, 0xa6, 0xfb,  4, ARG_NONE,   0, NA_T },
-    { /* REFMOVE */    docmd_refmove,     "R\305\306MOVE",       0x00, 0x00, 0xa6, 0xfe,  7, ARG_NONE,   1, FUNC },
-    { /* REFCOPY */    docmd_refcopy,     "R\305\306COPY",       0x00, 0x00, 0xa6, 0xff,  7, ARG_NONE,   1, FUNC },
-    { /* REFFIND */    docmd_reffind,     "R\305\306FIND",       0x00, 0x00, 0xa6, 0xee,  7, ARG_NONE,   1, FUNC },
+    { /* REFMOVE */    docmd_refmove,     "R\305\306MOVE",       0x4c, 0x00, 0x00, 0x00,  7, ARG_NONE,   1, FUNC },
+    { /* REFCOPY */    docmd_refcopy,     "R\305\306COPY",       0x4c, 0x00, 0x00, 0x00,  7, ARG_NONE,   1, FUNC },
+    { /* REFFIND */    docmd_reffind,     "R\305\306FIND",       0x4c, 0x00, 0x00, 0x00,  7, ARG_NONE,   1, FUNC },
     { /* PRALL */      docmd_prall,       "PRALL",               0x00, 0x00, 0xa6, 0xef,  5, ARG_NONE,   0, NA_T },
 
     /* Big Screen */
