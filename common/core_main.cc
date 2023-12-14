@@ -3795,6 +3795,8 @@ static void paste_programs(const char *buf) {
         // be spaces
         bool goose;
         goose = false;
+        int gtpos;
+        gtpos = -1;
         prev_hppos = hppos;
         while (hppos < hpend) {
             c = hpbuf[hppos];
@@ -3803,9 +3805,17 @@ static void paste_programs(const char *buf) {
                     break;
                 else
                     goose = 1;
+                if (c == '>')
+                    gtpos = hppos;
             } else if (c != ' ')
                 break;
             hppos++;
+        }
+        // If there was a '>' after the line number, and the command
+        // is not LBL, then we should consider the '>' to be a token.
+        if (gtpos == 0 || gtpos > 0 && hpbuf[gtpos - 1] == ' ') {
+            if (hpend - hppos < 4 || strncmp(hpbuf + hppos, "LBL ", 4) != 0)
+                hppos = gtpos;
         }
         // Now hppos should be pointing at the first character of the
         // command.
