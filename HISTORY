@@ -1,3 +1,11 @@
+2023-12-18: release 1.1.2b (Android only)
+
+* Fixed file access for Android >= 11.
+
+2023-12-12: release 1.1.2a (iOS and MacOS)
+
+* Fixed startup crash, caused by a bug in Apple's latest compiler.
+
 2023-12-06: release 1.1.2
 
 * Fixed a bug that could cause a crash on startup.
