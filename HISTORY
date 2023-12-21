@@ -1,3 +1,7 @@
+2023-12-21: release 1.1.2c (Android only)
+
+* Export State used f42 file extension instead of p42. Fixed.
+
 2023-12-18: release 1.1.2b (Android only)
 
 * Fixed file access for Android >= 11.
