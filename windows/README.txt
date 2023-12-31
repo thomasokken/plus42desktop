@@ -173,7 +173,7 @@ If you don't fully understand the above, it is best to play safe and use
 Plus42 Decimal.
 
 
-Plus42 is (C) 2004-2023, by Thomas Okken
+Plus42 is (C) 2004-2024, by Thomas Okken
 Contact the author at thomasokken@gmail.com
 Look for updates, and versions for other operating systems, at
 https://thomasokken.com/plus42/
