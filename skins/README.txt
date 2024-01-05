@@ -63,11 +63,32 @@ DisplaySize: cols,rows disp_y pixel_scale_y max_rows
 
 In addition, Plus42 can be configured to take advantage of expanded keyboards,
 by rearranging a couple of items, using the Flags: line.
+
 Flags: The "flags" line is a combination of these options: 1 = put FCN on the
   first row of CATALOG and DIRS on the second, instead of the other way around;
   2 = put MEM on the first row of CATALOG and UNITS on the second, instead of
   the other way around; and 4 = put TVM on Shift-0 instead of TOP.FCN. When
   there is no "flags," that's the same as Flags: 0.
+
+Finally, Plus42 can change the X<>Y, E, period, and R/S keys, to (, ), period/
+comma, and =, respectively, while the equation editor is active. To specify the
+alternate sections of skin background, and the alternate pressed-key images,
+use the AltBkgd and AltKey elements:
+
+AltBkgd: mode src_rect dst_point
+  Defines an image to be overlaid on the skin when the given mode is in effect.
+  Note that there can be multiple AltBkgd elements for each mode; all of them
+  will be drawn when the given mode is in effect.
+AltKey: mode code src_point
+  Defines an alternate pressed-key image to be used instead of the default
+  pressed-key, when the given mode is in effect, and for the given key code.
+  Note that only the image location is specified, not its size. The size is
+  assumed to match the size of the default pressed-key image for the given key
+  code.
+
+The mode can be 1 (equation editor in RDX. mode) or 2 (equation editor in RDX,
+mode).
+
 
 For examples, look at the *.layout and *.gif files in this directory.
 
