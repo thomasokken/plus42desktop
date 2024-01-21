@@ -122,3 +122,17 @@ Shift 0x1B   : 28 33   # OFF
 # Convenience key codes for GTO and PI
 g            : 28 6    # GTO
 p            : 28 9    # PI
+
+# Alternates to F1-F6 and Shift F1-F6, for keyboards without function keys
+Ctrl 1       : 1       # menu key 1
+Ctrl Shift 1 : 28 1    # menu key 1, shifted
+Ctrl 2       : 2       # menu key 2
+Ctrl Shift 2 : 28 2    # menu key 2, shifted
+Ctrl 3       : 3       # menu key 3
+Ctrl Shift 3 : 28 3    # menu key 3, shifted
+Ctrl 4       : 4       # menu key 4
+Ctrl Shift 4 : 28 4    # menu key 4, shifted
+Ctrl 5       : 5       # menu key 5
+Ctrl Shift 5 : 28 5    # menu key 5, shifted
+Ctrl 6       : 6       # menu key 6
+Ctrl Shift 6 : 28 6    # menu key 6, shifted
