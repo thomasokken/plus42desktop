@@ -131,3 +131,17 @@ equal           : 28 37   # CATALOG ("+" is already shifted so we have to do som
 # Convenience key codes for GTO and PI
 g               : 28 6    # GTO
 p               : 28 9    # PI
+
+# Alternates to F1-F6 and Shift F1-F6, for keyboards without function keys
+Ctrl 1                 : 1       # menu key 1
+Ctrl Shift exclam      : 28 1    # menu key 1, shifted
+Ctrl 2                 : 2       # menu key 2
+Ctrl Shift at          : 28 2    # menu key 2, shifted
+Ctrl 3                 : 3       # menu key 3
+Ctrl Shift numbersign  : 28 3    # menu key 3, shifted
+Ctrl 4                 : 4       # menu key 4
+Ctrl Shift dollar      : 28 4    # menu key 4, shifted
+Ctrl 5                 : 5       # menu key 5
+Ctrl Shift percent     : 28 5    # menu key 5, shifted
+Ctrl 6                 : 6       # menu key 6
+Ctrl Shift asciicircum : 28 6    # menu key 6, shifted
