@@ -126,3 +126,17 @@ Shift 187       : 37      # +
 # Convenience key codes for GTO and PI (g and p)
 71              : 28 6    # GTO
 80              : 28 9    # PI
+
+# Alternates to F1-F6 and Shift F1-F6, for keyboards without function keys
+Ctrl 49         : 1       # menu key 1
+Ctrl Shift 49   : 28 1    # menu key 1, shifted
+Ctrl 50         : 2       # menu key 2
+Ctrl Shift 50   : 28 2    # menu key 2, shifted
+Ctrl 51         : 3       # menu key 3
+Ctrl Shift 51   : 28 3    # menu key 3, shifted
+Ctrl 52         : 4       # menu key 4
+Ctrl Shift 52   : 28 4    # menu key 4, shifted
+Ctrl 53         : 5       # menu key 5
+Ctrl Shift 53   : 28 5    # menu key 5, shifted
+Ctrl 54         : 6       # menu key 6
+Ctrl Shift 54   : 28 6    # menu key 6, shifted
