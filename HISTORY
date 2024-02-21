@@ -1,3 +1,8 @@
+2024-02-21: release 1.1.4b (MacOS only)
+
+* Resizable main window.
+* Command-D shortcut for Clear Print-Out.
+
 2024-02-14: release 1.1.4a (iOS only)
 
 * iPad support
