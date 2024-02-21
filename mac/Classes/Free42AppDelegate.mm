@@ -311,9 +311,17 @@ static void low_battery_checker(CFRunLoopTimerRef timer, void *info) {
     disp_rows = rows;
     disp_cols = cols;
     NSSize sz;
-    sz.width = win_width;
-    sz.height = win_height;
+    if (state.mainWindowWidth == 0) {
+        sz.width = win_width;
+        sz.height = win_height;
+        state.mainWindowWidth = win_width;
+        state.mainWindowHeight = win_height;
+    } else {
+        sz.width = state.mainWindowWidth;
+        sz.height = state.mainWindowHeight;
+    }
     [mainWindow setContentSize:sz];
+    [mainWindow setContentAspectRatio:NSMakeSize(sz.width / 16384, sz.height / 16384)];
     
     if (state.mainWindowKnown) {
         NSPoint pt;
@@ -1002,18 +1010,30 @@ static char version[32] = "";
 
 - (void) updateSkinWithRows:(int) rows cols:(int)cols {
     long w, h;
+    int old_w, old_h;
+    bool dispResize = rows != -1;
+    if (dispResize)
+        skin_get_size(&old_w, &old_h);
+    else
+        [calcView scaleUnitSquareToSize:CGSizeMake(1, 1)];
     int flags;
     skin_load(&w, &h, &rows, &cols, &flags);
     disp_rows = rows;
     disp_cols = cols;
     core_repaint_display(disp_rows, disp_cols, flags);
     NSSize sz;
-    sz.width = w;
-    sz.height = h;
+    if (dispResize) {
+        sz.width = calcView.frame.size.width;
+        sz.height = calcView.frame.size.height * h / old_h;
+    } else {
+        sz.width = w;
+        sz.height = h;
+    }
     NSRect frame = [mainWindow frame];
     NSPoint p;
     p.x = frame.origin.x;
     p.y = frame.origin.y + frame.size.height;
+    [mainWindow setContentAspectRatio:NSMakeSize(sz.width / 16384, sz.height / 16384)];
     [mainWindow setContentSize:sz];
     [mainWindow setFrameTopLeftPoint:p];
     [calcView setNeedsDisplayInRect:CGRectMake(0, 0, w, h)];
@@ -1876,7 +1896,11 @@ static void init_shell_state(int4 version) {
             core_settings.localized_copy_paste = true;
             /* fall through */
         case 4:
-            /* current version (SHELL_VERSION = 4),
+            state.mainWindowWidth = 0;
+            state.mainWindowHeight = 0;
+            /* fall through */
+        case 5:
+            /* current version (SHELL_VERSION = 5),
              * so nothing to do here since everything
              * was initialized from the state file.
              */

@@ -1136,3 +1136,8 @@ void skin_repaint_display() {
 void skin_display_set_enabled(bool enable) {
     display_enabled = enable;
 }
+
+void skin_get_size(int *width, int *height) {
+    *width = skin.width;
+    *height = skin.height;
+}
