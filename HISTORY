@@ -1,3 +1,8 @@
+2024-02-28: release 1.1.4d (iOS and MacOS)
+
+* iOS version: Fixed crash when sharing on iPad.
+* MacOS version: Fixed crash when making the main window too small.
+
 2024-02-27: release 1.1.4c (Windows only)
 
 * Resizable main window.
