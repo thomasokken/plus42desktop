@@ -501,6 +501,8 @@ static void shell_keydown() {
                 }
                 skin_display_set_enabled(true);
                 invalidate_display();
+                for (int i = 1; i <= 7; i++)
+                    skin_invalidate_annunciator(i);
                 repeat = 0;
             }
         }
@@ -1076,17 +1078,35 @@ static LRESULT CALLBACK PrintOutWndProc(HWND hWnd, UINT message, WPARAM wParam, 
             hPrintOutWnd = NULL;
             return 0;
         case WM_SIZING: {
+            RECT windowRect, clientRect;
+            GetWindowRect(hPrintOutWnd, &windowRect);
+            GetClientRect(hPrintOutWnd, &clientRect);
+            int vBorder = (windowRect.bottom - windowRect.top) - (clientRect.bottom - clientRect.top);
+
             LPRECT r = (LPRECT) lParam;
             switch (wParam) {
-                case WMSZ_BOTTOMLEFT:
                 case WMSZ_TOPLEFT:
                 case WMSZ_LEFT:
+                case WMSZ_BOTTOMLEFT:
                     r->left = r->right - printOutWidth;
                     break;
-                case WMSZ_BOTTOMRIGHT:
                 case WMSZ_TOPRIGHT:
                 case WMSZ_RIGHT:
+                case WMSZ_BOTTOMRIGHT:
                     r->right = r->left + printOutWidth;
+                    break;
+            }
+            switch (wParam) {
+                case WMSZ_TOPLEFT:
+                case WMSZ_TOP:
+                case WMSZ_TOPRIGHT:
+                    r->top += (r->bottom - r->top - vBorder) % 18;
+                    break;
+                case WMSZ_BOTTOMLEFT:
+                case WMSZ_BOTTOM:
+                case WMSZ_BOTTOMRIGHT:
+                    r->bottom -= (r->bottom - r->top - vBorder) % 18;
+                    break;
             }
             return 1;
         }
@@ -2208,7 +2228,7 @@ static VOID CALLBACK ann_print_timeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, D
     KillTimer(NULL, ann_print_timer);
     ann_print_timer = 0;
     ann_print = 0;
-    skin_update_annunciator(3);
+    skin_invalidate_annunciator(3);
 }
 
 /* shell_annunciators()
@@ -2223,11 +2243,11 @@ static VOID CALLBACK ann_print_timeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, D
 void shell_annunciators(int updn, int shf, int prt, int run, int g, int rad) {
     if (updn != -1 && ann_updown != updn) {
         ann_updown = updn;
-        skin_update_annunciator(1);
+        skin_invalidate_annunciator(1);
     }
     if (shf != -1 && ann_shift != shf) {
         ann_shift = shf;
-        skin_update_annunciator(2);
+        skin_invalidate_annunciator(2);
     }
     if (prt != -1) {
         if (ann_print_timer != 0) {
@@ -2237,22 +2257,22 @@ void shell_annunciators(int updn, int shf, int prt, int run, int g, int rad) {
         if (ann_print != prt)
             if (prt) {
                 ann_print = 1;
-                skin_update_annunciator(3);
+                skin_invalidate_annunciator(3);
             } else {
                 ann_print_timer = SetTimer(NULL, 0, 1000, ann_print_timeout);
             }
     }
     if (run != -1 && ann_run != run) {
         ann_run = run;
-        skin_update_annunciator(4);
+        skin_invalidate_annunciator(4);
     }
     if (g != -1 && ann_g != g) {
         ann_g = g;
-        skin_update_annunciator(6);
+        skin_invalidate_annunciator(6);
     }
     if (rad != -1 && ann_rad != rad) {
         ann_rad = rad;
-        skin_update_annunciator(7);
+        skin_invalidate_annunciator(7);
     }
 }
 
@@ -2308,7 +2328,7 @@ bool shell_low_battery() {
                 && (powerstat.BatteryFlag & 6) != 0; // low or critical
     if (ann_battery != lowbat) {
         ann_battery = lowbat;
-        skin_update_annunciator(5);
+        skin_invalidate_annunciator(5);
     }
     return lowbat != 0;
 }
