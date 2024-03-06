@@ -296,8 +296,12 @@ class GeneratorContext {
             if (line->cmd == CMD_N_PLUS_U)
                 skipcount = 2;
         }
-        if (map != NULL)
+        if (map != NULL) {
+            // Make END map to start of eqn
+            map->add(0, ++lineno);
+            // Sentinel. Should be redundant.
             map->add(-2, ((uint4) -1) >> 1);
+        }
         current_prgm = saved_prgm;
         flags.f.prgm_mode = saved_prgm_mode;
         flags.f.printer_exists = prev_printer_exists;

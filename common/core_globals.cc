@@ -1093,8 +1093,9 @@ bool no_keystrokes_yet;
  * Version 36: 1.1    Matrix editor full screen: save offsets
  * Version 37: 1.1    Matrix editor full screen: globals for offsets
  * Version 38: 1.1    Matrix editor full screen: STK toggle
+ * Version 39: 1.1.5  Code mapping fix for N+U; requires eqn reparse
  */
-#define PLUS42_VERSION 38
+#define PLUS42_VERSION 39
 
 
 /*******************/
@@ -5110,7 +5111,7 @@ static bool load_state2(bool *clear, bool *too_new) {
     // When parser or code generator bugs are fixed, or when the semantics of
     // generated code are changed, re-parse all equations so all equation code
     // is re-generated.
-    if (ver < 35) {
+    if (ver < 39) {
         set_running(false);
         clear_all_rtns();
         pc = -1;
