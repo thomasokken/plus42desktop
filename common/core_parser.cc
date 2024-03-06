@@ -280,17 +280,21 @@ class GeneratorContext {
         // Then, the rest...
         int4 pc = -1;
         lineno = 0;
+        int skipcount = 0;
         for (int i = 0; i < lines->size(); i++) {
             Line *line = (*lines)[i];
             if (line->cmd == CMD_LBL)
                 continue;
-            if (line->cmd == CMD_N_PLUS_U)
-                lineno--;
-            else
-                lineno++;
             store_command_after(&pc, line->cmd, &line->arg, NULL);
-            if (map != NULL)
-                map->add(line->pos, lineno);
+            if (skipcount == 0) {
+                lineno++;
+                if (map != NULL)
+                    map->add(line->pos, lineno);
+            } else {
+                skipcount--;
+            }
+            if (line->cmd == CMD_N_PLUS_U)
+                skipcount = 2;
         }
         if (map != NULL)
             map->add(-2, ((uint4) -1) >> 1);
@@ -3146,14 +3150,14 @@ class Unit : public BinaryEvaluator {
             ctx->addLine(tpos, CMD_UBASE);
             ctx->addLine(tpos, CMD_UNIT_T);
             ctx->addLine(tpos, CMD_RAISE, ERR_INVALID_DATA);
-        } else {
-            bool n_plus_u = left->isLiteral() && right->isString();
-            if (n_plus_u)
-                ctx->addLine(tpos, CMD_N_PLUS_U);
+        } else if (left->isLiteral() && right->isString()) {
+            ctx->addLine(left->pos(), CMD_N_PLUS_U);
             left->generateCode(ctx);
             right->generateCode(ctx);
-            if (!n_plus_u)
-                ctx->addLine(tpos, CMD_TO_UNIT);
+        } else {
+            left->generateCode(ctx);
+            right->generateCode(ctx);
+            ctx->addLine(tpos, CMD_TO_UNIT);
         }
     }
 
