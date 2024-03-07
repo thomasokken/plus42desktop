@@ -16,6 +16,13 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    FILE *in = fopen(argv[1], "rb");
+    if (in == NULL) {
+        fprintf(stderr, "Can't open input file: %s\n", strerror(errno));
+        return 1;
+    }
+    fclose(in);
+
     int rows = 8, cols = 22;
     core_init(&rows, &cols, 0, NULL);
 
@@ -25,7 +32,12 @@ int main(int argc, char *argv[]) {
     if (len >= 4 && strcasecmp(argv[1] + (len - 4), ".raw") == 0)
         len -= 4;
     std::string outname = std::string(argv[1], len) + ".txt";
+
     FILE *out = fopen(outname.c_str(), "wb");
+    if (out == NULL) {
+        fprintf(stderr, "Can't open output file: %s\n", strerror(errno));
+        return 1;
+    }
 
     flags.f.prgm_mode = 1;
     for (int i = 0; i < cwd->prgms_count; i++) {
