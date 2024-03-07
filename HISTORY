@@ -1,3 +1,9 @@
+2024-03-07: release 1.1.5
+
+* Direct command mapping now supports alternate mappings for ALPHA mode.
+* Fixed source highlighting glitch when tracing N+U in equations.
+* Windows version: Fixed a couple of display glitches.
+
 2024-03-04: release 1.1.4e (Windows, MacOS, and Linux)
 
 * Windows, MacOS, and Linux versions: Constraining print-out window height to
