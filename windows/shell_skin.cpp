@@ -1056,7 +1056,7 @@ unsigned char *skin_find_macro(int ckey, int *type) {
     SkinMacro *m = macrolist;
     while (m != NULL) {
         if (m->code == ckey) {
-            if (!m->isName || m->secondType == 0 || !core_alpha_menu()) {
+            if (!m->isName || m->secondType == 0 || core_alpha_menu() != 1) {
                 *type = m->isName ? 1 : 0;
                 return m->macro;
             } else {

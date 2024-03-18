@@ -233,8 +233,8 @@ bool alpha_active() {
     return menu >= MENU_ALPHA1 && menu <= MENU_ALPHA_MISC2;
 }
 
-bool core_alpha_menu() {
-    return !mode_getkey && alpha_active() || eqn_editing();
+int core_alpha_menu() {
+    return !mode_getkey && alpha_active() ? 1 : eqn_editing() ? 2 : 0;
 }
 
 bool core_hex_menu() {

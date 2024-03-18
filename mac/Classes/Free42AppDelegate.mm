@@ -1356,7 +1356,7 @@ void calc_keydown(NSString *characters, NSUInteger flags, unsigned short keycode
         // effect for R/S will never be overridden by the special cases
         // for the ALPHA and A..F menus.
         if (!ctrl && !alt) {
-            if ((printable || c == ' ') && core_alpha_menu()) {
+            if ((printable || c == ' ') && core_alpha_menu() != 0) {
                 if (c >= 'a' && c <= 'z')
                     c = c + 'A' - 'a';
                 else if (c >= 'A' && c <= 'Z')

@@ -2750,7 +2750,7 @@ static gboolean key_cb(GtkWidget *w, GdkEventKey *event, gpointer cd) {
                 // for the ALPHA and A..F menus.
                 if (!ctrl && !alt) {
                     char c = event->string[0];
-                    if (printable && core_alpha_menu()) {
+                    if (printable && core_alpha_menu() != 0) {
                         if (c >= 'a' && c <= 'z')
                             c = c + 'A' - 'a';
                         else if (c >= 'A' && c <= 'Z')

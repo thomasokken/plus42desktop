@@ -90,8 +90,10 @@ bool core_menu();
  * Free42) are handled: in alpha mode, printable ASCII characters are sent
  * straight to the core; outside alpha mode, all key events are translated
  * sequences of HP-42S key events according to the keymap file.
+ * Returns: 0: ALPHA menu not active; 1: ALPHA menu active; 2: equation editor
+ * active.
  */
-bool core_alpha_menu();
+int core_alpha_menu();
 
 /* core_hex_menu()
  *

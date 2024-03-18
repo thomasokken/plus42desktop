@@ -786,7 +786,7 @@ static LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
                     // The test above is to make sure that whatever mapping is in
                     // effect for R/S will never be overridden by the special cases
                     // for the ALPHA and A..F menus.
-                    if (printable && core_alpha_menu()) {
+                    if (printable && core_alpha_menu() != 0) {
                         if (keyChar >= 'a' && keyChar <= 'z')
                             keyChar = keyChar + 'A' - 'a';
                         else if (keyChar >= 'A' && keyChar <= 'Z')
