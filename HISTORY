@@ -1,3 +1,8 @@
+2024-03-18: release 1.1.6
+
+* Fixed keyboard mapping bug in the equation editor. This bug was caused by the
+  alternate direct command mapping changes in 1.1.5.
+
 2024-03-07: release 1.1.5
 
 * Direct command mapping now supports alternate mappings for ALPHA mode.
