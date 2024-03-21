@@ -1,3 +1,7 @@
+2024-03-21: release 1.1.6a (Windows only)
+
+* Reduced display blurriness when the main window is resized.
+
 2024-03-18: release 1.1.6
 
 * Fixed keyboard mapping bug in the equation editor. This bug was caused by the
