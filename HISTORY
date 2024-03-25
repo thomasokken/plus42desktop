@@ -1,3 +1,8 @@
+2024-03-25: release 1.1.7
+
+* EDIT and EDITN, when editing lists, would not display the current element
+  index correctly in 1LINE mode. Fixed.
+
 2024-03-22: release 1.1.6b (iOS, Windows, and MacOS)
 
 * Windows version: Fixed display flicker using buffered painting.
