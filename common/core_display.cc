@@ -1935,11 +1935,28 @@ static void display_level(int level, int row) {
     int bufptr = 0;
     if (level == 0 && (matedit_mode == 2 || matedit_mode == 3)) {
         char nbuf[10];
-        int n = int2string(matedit_i + 1, nbuf, 10);
-        string2buf(buf, len, &bufptr, nbuf, n);
-        char2buf(buf, len, &bufptr, ':');
-        n = int2string(matedit_j + 1, nbuf, 10);
-        string2buf(buf, len, &bufptr, nbuf, n);
+        int n;
+        for (int i = 0; i < matedit_stack_depth; i++) {
+            n = int2string(matedit_stack[i].coord + 1, nbuf, 10);
+            string2buf(buf, len, &bufptr, nbuf, n);
+            char2buf(buf, len, &bufptr, '.');
+        }
+        if (matedit_is_list) {
+            vartype *m;
+            int err = matedit_get(&m);
+            if (err != ERR_NONE || ((vartype_list *) m)->size == 0) {
+                char2buf(buf, len, &bufptr, 'E');
+            } else {
+                n = int2string(matedit_i + 1, nbuf, 10);
+                string2buf(buf, len, &bufptr, nbuf, n);
+            }
+        } else {
+            n = int2string(matedit_i + 1, nbuf, 10);
+            string2buf(buf, len, &bufptr, nbuf, n);
+            char2buf(buf, len, &bufptr, ':');
+            n = int2string(matedit_j + 1, nbuf, 10);
+            string2buf(buf, len, &bufptr, nbuf, n);
+        }
         char2buf(buf, len, &bufptr, '=');
     } else if (level == 0 && input_length > 0) {
         string2buf(buf, len, &bufptr, input_name, input_length);
