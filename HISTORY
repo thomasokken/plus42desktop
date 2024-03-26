@@ -1,3 +1,7 @@
+2024-03-26: release 1.1.8
+
+* Accuracy improvements for C.LN1+X, and complex LN, ATAN, and ATANH.
+
 2024-03-25: release 1.1.7
 
 * EDIT and EDITN, when editing lists, would not display the current element
