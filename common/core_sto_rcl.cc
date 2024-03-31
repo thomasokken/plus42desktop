@@ -441,7 +441,7 @@ int generic_sto(arg_struct *arg, char operation) {
                     free_vartype(newval);
                 return err;
             } else {
-                vloc loc = lookup_var(arg->val.text, arg->length, false, true);
+                vloc loc = lookup_var(arg->val.text, arg->length);
                 if (loc.not_found())
                     return ERR_NONEXISTENT;
                 if (!loc.writable())
