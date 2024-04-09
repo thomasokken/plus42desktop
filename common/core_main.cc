@@ -4662,7 +4662,26 @@ void core_paste(const char *buf) {
         stop_interruptible();
     set_running(false);
 
-    if (flags.f.prgm_mode) {
+    if (mode_command_entry) {
+        if (incomplete_alpha) {
+            char hpbuf[54];
+            int len = ascii2hp(hpbuf, 50, buf);
+            int maxlen = incomplete_argtype == ARG_XSTR ? 50 : 7;
+            maxlen -= incomplete_length;
+            if (len > maxlen)
+                len = maxlen;
+            if (len == 0) {
+                squeak();
+                return;
+            } else {
+                memcpy(incomplete_str + incomplete_length, hpbuf, len);
+                incomplete_length += len;
+            }
+        } else {
+            squeak();
+            return;
+        }
+    } else if (flags.f.prgm_mode) {
         paste_programs(buf);
     } else if (alpha_active()) {
         char hpbuf[48];
