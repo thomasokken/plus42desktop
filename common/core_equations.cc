@@ -1166,7 +1166,8 @@ static void draw_menu(bool highlight) {
     const menu_item_spec *mi = getmenu(edit.id)->child;
     for (int i = 0; i < 6; i++) {
         int id = mi[i].menuid;
-        if (id == MENU_NONE || (id & 0x3000) != 0x1000) {
+        int flags;
+        if (id == MENU_NONE || (flags = id & 0x3000) != 0x1000 && flags != 0x2000) {
             draw_key(i, 0, 0, mi[i].title, mi[i].title_length);
         } else {
             id &= 0x0fff;
@@ -1354,7 +1355,7 @@ bool eqn_draw() {
         } else if (edit.id == MENU_PRINT2) {
             draw_print2_menu();
         } else if (edit.id >= MENU_MODES1 && edit.id <= MENU_MODES5
-                || edit.id == MENU_DISP1 || edit.id == MENU_DISP2) {
+                || edit.id >= MENU_DISP1 && edit.id <= MENU_DISP4) {
             draw_menu(true);
         } else {
             goto draw_eqn_menu;
@@ -1556,7 +1557,7 @@ int eqn_keydown(int key, int *repeat) {
     else if (edit.id == MENU_PRINT2)
         return keydown_print2(key, shift, repeat);
     else if (edit.id >= MENU_MODES1 && edit.id <= MENU_MODES5
-            || edit.id == MENU_DISP1 || edit.id == MENU_DISP2)
+            || edit.id >= MENU_DISP1 && edit.id <= MENU_DISP4)
         return keydown_modes(key, shift, repeat);
     else if (edit_pos == -1)
         return keydown_list(key, shift, repeat);
@@ -1804,7 +1805,7 @@ static int keydown_modes(int key, bool shift, int *repeat) {
             if (shift)
                 // TODO: stickiness
                 // (figure out stickiness for PRINT menu, too)
-                if (edit.id == MENU_DISP1 || edit.id == MENU_DISP2) {
+                if (edit.id >= MENU_DISP1 && edit.id <= MENU_DISP4) {
                     edit.id = MENU_MODES1;
                     eqn_draw();
                 }
