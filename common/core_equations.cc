@@ -706,9 +706,17 @@ static eqn_name_entry eqn_name[] = {
  * are allowed.
  */
 static bool insert_function(int cmd) {
-    if (cmd == CMD_NULL) {
-        squeak();
-        return false;
+    switch (cmd) {
+        case CMD_NULL:
+            squeak();
+            return false;
+        case CMD_PERCENT:
+            return insert_text("%", 1);
+        case CMD_PI:
+            if (flags.f.eqn_compat)
+                return insert_text("PI", 2);
+            else
+                return insert_text("\7", 1);
     }
     for (int i = 0; eqn_name[i].cmd != CMD_NULL; i++) {
         if (cmd == eqn_name[i].cmd) {
