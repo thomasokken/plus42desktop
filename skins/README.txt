@@ -79,10 +79,10 @@ Flags: The "flags" line is a combination of these options: 1 = put FCN on the
   the other way around; and 4 = put TVM on Shift-0 instead of TOP.FCN. When
   there is no "flags," that's the same as Flags: 0.
 
-Finally, Plus42 can change the X<>Y, E, period, and R/S keys, to (, ), period/
-comma, and =, respectively, while the equation editor is active. To specify the
-alternate sections of skin background, and the alternate pressed-key images,
-use the AltBkgd and AltKey elements:
+Finally, Plus42 can change the X<>Y, +/-, period, and R/S keys, to (, ),
+period/comma, and =, respectively, while the equation editor is active. To
+specify the alternate sections of skin background, and the alternate pressed-
+key images, use the AltBkgd and AltKey elements:
 
 AltBkgd: mode src_rect dst_point
   Defines an image to be overlaid on the skin when the given mode is in effect.
