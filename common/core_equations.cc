@@ -1467,7 +1467,7 @@ static int keydown_list(int key, bool shift, int *repeat);
 static int keydown_edit(int key, bool shift, int *repeat);
 static int keydown_print1(int key, bool shift, int *repeat);
 static int keydown_print2(int key, bool shift, int *repeat);
-static int keydown_modes_number(int key, int shift, int *repeat);
+static int keydown_modes_number(int key, bool shift, int *repeat);
 static int keydown_modes(int key, bool shift, int *repeat);
 static int keydown_error(int key, bool shift, int *repeat);
 static int keydown_save_confirmation(int key, bool shift, int *repeat);
@@ -1746,9 +1746,22 @@ static int keydown_modes(int key, bool shift, int *repeat) {
             int cmd = menus[edit.id].child[key - 1].menuid & 0x0fff;
             if (cmd == CMD_NULL) {
                 squeak();
-            } else if (cmd == CMD_WSIZE_T) {
+            } else if (cmd == CMD_WSIZE_T || cmd == CMD_WIDTH || cmd == CMD_HEIGHT || cmd == CMD_GETDS) {
                 char buf[23];
-                snprintf(buf, 23, "WSIZE = %02d", mode_wsize);
+                switch (cmd) {
+                    case CMD_WSIZE_T:
+                        snprintf(buf, 23, "WSIZE = %02d", mode_wsize);
+                        break;
+                    case CMD_WIDTH:
+                        snprintf(buf, 23, "WIDTH = %d", disp_w);
+                        break;
+                    case CMD_HEIGHT:
+                        snprintf(buf, 23, "HEIGHT = %d", disp_h);
+                        break;
+                    case CMD_GETDS:
+                        snprintf(buf, 23, "Rows = %d, Cols = %d", disp_r, disp_c);
+                        break;
+                }
                 clear_row(0);
                 draw_string(0, 0, buf, strlen(buf));
                 flush_display();
@@ -1775,6 +1788,8 @@ static int keydown_modes(int key, bool shift, int *repeat) {
                 dialog_cmd = cmd;
                 dialog = DIALOG_MODES;
                 eqn_draw();
+            } else if (cmd == CMD_SETDS) {
+                squeak();
             } else {
                 arg_struct arg;
                 arg.type = ARGTYPE_NONE;
@@ -2258,7 +2273,7 @@ static int keydown_sto_overwrite(int key, bool shift, int *repeat) {
     return 1;
 }
 
-static int keydown_modes_number(int key, int shift, int *repeat) {
+static int keydown_modes_number(int key, bool shift, int *repeat) {
     if (shift) {
         if (key == KEY_EXIT)
             docmd_off(NULL);
