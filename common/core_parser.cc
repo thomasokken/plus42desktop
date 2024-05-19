@@ -2112,6 +2112,70 @@ class Literal : public Evaluator {
     }
 };
 
+//////////////////////
+/////  LocalEll  /////
+//////////////////////
+
+class LocalEll : public Evaluator {
+
+    private:
+
+    std::string name;
+    Evaluator *value;
+    std::vector<Evaluator *> *evs;
+
+    public:
+
+    LocalEll(int pos, std::string name, Evaluator *value, std::vector<Evaluator *> *evs) : Evaluator(pos), name(name), value(value), evs(evs) {}
+
+    ~LocalEll() {
+        delete value;
+        for (int i = 0; i < evs->size(); i++)
+            delete (*evs)[i];
+        delete evs;
+    }
+
+    Evaluator *clone(For *f) {
+        std::vector<Evaluator *> *evs2 = new std::vector<Evaluator *>;
+        for (int i = 0; i < evs->size(); i++)
+            evs2->push_back((*evs)[i]->clone(f));
+        return new LocalEll(tpos, name, value->clone(f), evs2);
+    }
+
+    void generateCode(GeneratorContext *ctx) {
+        int lbl = ctx->nextLabel();
+        ctx->addLine(tpos, CMD_XEQL, lbl);
+        ctx->pushSubroutine();
+        ctx->addLine(tpos, CMD_LBL, lbl);
+        value->generateCode(ctx);
+        ctx->addLine(tpos, CMD_LSTO, name);
+        for (int i = 0; i < evs->size(); i++) {
+            ctx->addLine(tpos, CMD_DROP);
+            (*evs)[i]->generateCode(ctx);
+        }
+        ctx->popSubroutine();
+    }
+
+    void collectVariables(std::vector<std::string> *vars, std::vector<std::string> *locals) {
+        value->collectVariables(vars, locals);
+        locals->push_back(name);
+        for (int i = 0; i < evs->size(); i++)
+            (*evs)[i]->collectVariables(vars, locals);
+        locals->pop_back();
+    }
+
+    int howMany(const std::string &nam) {
+        if (value->howMany(nam) != 0)
+            return -1;
+        if (nam == name)
+            return 0;
+        for (int i = 0; i < evs->size(); i++)
+            if ((*evs)[i]->howMany(name) != 0)
+                return -1;
+        return 0;
+    }
+};
+
 /////////////////
 /////  Max  /////
 /////////////////
@@ -4619,6 +4683,10 @@ Evaluator *Parser::parseThing() {
             } else if (t == "L") {
                 min_args = max_args = 2;
                 mode = EXPR_LIST_LVALUE;
+            } else if (t == "LL") {
+                min_args = 3;
+                max_args = INT_MAX;
+                mode = EXPR_LIST_NAME;
             } else if (t == "ITEM") {
                 min_args = 2;
                 max_args = 3;
@@ -5006,6 +5074,14 @@ Evaluator *Parser::parseThing() {
                 } else {
                     return new Ell(tpos, left, right, lex->compatMode);
                 }
+            } else if (t == "LL") {
+                Evaluator *name = (*evs)[0];
+                evs->erase(evs->begin());
+                Evaluator *value = (*evs)[0];
+                evs->erase(evs->begin());
+                std::string n = name->name();
+                delete name;
+                return new LocalEll(tpos, n, value, evs);
             } else if (t == "ITEM") {
                 Evaluator *name = (*evs)[0];
                 Evaluator *ev1 = (*evs)[1];

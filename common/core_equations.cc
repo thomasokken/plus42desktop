@@ -188,19 +188,19 @@ const menu_spec eqn_menus[] = {
                         { 0x1000 + EQCMD_SEQ,      0, ""   },
                         { 0x1000 + CMD_XEQ,        0, ""   } } },
     { /* EQMN_PGM_FCN2 */ MENU_NONE, EQMN_PGM_FCN3, EQMN_PGM_FCN1,
-                      { { 0x0000 + CMD_GSTO,    1, "L"     },
-                        { 0x0000 + CMD_GRCL,    1, "G"     },
-                        { 0x0000 + CMD_SVAR,    1, "S"     },
-                        { 0x0000 + CMD_GETITEM, 4, "ITEM"  },
-                        { 0x1000 + EQCMD_MAX,   0, ""      },
-                        { 0x1000 + EQCMD_MIN,   0, ""      } } },
+                      { { 0x0000 + CMD_GSTO,    1, "L"  },
+                        { 0x0000 + CMD_LSTO,    2, "LL" },
+                        { 0x0000 + CMD_GRCL,    1, "G"  },
+                        { 0x0000 + CMD_SVAR,    1, "S"  },
+                        { 0x1000 + EQCMD_MAX,   0, ""   },
+                        { 0x1000 + EQCMD_MIN,   0, ""   } } },
     { /* EQMN_PGM_FCN3 */ MENU_NONE, EQMN_PGM_FCN4, EQMN_PGM_FCN2,
-                      { { 0x1000 + CMD_STOP,        0, "" },
-                        { 0x1000 + CMD_VIEW,        0, "" },
-                        { 0x2000 + EQMN_PGM_TYPES1, 5, "TYPES" },
-                        { 0x1000 + CMD_NULL,        0, "" },
-                        { 0x0000 + CMD_SIGMAADD,    1, "\5" },
-                        { 0x0000 + CMD_SIGMASUB,    1, "\3" } } },
+                      { { 0x1000 + CMD_STOP,        0, ""      },
+                        { 0x1000 + CMD_VIEW,        0, ""      },
+                        { 0x3000 + EQMN_PGM_TYPES1, 5, "TYPES" },
+                        { 0x0000 + CMD_GETITEM,     4, "ITEM"  },
+                        { 0x0000 + CMD_SIGMAADD,    1, "\5"    },
+                        { 0x0000 + CMD_SIGMASUB,    1, "\3"    } } },
     { /* EQMN_PGM_FCN4 */ MENU_NONE, EQMN_PGM_FCN1, EQMN_PGM_FCN3,
                       { { 0x1000 + CMD_DATE,    0, ""    },
                         { 0x1000 + CMD_TIME,    0, ""    },
@@ -681,6 +681,7 @@ static eqn_name_entry eqn_name[] = {
     { CMD_TIME,      5, "CTIME"    },
     { CMD_RAN,       4, "RAN#"     },
     { CMD_GSTO,      2, "L("       },
+    { CMD_LSTO,      3, "LL("      },
     { CMD_GRCL,      2, "G("       },
     { CMD_SVAR,      2, "S("       },
     { CMD_IF_T,      3, "IF("      },
@@ -3434,7 +3435,7 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
                 cmd = getmenu(edit.id)->child[key - 1].menuid;
                 if (cmd == MENU_NONE /*|| (cmd & 0xf000) == 0*/)
                     cmd = CMD_NULL;
-                else if ((cmd & 0x3000) == 0x2000) {
+                else if ((cmd & 0x3000) == 0x3000) {
                     update_menu(cmd & 0x0fff);
                     eqn_draw();
                     return 1;
