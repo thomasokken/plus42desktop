@@ -1094,8 +1094,9 @@ bool no_keystrokes_yet;
  * Version 37: 1.1    Matrix editor full screen: globals for offsets
  * Version 38: 1.1    Matrix editor full screen: STK toggle
  * Version 39: 1.1.5  Code mapping fix for N+U; requires eqn reparse
+ * Version 40: 1.1.11 Use local var for Integ() param; requires eqn reparse
  */
-#define PLUS42_VERSION 39
+#define PLUS42_VERSION 40
 
 
 /*******************/
@@ -5111,7 +5112,7 @@ static bool load_state2(bool *clear, bool *too_new) {
     // When parser or code generator bugs are fixed, or when the semantics of
     // generated code are changed, re-parse all equations so all equation code
     // is re-generated.
-    if (ver < 39) {
+    if (ver < 40) {
         set_running(false);
         clear_all_rtns();
         pc = -1;

@@ -1931,40 +1931,54 @@ class Integ : public Evaluator {
     }
 
     void generateCode(GeneratorContext *ctx) {
+        llim->generateCode(ctx);
+        ulim->generateCode(ctx);
+        if (acc != NULL)
+            acc->generateCode(ctx);
+        ctx->addLine(tpos, (phloat) 0);
+        int lbl = ctx->nextLabel();
+        ctx->addLine(tpos, CMD_XEQL, lbl);
+        ctx->pushSubroutine();
+        ctx->addLine(tpos, CMD_LBL, lbl);
+        ctx->addLine(tpos, CMD_LSTO, integ_var);
+        ctx->addLine(tpos, CMD_DROP);
+        if (acc != NULL) {
+            ctx->addLine(tpos, CMD_LSTO, std::string("ACC"));
+            ctx->addLine(tpos, CMD_DROP);
+        }
+        ctx->addLine(tpos, CMD_LSTO, std::string("ULIM"));
+        ctx->addLine(tpos, CMD_DROP);
+        ctx->addLine(tpos, CMD_LSTO, std::string("LLIM"));
+        ctx->addLine(tpos, CMD_DROP);
         ctx->addLine(tpos, CMD_XSTR, expr->getText());
         ctx->addLine(tpos, CMD_PARSE);
         ctx->addLine(tpos, CMD_EQNINT, 'X');
-        llim->generateCode(ctx);
-        ctx->addLine(tpos, CMD_LSTO, std::string("LLIM"));
-        ulim->generateCode(ctx);
-        ctx->addLine(tpos, CMD_LSTO, std::string("ULIM"));
-        if (acc != NULL) {
-            acc->generateCode(ctx);
-            ctx->addLine(tpos, CMD_LSTO, std::string("ACC"));
-        }
-        ctx->addLine(tpos, CMD_DROPN, acc == NULL ? 3 : 4);
+        ctx->addLine(tpos, CMD_DROP);
         ctx->addLine(tpos, CMD_INTEG, integ_var);
         ctx->addLine(tpos, CMD_SWAP);
         ctx->addLine(tpos, CMD_DROP);
+        ctx->popSubroutine();
     }
 
     void collectVariables(std::vector<std::string> *vars, std::vector<std::string> *locals) {
         locals->push_back(integ_var);
         expr->collectVariables(vars, locals);
+        locals->pop_back();
         llim->collectVariables(vars, locals);
         ulim->collectVariables(vars, locals);
         if (acc != NULL)
             acc->collectVariables(vars, locals);
-        locals->pop_back();
     }
 
     int howMany(const std::string &nam) {
         if (nam != integ_var) {
-            if (llim->howMany(nam) != 0
-                    || ulim->howMany(nam) != 0
-                    || acc != NULL && acc->howMany(nam) != 0)
+            if (expr->howMany(nam) != 0)
                 return -1;
         }
+        if (llim->howMany(nam) != 0
+                || ulim->howMany(nam) != 0
+                || acc != NULL && acc->howMany(nam) != 0)
+            return -1;
         return 0;
     }
 };
@@ -2167,11 +2181,11 @@ class LocalEll : public Evaluator {
     int howMany(const std::string &nam) {
         if (value->howMany(nam) != 0)
             return -1;
-        if (nam == name)
-            return 0;
-        for (int i = 0; i < evs->size(); i++)
-            if ((*evs)[i]->howMany(name) != 0)
-                return -1;
+        if (nam != name) {
+            for (int i = 0; i < evs->size(); i++)
+                if ((*evs)[i]->howMany(name) != 0)
+                    return -1;
+        }
         return 0;
     }
 };
@@ -2949,23 +2963,23 @@ class Sigma : public Evaluator {
     }
 
     void collectVariables(std::vector<std::string> *vars, std::vector<std::string> *locals) {
-        locals->push_back(name);
         from->collectVariables(vars, locals);
         to->collectVariables(vars, locals);
         step->collectVariables(vars, locals);
+        locals->push_back(name);
         ev->collectVariables(vars, locals);
         locals->pop_back();
     }
 
     int howMany(const std::string &nam) {
-        if (nam != name) {
-            if (ev->howMany(nam) != 0)
-                return -1;
-        }
         if (from->howMany(nam) != 0
                 || to->howMany(nam) != 0
                 || step->howMany(nam) != 0)
             return -1;
+        if (nam != name) {
+            if (ev->howMany(nam) != 0)
+                return -1;
+        }
         return 0;
     }
 };
