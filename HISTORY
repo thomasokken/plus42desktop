@@ -1,3 +1,9 @@
+2024-05-21: release 1.1.11
+
+* Implemented LL(NAME:VALUE:EXPR). This creates a local variable and executes
+  one or more expressions while the local variable is in scope.
+* Fixed parameter visibility issues in Σ() and ∫().
+
 2024-05-15: release 1.1.10a (Android, iOS, and MacOS)
 
 * PSE could halt program execution if it was used right after TONE or BEEP.
