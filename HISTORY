@@ -1,3 +1,9 @@
+2024-05-28: release 1.1.12
+
+* Fixed handling of ºC and ºF return values in numeric solver.
+* Android version: Fixed crash for certain unrecognized key codes from
+  Bluetooth keyboards.
+
 2024-05-21: release 1.1.11
 
 * Implemented LL(NAME:VALUE:EXPR). This creates a local variable and executes
