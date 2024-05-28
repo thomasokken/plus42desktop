@@ -973,6 +973,9 @@ int return_to_solve(bool failure, bool stop) {
                 solve.best_x = solve.curr_x;
             }
         } else if (stack[sp]->type == TYPE_UNIT) {
+            vartype_unit *u = (vartype_unit *) stack[sp];
+            if (u->length == 2 && u->text[0] == 19 && (u->text[1] == 'C' || u->text[1] == 'F'))
+                goto real_result;
             bool saved_norm = flags.f.normal_print;
             bool saved_trace = flags.f.trace_print;
             flags.f.normal_print = false;
