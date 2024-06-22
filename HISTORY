@@ -1,6 +1,6 @@
 2024-05-28: release 1.1.12
 
-* Fixed handling of ºC and ºF return values in numeric solver.
+* Fixed handling of °C and °F return values in numeric solver.
 * Android version: Fixed crash for certain unrecognized key codes from
   Bluetooth keyboards.
 
