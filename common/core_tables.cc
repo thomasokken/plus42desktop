@@ -62,7 +62,7 @@
 // XROM 30,37-63 (a7a5-a7bf) (Card Reader)
 // XROM 31,00-63 (a7c0-a7ff) (Data Logger)
 
-// Available XROMs: a6ee, a7dc, a7dd, a7e0, a7f5 (*), a7fa, a7fb
+// Available XROMs: a7dc, a7dd, a7e0, a7f5 (*), a7fa, a7fb
 // (*) Before reusing a7f5 (formerly NEWSTR), remove it from core_import_programs().
 // Time Module: a681-a6a3, of which we're only using some; see below.
 
@@ -419,6 +419,7 @@ const command_spec cmd_array[] =
     { /* BWRAP */       docmd_bwrap,       "BWR\301P",            0x00, 0x00, 0xa7, 0xd7,  5, ARG_NONE,   0, NA_T },
     { /* BRESET */      docmd_breset,      "BR\305S\305T",        0x00, 0x00, 0xa7, 0xd8,  6, ARG_NONE,   0, NA_T },
     { /* GETKEY1 */     docmd_getkey1,     "G\305TK\305\3311",    0x00, 0x00, 0xa7, 0xd9,  7, ARG_NONE,   0, NA_T },
+    { /* GETKEYA */     docmd_getkeya,     "G\305TK\305\331A",    0x00, 0x00, 0xa6, 0xee,  7, ARG_NONE,   0, NA_T },
     { /* LASTO */       docmd_lasto,       "LASTO",               0x00, 0xf5, 0xf2, 0xc8,  5, ARG_NAMED,  0, NA_T },
     { /* LCLV */        docmd_lclv,        "LCLV",                0x00, 0x71, 0xf2, 0x64,  4, ARG_NAMED,  0, NA_T },
 
