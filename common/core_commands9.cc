@@ -1212,7 +1212,7 @@ static int do_i_pct_yr(phloat n, phloat pv, phloat pmt, phloat fv, phloat p_yr, 
         phloat f = 0;
         while (true) {
             phloat eps, f0 = f;
-            if (1 + i * i == 1) {
+            if (1 + n * i * i == 1) {
                 phloat a = (pv + fv) / n;
                 phloat b = pv - fv;
                 phloat fp = (a + b) / 2;
@@ -1240,7 +1240,7 @@ static int do_i_pct_yr(phloat n, phloat pv, phloat pmt, phloat fv, phloat p_yr, 
             if (f == 0 || (f > 0) != (f0 > 0))
                 break;
             if (fabs(f) >= fabs(f0)) {
-                if (i == i - eps / 1000) {
+                if (i + eps * 1e-6 == i) {
                     i -= eps / 2;
                     break;
                 } else
