@@ -1213,12 +1213,11 @@ static int do_i_pct_yr(phloat n, phloat pv, phloat pmt, phloat fv, phloat p_yr, 
         while (true) {
             phloat eps, f0 = f;
             if (1 + n * i * i == 1) {
-                phloat a = (pv + fv) / n;
-                phloat b = pv - fv;
-                phloat fp = (a + b) / 2;
-                phloat fpp = (n * n - 1) * a / 6;
-                f = a + pmt + fp * i;
-                fp += fpp * i;
+                f = (pv + fv + n * pmt) / n;        // f(0)
+                phloat a = f - pmt;                 // f(0) - pmt
+                phloat b = (n * n - 1) * a / 6 * i; // f''(0)*i    
+                phloat fp = (pv - fv + a) / 2 + b;  // f'(0) + f''(0)*i
+                f = f + (fp - b / 2) * i;           // f(0) + f'(0)*i + f''(0)/2*i^2
                 i += (eps = -f / fp);
             } else {
                 phloat x = i / expm1(n * log1p(i));
