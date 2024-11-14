@@ -1,3 +1,8 @@
+2024-11-14: release 1.1.14
+
+* I%YR fixes for values close to zero.
+* Now pre-populating state name for States -> More -> Rename.
+
 2024-10-27: release 1.1.13
 
 * Implemented GETKEYA. This works like GETKEY, except that it will not wait for
