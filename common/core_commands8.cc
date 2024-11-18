@@ -1292,6 +1292,17 @@ static bool equiv_units(const std::string &x, const std::string &y) {
     return x == y || x == "" && y == "r" || x == "r" && y == "";
 }
 
+#ifdef BCD_MATH
+    /* Exact decimal temperature conversion constants */
+    const Phloat LIT_1_8(18, 10);
+    const Phloat LIT_273_15(27315, 100);
+    const Phloat LIT_459_67(45967, 100);
+#else
+    #define LIT_1_8 1.8
+    #define LIT_273_15 273.15
+    #define LIT_459_67 459.67
+#endif
+
 int convert_helper(const vartype *X, const vartype *Y, phloat *res) {
     /* Convert Y to match the units of X; used for CONVERT,
      * addition, and subtraction
@@ -1317,32 +1328,32 @@ int convert_helper(const vartype *X, const vartype *Y, phloat *res) {
             // only be another temperature unit
             if (bux == "\23C")
                 if (buy == "\23F")
-                    *res = (y - 32) / 1.8;
+                    *res = (y - 32) / LIT_1_8;
                 else if (buy == "K")
-                    *res = y - 273.15;
+                    *res = y - LIT_273_15;
                 else // buy == "\23R"
-                    *res = y / 1.8 - 273.15;
+                    *res = y / LIT_1_8 - LIT_273_15;
             else if (bux == "\23F")
                 if (buy == "\23C")
-                    *res = y * 1.8 + 32;
+                    *res = y * LIT_1_8 + 32;
                 else if (buy == "K")
-                    *res = y * 1.8 - 459.67;
+                    *res = y * LIT_1_8 - LIT_459_67;
                 else // buy == "\23R"
-                    *res = y - 459.67;
+                    *res = y - LIT_459_67;
             else if (bux == "K")
                 if (buy == "\23C")
-                    *res = y + 273.15;
+                    *res = y + LIT_273_15;
                 else if (buy == "\23F")
-                    *res = (y + 459.67) / 1.8;
+                    *res = (y + LIT_459_67) / LIT_1_8;
                 else // buy == "\23R" (can't get here)
-                    *res = y / 1.8;
+                    *res = y / LIT_1_8;
             else // bux == "\23R"
                 if (buy == "\23C")
-                    *res = (y + 273.15) * 1.8;
+                    *res = (y + LIT_273_15) * LIT_1_8;
                 else if (buy == "\23F")
-                    *res = y + 459.67;
+                    *res = y + LIT_459_67;
                 else // buy == "K" (can't get here)
-                    *res = y * 1.8;
+                    *res = y * LIT_1_8;
         } else
             goto normal;
     } else {
@@ -1422,9 +1433,9 @@ int docmd_ubase(arg_struct *arg) {
         vartype_unit *u = (vartype_unit *) stack[sp];
         std::string ou(u->text, u->length);
         if (ou == "\23C")
-            r = x + 273.15;
+            r = x + LIT_273_15;
         else if (ou == "\23F")
-            r = (x + 459.67) / 1.8;
+            r = (x + LIT_459_67) / LIT_1_8;
         else
             goto normal;
     } else {
