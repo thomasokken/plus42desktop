@@ -2799,10 +2799,11 @@ class Seq : public Evaluator {
 
     std::vector<Evaluator *> *evs;
     bool view;
+    bool compatMode;
 
     public:
 
-    Seq(int pos, bool view, std::vector<Evaluator *> *evs) : Evaluator(pos), evs(evs), view(view) {}
+    Seq(int pos, bool view, bool compatMode, std::vector<Evaluator *> *evs) : Evaluator(pos), evs(evs), view(view), compatMode(compatMode) {}
 
     ~Seq() {
         for (int i = 0; i < evs->size(); i++)
@@ -2814,7 +2815,7 @@ class Seq : public Evaluator {
         std::vector<Evaluator *> *evs2 = new std::vector<Evaluator *>;
         for (int i = 0; i < evs->size(); i++)
             evs2->push_back((*evs)[i]->clone(f));
-        return new Seq(tpos, view, evs2);
+        return new Seq(tpos, view, compatMode, evs2);
     }
 
     Evaluator *invert(const std::string &name, Evaluator *rhs) {
@@ -2822,22 +2823,38 @@ class Seq : public Evaluator {
         for (int i = 0; i < evs->size() - 1; i++)
             evs2->push_back((*evs)[i]->clone(NULL));
         evs2->push_back(rhs);
-        return evs->back()->invert(name, new Seq(0, view, evs2));
+        return evs->back()->invert(name, new Seq(0, view, compatMode, evs2));
     }
 
     void generateCode(GeneratorContext *ctx) {
-        bool first = true;
-        for (int i = 0; i < evs->size(); i++) {
-            if (first)
-                first = false;
-            else
-                ctx->addLine(tpos, CMD_DROP);
-            (*evs)[i]->generateCode(ctx);
+        int sz = evs->size();
+        for (int i = 0; i < sz; i++) {
+            Evaluator *ev = (*evs)[i];
+            bool isLast = i == sz - 1;
+            bool generate = isLast || ev->name() == "";
+            if (generate)
+                ev->generateCode(ctx);
             if (view) {
-                std::string name = (*evs)[i]->name2();
+                std::string name = ev->name2();
                 if (name != "") {
-                    ctx->addLine(tpos, CMD_VIEW, name);
-                } else if ((*evs)[i]->isString()) {
+                    if (compatMode && ev->name() == "") {
+                        // L() using GSTO or G() using GRCL; if we just use VIEW
+                        // here, we could end up viewing a local instead of the
+                        // intended global. In order to print the correct value,
+                        // which is now in level 1, and print it with the NAME=
+                        // label, we create a local with the same name for VIEW
+                        // to pick up.
+                        int lbl = ctx->nextLabel();
+                        ctx->pushSubroutine();
+                        ctx->addLine(tpos, CMD_LBL, lbl);
+                        ctx->addLine(tpos, CMD_LSTO, name);
+                        ctx->addLine(tpos, CMD_VIEW, name);
+                        ctx->popSubroutine();
+                        ctx->addLine(tpos, CMD_XEQL, lbl);
+                    } else {
+                        ctx->addLine(tpos, CMD_VIEW, name);
+                    }
+                } else if (ev->isString()) {
                     ctx->addLine(tpos, CMD_XVIEW);
                 } else {
                     int lbl1 = ctx->nextLabel();
@@ -2851,6 +2868,8 @@ class Seq : public Evaluator {
                     ctx->addLine(tpos, CMD_LBL, lbl2);
                 }
             }
+            if (generate && !isLast)
+                ctx->addLine(tpos, CMD_DROP);
         }
     }
 
@@ -5058,7 +5077,7 @@ Evaluator *Parser::parseThing() {
                 evs->erase(evs->begin());
                 return new Xeq(tpos, n, evs, t == "EVALN");
             } else if (t == "SEQ" || t == "VIEW") {
-                return new Seq(tpos, t == "VIEW", evs);
+                return new Seq(tpos, t == "VIEW", lex->compatMode, evs);
             } else if (t == "IF") {
                 Evaluator *condition = (*evs)[0];
                 Evaluator *trueEv = (*evs)[1];
