@@ -256,6 +256,11 @@ static struct timeval runner_end_time;
     }
     printout_top = 0;
     print_text_top = 0;
+    
+    /* Suppress the Search box in the Help menu */
+    NSMenu *unusedMenu = [[NSMenu alloc] initWithTitle:@"Unused"];
+    NSApplication *theApp = [NSApplication sharedApplication];
+    theApp.helpMenu = unusedMenu;
 }
 
 static void low_battery_checker(CFRunLoopTimerRef timer, void *info) {
@@ -488,6 +493,24 @@ static void low_battery_checker(CFRunLoopTimerRef timer, void *info) {
     [aboutVersion setStringValue:[NSString stringWithFormat:@"Plus42 %s", version]];
     [aboutCopyright setStringValue:@"© 2004-2024 Thomas Okken"];
     [NSApp runModalForWindow:aboutWindow];
+}
+
+- (IBAction) showDocumentation:(id)sender {
+    NSString *urlStr = @"https://thomasokken.com/plus42/#doc";
+    NSURL *url = [NSURL URLWithString:urlStr];
+    [[NSWorkspace sharedWorkspace] openURL:url];
+}
+
+- (IBAction) showWebSite:(id)sender {
+    NSString *urlStr = @"https://thomasokken.com/plus42/";
+    NSURL *url = [NSURL URLWithString:urlStr];
+    [[NSWorkspace sharedWorkspace] openURL:url];
+}
+
+- (IBAction) showFree42WebSite:(id)sender {
+    NSString *urlStr = @"https://thomasokken.com/free42/";
+    NSURL *url = [NSURL URLWithString:urlStr];
+    [[NSWorkspace sharedWorkspace] openURL:url];
 }
 
 - (IBAction) showPreferences:(id)sender {
