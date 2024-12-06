@@ -2712,36 +2712,39 @@ static int ext_disp_cat[] = {
 #if defined(ANDROID) || defined(IPHONE)
 #ifdef FREE42_FPTEST
 static int ext_misc_cat[] = {
-    CMD_A2LINE,  CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_FMA,    CMD_LINE,
-    CMD_PCOMPLX, CMD_PLOT_M,  CMD_PRREG,    CMD_RCOMPLX,     CMD_SPFV,   CMD_SPPV,
-    CMD_STRACE,  CMD_TVM,     CMD_USFV,     CMD_USPV,        CMD_X2LINE, CMD_ACCEL,
-    CMD_LOCAT,   CMD_HEADING, CMD_FPTEST,   CMD_NULL,        CMD_NULL,   CMD_NULL
+    CMD_A2LINE, CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_FMA,    CMD_GETLI,
+    CMD_GETMI,  CMD_LINE,    CMD_PCOMPLX,  CMD_PLOT_M,      CMD_PRREG,  CMD_PUTLI,
+    CMD_PUTMI,  CMD_RCOMPLX, CMD_SPFV,     CMD_SPPV,        CMD_STRACE, CMD_TVM,
+    CMD_USFV,   CMD_USPV,    CMD_X2LINE,   CMD_ACCEL,       CMD_LOCAT,  CMD_HEADING,
+    CMD_FPTEST, CMD_NULL,    CMD_NULL,     CMD_NULL,        CMD_NULL,   CMD_NULL
 };
-#define MISC_CAT_ROWS 4
+#define MISC_CAT_ROWS 5
 #else
 static int ext_misc_cat[] = {
-    CMD_A2LINE,  CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_FMA,    CMD_LINE,
-    CMD_PCOMPLX, CMD_PLOT_M,  CMD_PRREG,    CMD_RCOMPLX,     CMD_SPFV,   CMD_SPPV,
-    CMD_STRACE,  CMD_TVM,     CMD_USFV,     CMD_USPV,        CMD_X2LINE, CMD_ACCEL,
-    CMD_LOCAT,   CMD_HEADING, CMD_NULL,     CMD_NULL,        CMD_NULL,   CMD_NULL
+    CMD_A2LINE, CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_FMA,    CMD_GETLI,
+    CMD_GETMI,  CMD_LINE,    CMD_PCOMPLX,  CMD_PLOT_M,      CMD_PRREG,  CMD_PUTLI,
+    CMD_PUTMI,  CMD_RCOMPLX, CMD_SPFV,     CMD_SPPV,        CMD_STRACE, CMD_TVM,
+    CMD_USFV,   CMD_USPV,    CMD_X2LINE,   CMD_ACCEL,       CMD_LOCAT,  CMD_HEADING
 };
 #define MISC_CAT_ROWS 4
 #endif
 #else
 #ifdef FREE42_FPTEST
 static int ext_misc_cat[] = {
-    CMD_A2LINE,  CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_FMA,    CMD_LINE,
-    CMD_PCOMPLX, CMD_PLOT_M,  CMD_PRREG,    CMD_RCOMPLX,     CMD_SPFV,   CMD_SPPV,
-    CMD_STRACE,  CMD_TVM,     CMD_USFV,     CMD_USPV,        CMD_X2LINE, CMD_FPTEST
+    CMD_A2LINE, CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_FMA,    CMD_GETLI,
+    CMD_GETMI,  CMD_LINE,    CMD_PCOMPLX,  CMD_PLOT_M,      CMD_PRREG,  CMD_PUTLI,
+    CMD_PUTMI,  CMD_RCOMPLX, CMD_SPFV,     CMD_SPPV,        CMD_STRACE, CMD_TVM,
+    CMD_USFV,   CMD_USPV,    CMD_X2LINE,   CMD_FPTEST,      CMD_NULL,   CMD_NULL
 };
-#define MISC_CAT_ROWS 3
+#define MISC_CAT_ROWS 4
 #else
 static int ext_misc_cat[] = {
-    CMD_A2LINE,  CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_FMA,    CMD_LINE,
-    CMD_PCOMPLX, CMD_PLOT_M,  CMD_PRREG,    CMD_RCOMPLX,     CMD_SPFV,   CMD_SPPV,
-    CMD_STRACE,  CMD_TVM,     CMD_USFV,     CMD_USPV,        CMD_X2LINE, CMD_NULL
+    CMD_A2LINE, CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_FMA,    CMD_GETLI,
+    CMD_GETMI,  CMD_LINE,    CMD_PCOMPLX,  CMD_PLOT_M,      CMD_PRREG,  CMD_PUTLI,
+    CMD_PUTMI,  CMD_RCOMPLX, CMD_SPFV,     CMD_SPPV,        CMD_STRACE, CMD_TVM,
+    CMD_USFV,   CMD_USPV,    CMD_X2LINE,   CMD_NULL,        CMD_NULL,   CMD_NULL
 };
-#define MISC_CAT_ROWS 3
+#define MISC_CAT_ROWS 4
 #endif
 #endif
 
@@ -3151,6 +3154,7 @@ static void draw_catalog() {
                 show_type[TYPE_LIST] = true;
                 break;
             case CATSECT_LIST:
+            case CATSECT_LIST_ONLY:
                 show_type[TYPE_LIST] = true;
                 break;
             case CATSECT_EQN:
@@ -4841,6 +4845,8 @@ void set_catalog_menu(int section) {
         case CATSECT_OTHER:
         case CATSECT_VARS_ONLY:
         case CATSECT_LIST_STR_ONLY:
+        case CATSECT_LIST:
+        case CATSECT_LIST_ONLY:
             if (!vars_exist(section))
                 mode_commandmenu = MENU_NONE;
             return;
@@ -5025,6 +5031,7 @@ void update_catalog() {
         case CATSECT_EQN_ONLY:
         case CATSECT_VARS_ONLY:
         case CATSECT_LIST_STR_ONLY:
+        case CATSECT_LIST_ONLY:
             if (!vars_exist(section)) {
                 *the_menu = MENU_NONE;
                 redisplay();

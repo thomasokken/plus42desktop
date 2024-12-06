@@ -1848,10 +1848,10 @@ static int hp42ext[] = {
     CMD_XAXIS   | 0x2000,
     CMD_YAXIS   | 0x2000,
     CMD_LCLV    | 0x2000,
-    CMD_NULL    | 0x4000,
-    CMD_NULL    | 0x4000,
-    CMD_NULL    | 0x4000,
-    CMD_NULL    | 0x4000,
+    CMD_GETMI   | 0x2000,
+    CMD_PUTMI   | 0x2000,
+    CMD_GETLI   | 0x2000,
+    CMD_PUTLI   | 0x2000,
     CMD_NULL    | 0x4000,
     CMD_NULL    | 0x4000,
     CMD_NULL    | 0x4000,
@@ -1863,18 +1863,18 @@ static int hp42ext[] = {
     /* 70-7F */
     CMD_YAXIS | 0x0000,
     CMD_LCLV  | 0x0000,
-    CMD_NULL  | 0x4000,
-    CMD_NULL  | 0x4000,
-    CMD_NULL  | 0x4000,
-    CMD_NULL  | 0x4000,
+    CMD_GETMI | 0x0000,
+    CMD_PUTMI | 0x0000,
+    CMD_GETLI | 0x0000,
+    CMD_PUTLI | 0x0000,
     CMD_NULL  | 0x4000,
     CMD_NULL  | 0x4000,
     CMD_YAXIS | 0x1000,
     CMD_LCLV  | 0x1000,
-    CMD_NULL  | 0x4000,
-    CMD_NULL  | 0x4000,
-    CMD_NULL  | 0x4000,
-    CMD_NULL  | 0x4000,
+    CMD_GETMI | 0x1000,
+    CMD_PUTMI | 0x1000,
+    CMD_GETLI | 0x1000,
+    CMD_PUTLI | 0x1000,
     CMD_NULL  | 0x4000,
     CMD_NULL  | 0x4000,
 
@@ -5377,6 +5377,7 @@ void start_incomplete_command(int cmd_id) {
     incomplete_ind = false;
     if (argtype == ARG_NAMED || argtype == ARG_PRGM
             || argtype == ARG_RVAR || argtype == ARG_MAT
+            || argtype == ARG_M_STK || argtype == ARG_L_STK
             || argtype == ARG_EQN || argtype == ARG_XSTR
             || argtype == ARG_DIR)
         incomplete_alpha = true;
@@ -5442,6 +5443,12 @@ void start_incomplete_command(int cmd_id) {
             mode_command_entry = false;
             display_error(ERR_NO_MATRIX_VARIABLES, false);
         }
+    } else if (argtype == ARG_M_STK) {
+        if (flags.f.prgm_mode || vars_exist(CATSECT_MAT))
+            set_catalog_menu(CATSECT_MAT_ONLY);
+    } else if (argtype == ARG_L_STK) {
+        if (flags.f.prgm_mode || vars_exist(CATSECT_LIST))
+            set_catalog_menu(CATSECT_LIST_ONLY);
     } else if (argtype == ARG_DIR) {
         if (cmd_id != CMD_CRDIR && cwd->children_count != 0)
             set_catalog_menu(CATSECT_DIRS_ONLY);

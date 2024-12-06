@@ -578,6 +578,8 @@ extern int4 incomplete_saved_highlight_row;
 #define CATSECT_LIST_STR_ONLY 56
 #define CATSECT_MAT_LIST 57
 #define CATSECT_MAT_LIST_ONLY 58
+#define CATSECT_LIST 59
+#define CATSECT_LIST_ONLY 60
 
 /* Command line handling temporaries */
 extern char cmdline[100];

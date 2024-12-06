@@ -855,6 +855,7 @@ void keydown_command_entry(int shift, int key) {
                 || (menukey == 5 && mode_commandmenu == MENU_IND_ST))) {
             if (mode_commandmenu == MENU_IND_ST && menukey == 0) {
                 incomplete_ind = true;
+                incomplete_alpha = false;
                 incomplete_maxdigits = 2;
                 set_catalog_menu(CATSECT_REAL_ONLY);
                 redisplay();
@@ -1556,6 +1557,8 @@ void keydown_command_entry(int shift, int key) {
                 if (incomplete_argtype == ARG_VAR
                         || incomplete_argtype == ARG_REAL
                         || incomplete_argtype == ARG_MAT
+                        || incomplete_argtype == ARG_M_STK
+                        || incomplete_argtype == ARG_L_STK
                         || incomplete_argtype == ARG_RVAR
                         || incomplete_argtype == ARG_NAMED
                         || incomplete_argtype == ARG_LBL
@@ -1766,6 +1769,16 @@ void keydown_command_entry(int shift, int key) {
             set_catalog_menu(CATSECT_REAL_ONLY);
             redisplay();
             return;
+        } else if ((incomplete_argtype == ARG_M_STK
+                    || incomplete_argtype == ARG_L_STK)
+                && !incomplete_ind
+                && incomplete_length == 0
+                && (mode_commandmenu < MENU_ALPHA1
+                    || mode_commandmenu > MENU_ALPHA_MISC2)
+                && !shift && key == KEY_DOT) {
+            set_menu(MENULEVEL_COMMAND, MENU_IND_ST);
+            redisplay();
+            return;
         }
 
         if (incomplete_argtype == ARG_EQN
@@ -1946,6 +1959,16 @@ void keydown_command_entry(int shift, int key) {
                             set_catalog_menu(CATSECT_MAT_LIST_ONLY);
                         else
                             set_menu(MENULEVEL_COMMAND, MENU_NONE);
+                    } else if (incomplete_argtype == ARG_M_STK) {
+                        if (vars_exist(CATSECT_MAT))
+                            set_catalog_menu(CATSECT_MAT_ONLY);
+                        else
+                            set_menu(MENULEVEL_COMMAND, MENU_NONE);
+                    } else if (incomplete_argtype == ARG_L_STK) {
+                        if (vars_exist(CATSECT_LIST))
+                            set_catalog_menu(CATSECT_LIST_ONLY);
+                        else
+                            set_menu(MENULEVEL_COMMAND, MENU_NONE);
                     } else if (incomplete_argtype == ARG_DIR) {
                         if (cwd->children_count != 0)
                             set_catalog_menu(CATSECT_DIRS_ONLY);
@@ -2043,6 +2066,12 @@ void keydown_command_entry(int shift, int key) {
                 } else if (incomplete_argtype == ARG_MAT) {
                     if (vars_exist(CATSECT_MAT_LIST_ONLY))
                         set_catalog_menu(CATSECT_MAT_LIST_ONLY);
+                } else if (incomplete_argtype == ARG_M_STK) {
+                    if (vars_exist(CATSECT_MAT))
+                        set_catalog_menu(CATSECT_MAT_ONLY);
+                } else if (incomplete_argtype == ARG_L_STK) {
+                    if (vars_exist(CATSECT_LIST))
+                        set_catalog_menu(CATSECT_LIST_ONLY);
                 } else if (incomplete_argtype == ARG_DIR) {
                     if (cwd->children_count != 0)
                         set_catalog_menu(CATSECT_DIRS_ONLY);
@@ -2110,6 +2139,7 @@ void keydown_command_entry(int shift, int key) {
                             || catsect == CATSECT_REAL_ONLY
                             || catsect == CATSECT_MAT_ONLY
                             || catsect == CATSECT_MAT_LIST_ONLY
+                            || catsect == CATSECT_LIST_ONLY
                             || catsect == CATSECT_EQN_ONLY
                             || catsect == CATSECT_VARS_ONLY
                             || catsect == CATSECT_LIST_STR_ONLY
