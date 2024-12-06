@@ -33,6 +33,7 @@
 int resolve_ind_arg(arg_struct *arg, char *buf = NULL, int *len = NULL);
 int arg_to_num(arg_struct *arg, int4 *num);
 int get_arg_equation(arg_struct *arg, vartype_equation **eq);
+bool dim_to_int4(vartype *dim, int4 *res);
 int recall_result_silently(vartype *v);
 int recall_result(vartype *v);
 int recall_two_results(vartype *x, vartype *y);

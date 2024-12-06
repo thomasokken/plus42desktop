@@ -185,6 +185,19 @@ int get_arg_equation(arg_struct *arg, vartype_equation **eq) {
     return ERR_NONE;
 }
 
+bool dim_to_int4(vartype *dim, int4 *res) {
+    phloat d = ((vartype_real *) dim)->x;
+    if (d <= -2147483648.0 || d >= 2147483648.0)
+        return false;
+    int4 dd = to_int4(d);
+    if (dd == 0)
+        return false;
+    if (dd < 0)
+        dd = -dd;
+    *res = dd - 1;
+    return true;
+}
+
 int recall_result_silently(vartype *v) {
     if (flags.f.stack_lift_disable) {
         if (sp == -1)
