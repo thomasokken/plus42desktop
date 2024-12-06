@@ -261,27 +261,15 @@ static int item_helper(arg_struct *arg, bool get) {
         }
     }
 
-    phloat d = ((vartype_real *) stack[spo])->x;
-    if (d <= -2147483648.0 || d >= 2147483648.0)
-        return ERR_DIMENSION_ERROR;
-    int4 n = to_int4(d);
-    if (n < 0)
-        n = -n;
-    n--;
-    if (n < 0)
+    int4 n;
+    if (!dim_to_int4(stack[spo], &n))
         return ERR_DIMENSION_ERROR;
 
     if (two_d) {
         if (v->type == TYPE_LIST)
             return ERR_DIMENSION_ERROR;
-        d = ((vartype_real *) stack[spo - 1])->x;
-        if (d <= -2147483648.0 || d >= 2147483648.0)
-            return ERR_DIMENSION_ERROR;
-        int4 m = to_int4(d);
-        if (m < 0)
-            m = -m;
-        m--;
-        if (m < 0)
+        int4 m;
+        if (!dim_to_int4(stack[spo - 1], &m))
             return ERR_DIMENSION_ERROR;
         int4 cols = v->type == TYPE_REALMATRIX
                 ? ((vartype_realmatrix *) v)->columns
