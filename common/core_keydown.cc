@@ -1934,6 +1934,8 @@ void keydown_command_entry(int shift, int key) {
                 int catsect;
                 if (mode_commandmenu >= MENU_ALPHA1
                         && mode_commandmenu <= MENU_ALPHA_MISC2) {
+                    if (incomplete_ind)
+                        goto out_of_alpha;
                     if (incomplete_command == CMD_GTODOT) {
                         incomplete_argtype = ARG_OTHER;
                         incomplete_maxdigits = 4;
@@ -2046,6 +2048,10 @@ void keydown_command_entry(int shift, int key) {
             }
             incomplete_length--;
             if (incomplete_length == 0) {
+                if (incomplete_ind
+                        && mode_commandmenu >= MENU_ALPHA1
+                        && mode_commandmenu <= MENU_ALPHA_MISC2)
+                    goto out_of_alpha;
                 if (incomplete_command == CMD_GTODOT) {
                     incomplete_argtype = ARG_OTHER;
                     incomplete_maxdigits = 4;
