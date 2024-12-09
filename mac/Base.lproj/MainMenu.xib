@@ -169,7 +169,7 @@
                 </menuItem>
                 <menuItem title="Help" id="NiD-dB-AGv">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <menu key="submenu" id="Dbv-7z-xMi">
+                    <menu key="submenu" title="Help" id="Dbv-7z-xMi">
                         <items>
                             <menuItem title="Documentation" id="w0F-lj-Liw">
                                 <modifierMask key="keyEquivalentModifierMask"/>
@@ -190,8 +190,8 @@
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="vLP-gA-bwz"/>
-                            <menuItem title="Keyboard Shortcuts" id="P0a-27-e9q">
-                                <modifierMask key="keyEquivalentModifierMask"/>
+                            <menuItem title="Keyboard Shortcuts" keyEquivalent="k" id="P0a-27-e9q">
+                                <modifierMask key="keyEquivalentModifierMask" control="YES" option="YES"/>
                                 <connections>
                                     <action selector="toggleKeyboardShortcuts:" target="501" id="4eM-I3-6a2"/>
                                 </connections>
@@ -364,7 +364,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <clipView key="contentView" id="uwR-uY-YBn">
                             <rect key="frame" x="1" y="1" width="358" height="598"/>
-                            <autoresizingMask key="autoresizingMask"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="505" customClass="PrintView">
                                     <rect key="frame" x="0.0" y="0.0" width="358" height="627"/>
