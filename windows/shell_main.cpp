@@ -529,6 +529,11 @@ static void shell_keyup() {
         running = core_keyup();
 }
 
+static void toggle_keyboard_shortcuts() {
+    // Not yet implemented
+    Beep(1000, 500);
+}
+
 //
 //  FUNCTION: WndProc(HWND, unsigned, WORD, LONG)
 //
@@ -599,6 +604,18 @@ static LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
                     break;
                 case ID_EDIT_PASTE:
                     paste();
+                    break;
+                case IDM_DOCUMENTATION:
+                    ShellExecute(NULL, "open", "https://thomasokken.com/plus42/#doc", NULL, NULL, SW_SHOWNORMAL);
+                    break;
+                case IDM_WEBSITE:
+                    ShellExecute(NULL, "open", "https://thomasokken.com/plus42/", NULL, NULL, SW_SHOWNORMAL);
+                    break;
+                case IDM_OTHER_WEBSITE:
+                    ShellExecute(NULL, "open", "https://thomasokken.com/free42/", NULL, NULL, SW_SHOWNORMAL);
+                    break;
+                case IDM_SHORTCUTS:
+                    toggle_keyboard_shortcuts();
                     break;
                 case IDM_ABOUT:
                     DialogBoxW(hInst, (LPCWSTR)IDD_ABOUTBOX, hWnd, (DLGPROC)About);
@@ -1186,6 +1203,9 @@ static LRESULT CALLBACK PrintOutWndProc(HWND hWnd, UINT message, WPARAM wParam, 
                     break;
                 case ID_EDIT_PASTE:
                     paste();
+                    break;
+                case IDM_SHORTCUTS:
+                    toggle_keyboard_shortcuts();
                     break;
             }
             return 0;
