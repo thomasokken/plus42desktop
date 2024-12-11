@@ -529,9 +529,14 @@ static void shell_keyup() {
         running = core_keyup();
 }
 
+static bool keyboardShortcutsShowing = false;
+
 static void toggle_keyboard_shortcuts() {
-    // Not yet implemented
-    Beep(1000, 500);
+    keyboardShortcutsShowing = !keyboardShortcutsShowing;
+    HMENU mainmenu = GetMenu(hMainWnd);
+    HMENU helpmenu = GetSubMenu(mainmenu, 3);
+    CheckMenuItem(helpmenu, IDM_SHORTCUTS, keyboardShortcutsShowing ? MF_CHECKED : MF_UNCHECKED);
+    InvalidateRect(hMainWnd, NULL, FALSE);
 }
 
 //
@@ -718,7 +723,7 @@ static LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
             goto do_default;
         }
         case WM_PAINT: {
-            skin_repaint();
+            skin_repaint(keyboardShortcutsShowing);
             break;
         }
         case WM_LBUTTONDOWN: {
@@ -2960,4 +2965,9 @@ int my_remove(const char *name) {
     int ret = _wremove(wname);
     free(wname);
     return ret;
+}
+
+void get_keymap(keymap_entry **map, int *length) {
+    *map = keymap;
+    *length = keymap_length;
 }
