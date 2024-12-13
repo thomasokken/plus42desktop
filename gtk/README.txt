@@ -55,9 +55,9 @@ Remove plus42dec, plus42bin, and the $XDG_DATA_HOME/plus42 or
 $HOME/.local/share/plus42 directory and its contents.
 
 
-NOTE: The binary in this package was built on a PC running Ubuntu 12.04, and it
-is dynamically linked against glibc version 3.2, libstdc++ version 4.6.3, and
-GTK+ version 3.4.2. If your system has different versions of these libraries,
+NOTE: The binary in this package was built on a PC running Ubuntu 16.04, and it
+is dynamically linked against libc version 2.23, libstdc++ version 5.4.0, and
+GTK+ version 3.18.9. If your system has different versions of these libraries,
 the binary in this package may not work. In this case, please download the
 Plus42 source package and compile Plus42 using your installation's own compiler
 and libraries.
