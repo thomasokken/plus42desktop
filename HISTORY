@@ -1,3 +1,14 @@
+2024-12-13: release 1.1.15
+
+* Added option to show the active keyboard map superimposed on the skin. The
+  desktop versions have this in the Help menu, and the mobile versions have it
+  in the About dialog.
+* Added functions for direct access to matrix and list elements: GETMI, PUTMI,
+  GETLI, and PUTLI. See the Free42 web site for details.
+* iOS and MacOS versions: Improved Dark Mode support.
+* In compatibility mode, VIEW(G(A)) would recall the global A to the stack, but
+  view the local A. Fixed.
+
 2024-11-14: release 1.1.14
 
 * I%YR fixes for values close to zero.
