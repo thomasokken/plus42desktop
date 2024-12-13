@@ -27,7 +27,7 @@ cd ..
 
 rm -rf $PKGNAME
 mkdir $PKGNAME
-cp gtk/README $PKGNAME
+cp gtk/README.txt $PKGNAME
 cp gtk/plus42bin $PKGNAME
 cp gtk/plus42dec $PKGNAME
 strip $PKGNAME/plus42bin
