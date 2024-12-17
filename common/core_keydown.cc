@@ -1079,9 +1079,16 @@ void keydown_command_entry(int shift, int key) {
                             display_mem();
                             pending_command = CMD_LINGER1;
                             shell_request_timeout3(2000);
-                        } else
-                            squeak();
-                        return;
+                            return;
+                        } else {
+                            if (incomplete_command == CMD_ASSIGNa) {
+                                set_cat_section(CATSECT_UNITS_1);
+                                break;
+                            } else {
+                                squeak();
+                                return;
+                            }
+                        }
                 }
                 redisplay();
                 return;
@@ -1135,9 +1142,16 @@ void keydown_command_entry(int shift, int key) {
                             display_mem();
                             pending_command = CMD_LINGER1;
                             shell_request_timeout3(2000);
-                        } else
-                            squeak();
-                        return;
+                            return;
+                        } else {
+                            if (incomplete_command == CMD_ASSIGNa) {
+                                set_cat_section(CATSECT_UNITS_1);
+                                break;
+                            } else {
+                                squeak();
+                                return;
+                            }
+                        }
                 }
                 move_cat_row(0);
                 redisplay();
@@ -1200,6 +1214,59 @@ void keydown_command_entry(int shift, int key) {
                     squeak();
                 }
                 return;
+            } else if (catsect == CATSECT_UNITS_1) {
+                switch (menukey) {
+                    case 0: set_cat_section(CATSECT_UNITS_LENG); break;
+                    case 1: set_cat_section(CATSECT_UNITS_AREA); break;
+                    case 2: set_cat_section(CATSECT_UNITS_VOL); break;
+                    case 3: set_cat_section(CATSECT_UNITS_TIME); break;
+                    case 4: set_cat_section(CATSECT_UNITS_SPEED); break;
+                    case 5: set_cat_section(CATSECT_UNITS_MASS); break;
+                }
+                move_cat_row(0);
+                redisplay();
+                return;
+            } else if (catsect == CATSECT_UNITS_2) {
+                switch (menukey) {
+                    case 0: set_cat_section(CATSECT_UNITS_FORCE); break;
+                    case 1: set_cat_section(CATSECT_UNITS_ENRG); break;
+                    case 2: set_cat_section(CATSECT_UNITS_POWR); break;
+                    case 3: set_cat_section(CATSECT_UNITS_PRESS); break;
+                    case 4: set_cat_section(CATSECT_UNITS_TEMP); break;
+                    case 5: set_cat_section(CATSECT_UNITS_ELEC); break;
+                }
+                move_cat_row(0);
+                redisplay();
+                return;
+            } else if (catsect == CATSECT_UNITS_3) {
+                switch (menukey) {
+                    case 0: set_cat_section(CATSECT_UNITS_ANGL); break;
+                    case 1: set_cat_section(CATSECT_UNITS_LIGHT); break;
+                    case 2: set_cat_section(CATSECT_UNITS_RAD); break;
+                    case 3: set_cat_section(CATSECT_UNITS_VISC); break;
+                    case 4: squeak(); return;
+                    case 5: squeak(); return;
+                }
+                move_cat_row(0);
+                redisplay();
+                return;
+            } else if (catsect >= CATSECT_UNITS_LENG && catsect <= CATSECT_UNITS_VISC) {
+                const char *text[6];
+                int length[6];
+                int row;
+                row = get_cat_row();
+                int rows;
+                get_units_cat_row(catsect, text, length, &row, &rows);
+                if (length[menukey] == 0 || length[menukey] > 7) {
+                    squeak();
+                    return;
+                } else {
+                    pending_command = incomplete_command;
+                    pending_command_arg.type = ARGTYPE_STR;
+                    string_copy(pending_command_arg.val.text, &pending_command_arg.length, text[menukey], length[menukey]);
+                    finish_command_entry(true);
+                    return;
+                }
             } else {
                 int4 dir_id;
                 int itemindex;
@@ -1295,6 +1362,11 @@ void keydown_command_entry(int shift, int key) {
         }
         if (!shift && (key == KEY_UP || key == KEY_DOWN)) {
             move_cat_row(key == KEY_UP ? -1 : 1);
+            redisplay();
+            return;
+        }
+        if (incomplete_command == CMD_ASSIGNa && key == 2048 + CMD_UNITS) {
+            set_cat_section(CATSECT_UNITS_1);
             redisplay();
             return;
         }
@@ -2002,8 +2074,23 @@ void keydown_command_entry(int shift, int key) {
                     redisplay();
                 } else if (mode_commandmenu == MENU_CATALOG
                         && catsect >= CATSECT_UNITS_1
-                                && catsect <= CATSECT_UNITS_3) {
+                        && catsect <= CATSECT_UNITS_3) {
                     set_catalog_menu((skin_flags & 2) == 0 ? CATSECT_TOP : CATSECT_MORE);
+                    redisplay();
+                } else if (mode_commandmenu == MENU_CATALOG
+                        && catsect >= CATSECT_UNITS_LENG
+                        && catsect <= CATSECT_UNITS_MASS) {
+                    set_catalog_menu(CATSECT_UNITS_1);
+                    redisplay();
+                } else if (mode_commandmenu == MENU_CATALOG
+                        && catsect >= CATSECT_UNITS_FORCE
+                        && catsect <= CATSECT_UNITS_ELEC) {
+                    set_catalog_menu(CATSECT_UNITS_2);
+                    redisplay();
+                } else if (mode_commandmenu == MENU_CATALOG
+                        && catsect >= CATSECT_UNITS_ANGL
+                        && catsect <= CATSECT_UNITS_VISC) {
+                    set_catalog_menu(CATSECT_UNITS_3);
                     redisplay();
                 } else if (mode_commandmenu == MENU_CATALOG
                         && (catsect == CATSECT_LIST
@@ -2777,35 +2864,35 @@ void keydown_normal_mode(int shift, int key) {
                     char name[7];
                     keynum = menukey + 6 * (menu - MENU_CUSTOM1) + 1;
                     get_custom_key(keynum, name, &length);
-                    if (length == 0)
+                    if (length == 0) {
                         squeak();
-                    else {
-                        pgm_index dummyprgm;
-                        int4 dummypc;
-                        int i;
-                        pending_command_arg.type = ARGTYPE_STR;
-                        pending_command_arg.length = length;
-                        for (i = 0; i < length; i++)
-                            pending_command_arg.val.text[i] = name[i];
-                        if (find_global_label(&pending_command_arg,
-                                              &dummyprgm, &dummypc)) {
-                            pending_command = CMD_XEQ;
-                            goto send_it_off;
+                        return;
+                    }
+                    pgm_index dummyprgm;
+                    int4 dummypc;
+                    int i;
+                    pending_command_arg.type = ARGTYPE_STR;
+                    pending_command_arg.length = length;
+                    for (i = 0; i < length; i++)
+                        pending_command_arg.val.text[i] = name[i];
+                    if (find_global_label(&pending_command_arg,
+                                          &dummyprgm, &dummypc)) {
+                        pending_command = CMD_XEQ;
+                        goto send_it_off;
+                    }
+                    vloc idx = lookup_var(name, length);
+                    if (!idx.not_found()) {
+                        vartype *v = idx.value();
+                        if (v->type == TYPE_UNIT && sp >= 0 && (stack[sp]->type == TYPE_REAL || stack[sp]->type == TYPE_UNIT)) {
+                            s = std::string(name, length);
+                            goto apply_unit;
                         }
-                        vloc idx = lookup_var(name, length);
-                        if (!idx.not_found()) {
-                            vartype *v = idx.value();
-                            if (v->type == TYPE_UNIT && sp >= 0 && (stack[sp]->type == TYPE_REAL || stack[sp]->type == TYPE_UNIT)) {
-                                s = std::string(name, length);
-                                goto apply_unit;
-                            }
-                            pending_command = CMD_RCL;
-                            goto send_it_off;
-                        }
-                        int cmd = find_builtin(name, length);
-                        if (cmd == -1)
-                            pending_command = CMD_XEQ;
-                        else if (cmd == CMD_CLALLa) {
+                        pending_command = CMD_RCL;
+                        goto send_it_off;
+                    }
+                    int cmd = find_builtin(name, length);
+                    if (cmd != -1) {
+                        if (cmd == CMD_CLALLa) {
                             mode_clall = true;
                             set_menu(MENULEVEL_ALPHA, MENU_NONE);
                             pending_command = CMD_NONE;
@@ -2855,7 +2942,18 @@ void keydown_normal_mode(int shift, int key) {
                         }
                         goto send_it_off;
                     }
-                    return;
+                    if (is_custom_menu_unit(name, length)) {
+                        if (sp >= 0 && (stack[sp]->type == TYPE_REAL || stack[sp]->type == TYPE_UNIT)) {
+                            s = std::string(name, length);
+                            goto apply_unit;
+                        } else {
+                            squeak();
+                            return;
+                        }
+                    }
+                    // Nothing found. Fall back on XEQ, which will result in Label Not Found
+                    pending_command = CMD_XEQ;
+                    goto send_it_off;
                 }
             } else if (menu == MENU_CATALOG) {
                 int catsect;

@@ -1258,6 +1258,62 @@ bool is_unit(const char *text, int length) {
     return success;
 }
 
+static bool is_builtin_unit(const char *text, int length) {
+    for (const unitdef *u = units; u->name != NULL; u++) {
+        int ulen = strlen(u->name);
+        if (ulen != length)
+            continue;
+        for (int i = 0; i < length; i++) {
+            char c = text[i];
+            if (c == 0)
+                c = '/';
+            else if (c == 1)
+                c = '*';
+            if (c != u->name[i])
+                goto endloop;
+        }
+        return true;
+        endloop:;
+    }
+    return false;
+}
+
+bool is_custom_menu_unit(const char *text, int length) {
+    if (is_builtin_unit(text, length))
+        return true;
+    /* If the string is not a built-in unit, we'll only consider it if it is a
+     * compound. The reason being that a simple user-defined unit would already
+     * have been found by the CUSTOM menu's variable lookup.
+     */
+    bool could_be_compound_unit = false;
+    for (int i = 0; i < length; i++) {
+        char c = text[i];
+        if (c == 0 || c == 1 || c == '/' || c == '*' || c == '^') {
+            could_be_compound_unit = true;
+            break;
+        }
+    }
+    if (!could_be_compound_unit)
+        return false;
+    int errpos;
+    UnitProduct *up = UnitParser::parse(std::string(text, length), &errpos);
+    if (up == NULL)
+        return false;
+    for (std::map<std::string, int>::iterator iter = up->elem.begin(); iter != up->elem.end(); iter++) {
+        const char *t = iter->first.c_str();
+        int sz = iter->first.length();
+        if (is_builtin_unit(t, sz))
+            continue;
+        vloc v = lookup_var(t, sz);
+        if (v.not_found() || v.value()->type != TYPE_UNIT) {
+            delete up;
+            return false;
+        }
+    }
+    delete up;
+    return true;
+}
+
 static int get_value_and_base(const vartype *v, phloat *value, std::string *baseUnit, phloat *factor) {
     if (v->type == TYPE_REAL) {
         *value = ((vartype_real *) v)->x;

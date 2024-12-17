@@ -73,6 +73,7 @@ int docmd_sylnx(arg_struct *arg);
 int convert_helper(const vartype *X, const vartype *Y, phloat *res);
 bool normalize_unit(std::string s, std::string *r);
 bool is_unit(const char *text, int length);
+bool is_custom_menu_unit(const char *text, int length);
 int unit_compare(const vartype *x, const vartype *y, char which);
 int unit_add(const vartype *x, const vartype *y, vartype **r);
 int unit_sub(const vartype *x, const vartype *y, vartype **r);
