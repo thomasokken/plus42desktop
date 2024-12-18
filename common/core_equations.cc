@@ -3093,18 +3093,9 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
                 squeak();
                 return 1;
             }
-            /* Builtins go through the usual mapping; everything else
-             * is inserted literally.
+            /* We do the same order of lookups as in HP-42S operation:
+             * First, look for a LBL.
              */
-            int cmd = find_builtin(label, len);
-            if (cmd != CMD_NONE) {
-                if (insert_function(cmd)) {
-                    goto_prev_menu();
-                    eqn_draw();
-                } else
-                    squeak();
-                return 1;
-            }
             arg_struct arg;
             arg.type = ARGTYPE_STR;
             string_copy(arg.val.text, &arg.length, label, len);
@@ -3121,31 +3112,54 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
                     squeak();
                 return 1;
             }
+            /* Second, look for a variable.
+             * Special treatment for unit objects.
+             */
             vartype *v = recall_var(label, len);
-            if (v == NULL) {
-                squeak();
-                return 1;
-            }
-            if (v->type == TYPE_EQUATION) {
-                std::string s("EVALN(");
-                s += std::string(label, len);
-                s += ":";
-                if (insert_text(s.c_str(), s.length())) {
+            if (v != NULL) {
+                if (v->type == TYPE_EQUATION) {
+                    std::string s("EVALN(");
+                    s += std::string(label, len);
+                    s += ":";
+                    if (insert_text(s.c_str(), s.length())) {
+                        goto_prev_menu();
+                        eqn_draw();
+                    } else
+                        squeak();
+                    return 1;
+                }
+                if (v->type == TYPE_UNIT) {
+                    us = std::string(label, len);
+                    goto do_unit;
+                }
+                if (insert_text(label, len)) {
                     goto_prev_menu();
                     eqn_draw();
                 } else
                     squeak();
                 return 1;
             }
-            if (v->type == TYPE_UNIT) {
+            /* Third, look for a built-in function.
+             * These go through the usual mapping.
+             */
+            int cmd = find_builtin(label, len);
+            if (cmd != CMD_NONE) {
+                if (insert_function(cmd)) {
+                    goto_prev_menu();
+                    eqn_draw();
+                } else
+                    squeak();
+                return 1;
+            }
+            /* Fourth and last, check if the assignment is a valid unit,
+             * and if so, use it.
+             */
+            if (is_custom_menu_unit(label, len)) {
                 us = std::string(label, len);
                 goto do_unit;
             }
-            if (insert_text(label, len)) {
-                goto_prev_menu();
-                eqn_draw();
-            } else
-                squeak();
+            /* Nothing usable found! */
+            squeak();
             return 1;
         } else if (edit.id == MENU_CATALOG && edit.catsect == CATSECT_TOP) {
             switch (key) {
