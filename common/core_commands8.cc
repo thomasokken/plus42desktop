@@ -855,6 +855,21 @@ static std::string to_string(int i) {
     return std::string(buf, strlen(buf));
 }
 
+struct UnitLink {
+    std::string name;
+    UnitLink *next;
+    UnitLink(std::string name, UnitLink *next) : name(name), next(next) {}
+    bool circular() {
+        UnitLink *ptr = next;
+        while (ptr != NULL) {
+            if (name == ptr->name)
+                return true;
+            ptr = ptr->next;
+        }
+        return false;
+    }
+};
+
 struct UnitProduct {
     std::map<std::string, int> elem;
     UnitProduct() {}
@@ -920,7 +935,7 @@ struct UnitProduct {
         }
     }
 
-    bool toBase(phloat *f, std::string *s);
+    bool toBase(phloat *f, std::string *s, UnitLink *link = NULL);
 };
 
 class UnitLexer {
@@ -1164,7 +1179,7 @@ class UnitParser {
     }
 };
 
-bool UnitProduct::toBase(phloat *f, std::string *s) {
+bool UnitProduct::toBase(phloat *f, std::string *s, UnitLink *link) {
     phloat v = 1;
     int exp = 0;
     std::string us = "";
@@ -1187,8 +1202,12 @@ bool UnitProduct::toBase(phloat *f, std::string *s) {
                     s2 = userName;
                 } else {
                     int errpos;
-                    UnitProduct *up = UnitParser::parse(std::string(u->text, u->length), &errpos);
-                    bool success = up->toBase(&f2, &s2);
+                    std::string un(u->text, u->length);
+                    UnitLink linque(un, link);
+                    if (linque.circular())
+                        return false;
+                    UnitProduct *up = UnitParser::parse(un, &errpos);
+                    bool success = up->toBase(&f2, &s2, &linque);
                     delete up;
                     if (!success)
                         return false;
