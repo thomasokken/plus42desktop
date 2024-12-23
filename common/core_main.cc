@@ -2035,8 +2035,7 @@ static bool looks_like_zero(const char *buf) {
     return true;
 }
 
-static phloat parse_number_line(char *buf) {
-    phloat res;
+static bool parse_number_line(char *buf, phloat *res) {
     if (buf[0] == 'E' || buf[0] == '-' && buf[1] == 'E') {
         char *buf2 = (char *) malloc(strlen(buf) + 2);
         strcpy(buf2 + 1, buf);
@@ -2049,22 +2048,40 @@ static phloat parse_number_line(char *buf) {
         int len2 = (int) strlen(buf2);
         if (buf2[len2 - 1] == 'E')
             buf2[len2 - 1] = 0;
-        res = parse_number_line(buf2);
+        bool success = parse_number_line(buf2, res);
         free(buf2);
-        return res;
+        return success;
     }
+
+    /* This isn't very thorough, but the aim is simply to prevent things
+     * that start with a valid number character but are clearly not valid
+     * numbers from being accepted as number lines. Things like
+     * EXACTAMUNDO, for instance, or numbers with attached text like
+     * 20five.
+     */
+    bool seen_e = false;
+    for (char *cp = buf; *cp != 0; cp++) {
+        char c = *cp;
+        if (seen_e && (c == 'E' || c == '.'))
+            return false;
+        if (c == 'E')
+            seen_e = true;
+        else if ((c < '0' || c > '9') && c != '.' && c != '+' && c != '-')
+            return false;
+    }
+
 #ifdef BCD_MATH
-    res = Phloat(buf);
+    *res = Phloat(buf);
 #else
     BID_UINT128 d;
     bid128_from_string(&d, buf);
-    bid128_to_binary64(&res, &d);
+    bid128_to_binary64(res, &d);
 #endif
-    if (p_isinf(res) != 0)
-        res = NAN_1_PHLOAT;
-    else if (res == 0 && !looks_like_zero(buf))
-        res = NAN_2_PHLOAT;
-    return res;
+    if (p_isinf(*res) != 0)
+        *res = NAN_1_PHLOAT;
+    else if (*res == 0 && !looks_like_zero(buf))
+        *res = NAN_2_PHLOAT;
+    return true;
 }
 
 void core_import_programs(int num_progs, const char *raw_file_name) {
@@ -2173,7 +2190,7 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
                 else if (byte1 != 0x00)
                     ungetc(byte1, gfile);
                 numbuf[numlen++] = 0;
-                arg.val_d = parse_number_line(numbuf);
+                parse_number_line(numbuf, &arg.val_d);
                 cmd = CMD_NUMBER;
                 arg.type = ARGTYPE_DOUBLE;
             } else if (byte1 == 0x1D || byte1 == 0x1E) {
@@ -3785,7 +3802,8 @@ static void paste_programs(const char *buf) {
                 cmd = CMD_NUMBER;
                 if (unit_offset != -1)
                     numbuf[unit_offset] = 0;
-                arg.val_d = parse_number_line(numbuf);
+                if (!parse_number_line(numbuf, &arg.val_d))
+                    goto line_done;
                 if (unit_offset != -1)
                     numbuf[unit_offset] = '_';
                 arg.type = ARGTYPE_DOUBLE;
@@ -3882,7 +3900,7 @@ static void paste_programs(const char *buf) {
                 hpbuf[lineno_end] = 0;
                 cmd = CMD_NUMBER;
                 strcpy(numbuf, hpbuf + lineno_start);
-                arg.val_d = parse_number_line(numbuf);
+                parse_number_line(numbuf, &arg.val_d);
                 arg.type = ARGTYPE_DOUBLE;
                 goto store;
             }
@@ -4387,7 +4405,8 @@ static void paste_programs(const char *buf) {
                         cmd = CMD_NUMBER;
                         if (unit_offset != -1)
                             numbuf[unit_offset] = 0;
-                        arg.val_d = parse_number_line(numbuf);
+                        if (!parse_number_line(numbuf, &arg.val_d))
+                            goto line_done;
                         if (unit_offset != -1)
                             numbuf[unit_offset] = '_';
                         arg.type = ARGTYPE_DOUBLE;
