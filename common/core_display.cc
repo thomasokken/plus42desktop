@@ -4744,6 +4744,7 @@ int set_menu_return_err(int level, int menuid, bool exitall) {
     } else
         mode_updown = false;
     set_annunciators(mode_updown, -1, -1, -1, -1, -1);
+    catsect_when_units_key_was_pressed = -1;
     return ERR_NONE;
 }
 
