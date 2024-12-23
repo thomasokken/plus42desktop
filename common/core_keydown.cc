@@ -1034,7 +1034,7 @@ void keydown_command_entry(int shift, int key) {
                             set_cat_section(CATSECT_FCN);
                             break;
                         } else {
-                            if (cwd->children_count == 0) {
+                            if (incomplete_command == CMD_ASSIGNa || cwd->children_count == 0) {
                                 squeak();
                                 return;
                             } else {
@@ -1128,7 +1128,7 @@ void keydown_command_entry(int shift, int key) {
                             set_cat_section(CATSECT_FCN);
                             break;
                         } else {
-                            if (cwd->children_count == 0) {
+                            if (incomplete_command == CMD_ASSIGNa || cwd->children_count == 0) {
                                 squeak();
                                 return;
                             } else {
