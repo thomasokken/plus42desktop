@@ -1366,7 +1366,7 @@ void keydown_command_entry(int shift, int key) {
             return;
         }
         if (incomplete_command == CMD_ASSIGNa && key == 2048 + CMD_UNITS) {
-            set_cat_section(CATSECT_UNITS_1);
+            set_cat_section_using_units_key();
             redisplay();
             return;
         }

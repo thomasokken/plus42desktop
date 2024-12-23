@@ -1096,8 +1096,9 @@ bool no_keystrokes_yet;
  * Version 39: 1.1.5  Code mapping fix for N+U; requires eqn reparse
  * Version 40: 1.1.11 Use local var for Integ() param; requires eqn reparse
  * Version 41: 1.1.15 Global visibility fix for VIEW(); requires eqn reparse
+ * Version 42: 1.1.18 Remember cat position for UNITS key in ASSIGN
  */
-#define PLUS42_VERSION 41
+#define PLUS42_VERSION 42
 
 
 /*******************/

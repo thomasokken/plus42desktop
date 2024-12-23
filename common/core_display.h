@@ -108,6 +108,7 @@ void set_catalog_menu(int direction);
 int get_front_menu();
 void set_cat_section(int section);
 void set_cat_section_no_top(int section);
+void set_cat_section_using_units_key();
 int get_cat_section();
 void move_cat_row(int direction);
 void set_cat_row(int row);

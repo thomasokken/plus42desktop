@@ -622,6 +622,7 @@ static int catalogmenu_row[6];
 static int4 catalogmenu_dir[6][6];
 static int catalogmenu_item[6][6];
 static bool catalog_no_top;
+static int catsect_when_units_key_was_pressed = -1;
 
 static int custommenu_length[3][6];
 static char custommenu_label[3][6][7];
@@ -685,6 +686,7 @@ bool persist_display() {
         }
     }
     write_bool(catalog_no_top);
+    write_int(catsect_when_units_key_was_pressed);
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 6; j++) {
             if (!write_int(custommenu_length[i][j])) return false;
@@ -761,6 +763,12 @@ bool unpersist_display(int ver) {
             return false;
     } else {
         catalog_no_top = false;
+    }
+    if (ver >= 42) {
+        if (!read_int(&catsect_when_units_key_was_pressed))
+            return false;
+    } else {
+        catsect_when_units_key_was_pressed = -1;
     }
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 6; j++) {
@@ -4881,6 +4889,13 @@ void set_cat_section(int section) {
     int index = get_cat_index();
     if (index == -1)
         return;
+    if (catsect_when_units_key_was_pressed != -1) {
+        if (section < CATSECT_UNITS_1 || section > CATSECT_UNITS_VISC) {
+            if (section == CATSECT_TOP || section == CATSECT_MORE)
+                section = catsect_when_units_key_was_pressed;
+            catsect_when_units_key_was_pressed = -1;
+        }
+    }
     if (index == MENULEVEL_AUX && catalog_no_top) {
         int old_section = catalogmenu_section[index];
         bool going_to_top = section == CATSECT_TOP || section == CATSECT_MORE;
@@ -4910,6 +4925,12 @@ void set_cat_section_no_top(int section) {
         return;
     catalogmenu_section[index] = section;
     catalog_no_top = true;
+}
+
+void set_cat_section_using_units_key() {
+    int oldsect = get_cat_section();
+    set_cat_section(CATSECT_UNITS_1);
+    catsect_when_units_key_was_pressed = oldsect;
 }
 
 int get_cat_section() {
