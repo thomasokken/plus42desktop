@@ -171,6 +171,8 @@
 		E979254B1698897600598A02 /* shell_skin.mm in Sources */ = {isa = PBXBuildFile; fileRef = E979254A1698897600598A02 /* shell_skin.mm */; };
 		E97925501698ED2B00598A02 /* URLTextField.mm in Sources */ = {isa = PBXBuildFile; fileRef = E979254F1698ED2B00598A02 /* URLTextField.mm */; };
 		E99FDE2F11624FFA004DB479 /* core_commands7.cc in Sources */ = {isa = PBXBuildFile; fileRef = E99FDE2D11624FFA004DB479 /* core_commands7.cc */; };
+		E9A615732D20507B00A7ACB7 /* beep.wav in Resources */ = {isa = PBXBuildFile; fileRef = E9A615722D20507B00A7ACB7 /* beep.wav */; };
+		E9A615742D20507B00A7ACB7 /* beep.wav in Resources */ = {isa = PBXBuildFile; fileRef = E9A615722D20507B00A7ACB7 /* beep.wav */; };
 		E9B079260FF548690021B83D /* squeak.wav in Resources */ = {isa = PBXBuildFile; fileRef = E9B079250FF548690021B83D /* squeak.wav */; };
 		E9B079310FF548770021B83D /* tone0.wav in Resources */ = {isa = PBXBuildFile; fileRef = E9B079270FF548770021B83D /* tone0.wav */; };
 		E9B079320FF548770021B83D /* tone1.wav in Resources */ = {isa = PBXBuildFile; fileRef = E9B079280FF548770021B83D /* tone1.wav */; };
@@ -289,6 +291,7 @@
 		E979254F1698ED2B00598A02 /* URLTextField.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = URLTextField.mm; path = Classes/URLTextField.mm; sourceTree = "<group>"; };
 		E99FDE2D11624FFA004DB479 /* core_commands7.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = core_commands7.cc; path = ../common/core_commands7.cc; sourceTree = SOURCE_ROOT; };
 		E99FDE2E11624FFA004DB479 /* core_commands7.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = core_commands7.h; path = ../common/core_commands7.h; sourceTree = SOURCE_ROOT; };
+		E9A615722D20507B00A7ACB7 /* beep.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = beep.wav; sourceTree = "<group>"; };
 		E9B079250FF548690021B83D /* squeak.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = squeak.wav; sourceTree = "<group>"; };
 		E9B079270FF548770021B83D /* tone0.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = tone0.wav; sourceTree = "<group>"; };
 		E9B079280FF548770021B83D /* tone1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = tone1.wav; sourceTree = "<group>"; };
@@ -465,6 +468,7 @@
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				E9E335DD0FF67A1D006A40AD /* keymap.txt */,
 				1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
+				E9A615722D20507B00A7ACB7 /* beep.wav */,
 				E9B079250FF548690021B83D /* squeak.wav */,
 				E9B079270FF548770021B83D /* tone0.wav */,
 				E9B079280FF548770021B83D /* tone1.wav */,
@@ -693,6 +697,7 @@
 				E9B079330FF548770021B83D /* tone2.wav in Resources */,
 				E9562AA127A47A61000A10DA /* Plus42.layout in Resources */,
 				E9B079340FF548770021B83D /* tone3.wav in Resources */,
+				E9A615732D20507B00A7ACB7 /* beep.wav in Resources */,
 				E9B079350FF548770021B83D /* tone4.wav in Resources */,
 				E9B079360FF548770021B83D /* tone5.wav in Resources */,
 				E9B079370FF548770021B83D /* tone6.wav in Resources */,
@@ -718,6 +723,7 @@
 				E969E2112603F14900EABB28 /* tone2.wav in Resources */,
 				E9562AA227A47A61000A10DA /* Plus42.layout in Resources */,
 				E969E2122603F14900EABB28 /* tone3.wav in Resources */,
+				E9A615742D20507B00A7ACB7 /* beep.wav in Resources */,
 				E969E2132603F14900EABB28 /* tone4.wav in Resources */,
 				E969E2142603F14900EABB28 /* tone5.wav in Resources */,
 				E969E2152603F14900EABB28 /* tone6.wav in Resources */,
