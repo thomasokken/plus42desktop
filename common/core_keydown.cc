@@ -1605,10 +1605,22 @@ void keydown_command_entry(int shift, int key) {
                         incomplete_num = 1;
                         goto do_goto1;
                     }
+                    if ((flags.f.trace_print || flags.f.normal_print) && flags.f.printer_exists) {
+                        arg_struct arg;
+                        arg.type = ARGTYPE_NUM;
+                        arg.val.num = incomplete_num;
+                        print_command(CMD_GOTOROW, &arg);
+                    }
                     start_incomplete_command(CMD_GOTOCOLUMN);
                     return;
                 } else if (incomplete_command == CMD_GOTOCOLUMN) {
                     do_goto1:
+                    if ((flags.f.trace_print || flags.f.normal_print) && flags.f.printer_exists) {
+                        arg_struct arg;
+                        arg.type = ARGTYPE_NUM;
+                        arg.val.num = incomplete_num;
+                        print_command(CMD_GOTOCOLUMN, &arg);
+                    }
                     matedit_goto(pending_command_arg.val.num, incomplete_num);
                     pending_command = CMD_NONE;
                     finish_command_entry(true);
@@ -1701,10 +1713,22 @@ void keydown_command_entry(int shift, int key) {
                         incomplete_num = 1;
                         goto do_goto2;
                     }
+                    if ((flags.f.trace_print || flags.f.normal_print) && flags.f.printer_exists) {
+                        arg_struct arg;
+                        arg.type = ARGTYPE_NUM;
+                        arg.val.num = incomplete_num;
+                        print_command(CMD_GOTOROW, &arg);
+                    }
                     start_incomplete_command(CMD_GOTOCOLUMN);
                     return;
                 } else if (incomplete_command == CMD_GOTOCOLUMN) {
                     do_goto2:
+                    if ((flags.f.trace_print || flags.f.normal_print) && flags.f.printer_exists) {
+                        arg_struct arg;
+                        arg.type = ARGTYPE_NUM;
+                        arg.val.num = incomplete_num;
+                        print_command(CMD_GOTOCOLUMN, &arg);
+                    }
                     matedit_goto(pending_command_arg.val.num, incomplete_num);
                     pending_command = CMD_NONE;
                     finish_command_entry(true);
