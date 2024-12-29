@@ -3016,7 +3016,7 @@ void keydown_normal_mode(int shift, int key) {
                                 set_cat_section(CATSECT_REAL);
                                 move_cat_row(0);
                             } else {
-                                display_error(ERR_NO_REAL_VARIABLES, false);
+                                display_error(ERR_NO_REAL_VARIABLES, true);
                                 flush_display();
                                 return;
                             }
@@ -3026,7 +3026,7 @@ void keydown_normal_mode(int shift, int key) {
                                 set_cat_section(CATSECT_CPX);
                                 move_cat_row(0);
                             } else {
-                                display_error(ERR_NO_COMPLEX_VARIABLES, false);
+                                display_error(ERR_NO_COMPLEX_VARIABLES, true);
                                 flush_display();
                                 return;
                             }
@@ -3036,7 +3036,7 @@ void keydown_normal_mode(int shift, int key) {
                                 set_cat_section(CATSECT_MAT);
                                 move_cat_row(0);
                             } else {
-                                display_error(ERR_NO_MATRIX_VARIABLES, false);
+                                display_error(ERR_NO_MATRIX_VARIABLES, true);
                                 flush_display();
                                 return;
                             }
