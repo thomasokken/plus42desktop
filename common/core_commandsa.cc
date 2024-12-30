@@ -903,7 +903,7 @@ void display_plot_params(int key) {
             if (err == ERR_NONE)
                 draw_message(0, "Variables Printed", 17);
             else {
-                display_error(err, false);
+                display_error(err);
                 flush_display();
             }
             return;
@@ -1528,7 +1528,7 @@ static bool run_plot(bool reset) {
     mode_plot_viewer = false;
     int err = plot_helper(reset);
     if (err != ERR_NONE && err != ERR_RUN) {
-        display_error(err, false);
+        display_error(err);
         flush_display();
         return false;
     }

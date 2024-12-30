@@ -60,7 +60,7 @@ bool should_highlight(int cmd);
 int special_menu_key(int which);
 void clear_row(int row);
 
-void display_error(int error, bool print);
+void display_error(int error);
 int start_varmenu_lbl(const char *name, int len, int role);
 int start_varmenu_eqn(vartype *eq, int role);
 void config_varmenu_lbl(const char *name, int len);

@@ -77,7 +77,7 @@ static void set_solve_integ(int solve) {
     if (flags.f.prgm_mode || !mvar_prgms_exist()) {
         set_menu(MENULEVEL_APP, solve ? MENU_SOLVE : MENU_INTEG);
         if (!flags.f.prgm_mode)
-            display_error(ERR_NO_MENU_VARIABLES, false);
+            display_error(ERR_NO_MENU_VARIABLES);
     } else {
         int err = set_menu_return_err(MENULEVEL_APP, MENU_CATALOG, false);
         if (err == ERR_NONE) {
@@ -88,7 +88,7 @@ static void set_solve_integ(int solve) {
             else
                 draw_message(0, "Select \003f(x) Program", 20, false);
         } else
-            display_error(err, true);
+            display_error(err);
     }
     redisplay();
 }
@@ -102,7 +102,7 @@ static void view(const char *varname, int varlength) {
         arg.val.text[i] = varname[i];
     err = view_helper(&arg, 0);
     if (err != ERR_NONE) {
-        display_error(err, true);
+        display_error(err);
         flush_display();
         pending_command = CMD_NONE;
     } else {
@@ -224,7 +224,7 @@ void keydown(int shift, int key) {
             flags.f.stack_lift_disable = 0;
         } else {
             nomem:
-            display_error(ERR_INSUFFICIENT_MEMORY, true);
+            display_error(ERR_INSUFFICIENT_MEMORY);
             set_running(false);
         }
         if (key == KEY_RUN || !mode_getkey1 && (key == KEY_EXIT || key == KEY_EXIT + 37))
@@ -2370,7 +2370,7 @@ void keydown_alpha_mode(int shift, int key) {
         if (flags.f.prgm_mode) {
             if (!mode_alpha_entry) {
                 if (!start_alpha_prgm_line()) {
-                    display_error(ERR_RESTRICTED_OPERATION, false);
+                    display_error(ERR_RESTRICTED_OPERATION);
                     redisplay();
                     return;
                 }
@@ -2432,7 +2432,7 @@ void keydown_alpha_mode(int shift, int key) {
     if (flags.f.prgm_mode) {
         if (!mode_alpha_entry) {
             if (!start_alpha_prgm_line()) {
-                display_error(ERR_RESTRICTED_OPERATION, false);
+                display_error(ERR_RESTRICTED_OPERATION);
                 redisplay();
                 return;
             }
@@ -2543,7 +2543,7 @@ void keydown_alpha_mode(int shift, int key) {
                     entered_string[0] = 127;
                     entered_string_length = 1;
                 } else
-                    display_error(ERR_RESTRICTED_OPERATION, false);
+                    display_error(ERR_RESTRICTED_OPERATION);
             }
         } else {
             if (shift || mode_alpha_entry) {
@@ -2670,7 +2670,7 @@ void keydown_normal_mode(int shift, int key) {
         if (deferred_print)
             print_command(CMD_NULL, NULL);
         if (flags.f.prgm_mode && !current_prgm.is_editable()) {
-            display_error(ERR_RESTRICTED_OPERATION, false);
+            display_error(ERR_RESTRICTED_OPERATION);
             redisplay();
             return;
         }
@@ -2690,7 +2690,7 @@ void keydown_normal_mode(int shift, int key) {
             if (!flags.f.stack_lift_disable) {
                 if (flags.f.big_stack) {
                     if (!ensure_stack_capacity(1)) {
-                        display_error(ERR_INSUFFICIENT_MEMORY, false);
+                        display_error(ERR_INSUFFICIENT_MEMORY);
                         return;
                     }
                     sp++;
@@ -2714,7 +2714,7 @@ void keydown_normal_mode(int shift, int key) {
         if (line == 0)
             return;
         if (!current_prgm.is_editable()) {
-            display_error(ERR_RESTRICTED_OPERATION, false);
+            display_error(ERR_RESTRICTED_OPERATION);
         } else {
             if (current_prgm.is_editable()
                     && (current_prgm.idx != dir_list[current_prgm.dir]->prgms_count - 1
@@ -2953,7 +2953,7 @@ void keydown_normal_mode(int shift, int key) {
                             return;
                         } else if (cmd == CMD_CLV || cmd == CMD_PRV || cmd == CMD_LCLV) {
                             if (!flags.f.prgm_mode && cwd->vars_count == 0) {
-                                display_error(ERR_NO_VARIABLES, false);
+                                display_error(ERR_NO_VARIABLES);
                                 pending_command = CMD_NONE;
                                 redisplay();
                                 return;
@@ -3034,7 +3034,7 @@ void keydown_normal_mode(int shift, int key) {
                                 set_cat_section(CATSECT_REAL);
                                 move_cat_row(0);
                             } else {
-                                display_error(ERR_NO_REAL_VARIABLES, true);
+                                display_error(ERR_NO_REAL_VARIABLES);
                                 flush_display();
                                 return;
                             }
@@ -3045,7 +3045,7 @@ void keydown_normal_mode(int shift, int key) {
                                 set_cat_section(CATSECT_CPX);
                                 move_cat_row(0);
                             } else {
-                                display_error(ERR_NO_COMPLEX_VARIABLES, true);
+                                display_error(ERR_NO_COMPLEX_VARIABLES);
                                 flush_display();
                                 return;
                             }
@@ -3056,7 +3056,7 @@ void keydown_normal_mode(int shift, int key) {
                                 set_cat_section(CATSECT_MAT);
                                 move_cat_row(0);
                             } else {
-                                display_error(ERR_NO_MATRIX_VARIABLES, true);
+                                display_error(ERR_NO_MATRIX_VARIABLES);
                                 flush_display();
                                 return;
                             }
@@ -3082,7 +3082,7 @@ void keydown_normal_mode(int shift, int key) {
                             if (vars_exist(CATSECT_LIST)) {
                                 set_cat_section(CATSECT_LIST);
                             } else {
-                                display_error(ERR_NO_LIST_VARIABLES, true);
+                                display_error(ERR_NO_LIST_VARIABLES);
                                 flush_display();
                                 return;
                             }
@@ -3092,7 +3092,7 @@ void keydown_normal_mode(int shift, int key) {
                             if (vars_exist(CATSECT_EQN)) {
                                 set_cat_section(CATSECT_EQN);
                             } else {
-                                display_error(ERR_NO_EQUATION_VARIABLES, true);
+                                display_error(ERR_NO_EQUATION_VARIABLES);
                                 flush_display();
                                 return;
                             }
@@ -3102,7 +3102,7 @@ void keydown_normal_mode(int shift, int key) {
                             if (named_eqns_exist()) {
                                 set_cat_section(CATSECT_EQN_NAMED);
                             } else {
-                                display_error(ERR_NO_NAMED_EQUATIONS, true);
+                                display_error(ERR_NO_NAMED_EQUATIONS);
                                 flush_display();
                                 return;
                             }
@@ -3112,7 +3112,7 @@ void keydown_normal_mode(int shift, int key) {
                             if (vars_exist(CATSECT_OTHER)) {
                                 set_cat_section(CATSECT_OTHER);
                             } else {
-                                display_error(ERR_NO_OTHER_VARIABLES, true);
+                                display_error(ERR_NO_OTHER_VARIABLES);
                                 flush_display();
                                 return;
                             }
@@ -3213,7 +3213,7 @@ void keydown_normal_mode(int shift, int key) {
                     directory *dir = get_dir(dir_id);
                     if (flags.f.prgm_mode
                                     && dir->labels[labelindex].length == 0) {
-                        display_error(ERR_RESTRICTED_OPERATION, false);
+                        display_error(ERR_RESTRICTED_OPERATION);
                         flush_display();
                         pending_command = CMD_NONE;
                         return;
@@ -3248,7 +3248,7 @@ void keydown_normal_mode(int shift, int key) {
                     if (labelindex == -2) {
                         int err = eqn_start(catsect);
                         if (err != ERR_NONE) {
-                            display_error(err, false);
+                            display_error(err);
                             flush_display();
                         }
                         return;
@@ -3484,7 +3484,7 @@ void keydown_normal_mode(int shift, int key) {
                             if (list == NULL) {
                                 nomem:
                                 free_vartype(v);
-                                display_error(ERR_INSUFFICIENT_MEMORY, false);
+                                display_error(ERR_INSUFFICIENT_MEMORY);
                                 return;
                             }
                             list->array->data[0] = stack[sp];
@@ -3714,7 +3714,7 @@ void keydown_normal_mode(int shift, int key) {
             } else if (menu == MENU_GRAPH_AXES && menukey < 2 && !flags.f.prgm_mode) {
                 int err = start_graph_varmenu(menukey + 4, 7);
                 if (err != ERR_NONE)
-                    display_error(err, false);
+                    display_error(err);
                 redisplay();
                 return;
             } else if (menu == MENU_GRAPH_VIEW && menukey <=4 && shift) {
@@ -3832,7 +3832,7 @@ void keydown_normal_mode(int shift, int key) {
                     int err = docmd_stoel(NULL);
                     if (err != ERR_NONE && err != ERR_NONEXISTENT) {
                         // Nonexistent happens with empty lists
-                        display_error(err, false);
+                        display_error(err);
                         flush_display();
                         return;
                     }
@@ -3846,7 +3846,7 @@ void keydown_normal_mode(int shift, int key) {
                     flags.f.stack_lift_disable = true;
                 int err = docmd_rclel(NULL);
                 if (err != ERR_NONE)
-                    display_error(err, false);
+                    display_error(err);
                 redisplay();
                 return;
             } else {
