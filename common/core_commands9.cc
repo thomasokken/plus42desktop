@@ -1039,7 +1039,7 @@ int docmd_dirs(arg_struct *arg) {
 }
 
 int docmd_dir_fcn(arg_struct *arg) {
-    set_plainmenu(MENU_DIR_FCN1);
+    set_plainmenu(MENU_DIR_FCN1, NULL, 0);
     return ERR_NONE;
 }
 
@@ -1051,7 +1051,7 @@ int docmd_units(arg_struct *arg) {
 }
 
 int docmd_unit_fcn(arg_struct *arg) {
-    set_plainmenu(MENU_UNIT_FCN1);
+    set_plainmenu(MENU_UNIT_FCN1, NULL, 0);
     return ERR_NONE;
 }
 
@@ -1414,7 +1414,7 @@ static void show_tvm_message() {
 
 int docmd_tvm(arg_struct *arg) {
     if (flags.f.prgm_mode) {
-        set_plainmenu(MENU_TVM_PRGM1);
+        set_plainmenu(MENU_TVM_PRGM1, NULL, 0);
         return ERR_NONE;
     }
 
@@ -1451,7 +1451,7 @@ int docmd_eqn(arg_struct *arg) {
 }
 
 int docmd_eqn_fcn(arg_struct *arg) {
-    set_plainmenu(MENU_EQN_FCN);
+    set_plainmenu(MENU_EQN_FCN, NULL, 0);
     return ERR_NONE;
 }
 
