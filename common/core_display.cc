@@ -2311,7 +2311,7 @@ void display_error(int error) {
         err_text = errors[error].text;
     }
     draw_message(0, err_text, err_len, false);
-    if ((flags.f.trace_print || flags.f.normal_print) && flags.f.printer_exists)
+    if (!flags.f.prgm_mode && (flags.f.trace_print || flags.f.normal_print) && flags.f.printer_exists)
         print_text(err_text, err_len, true);
 }
 
