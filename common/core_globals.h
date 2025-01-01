@@ -475,7 +475,6 @@ extern bool mode_running;
 extern bool mode_getkey;
 extern bool mode_getkey1;
 extern bool mode_pause;
-extern bool mode_tone;
 extern bool mode_disable_stack_lift;
 extern bool mode_varmenu;
 extern int mode_varmenu_whence;

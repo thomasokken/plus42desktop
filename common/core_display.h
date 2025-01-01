@@ -42,7 +42,7 @@ void fly_goose();
 void move_prgm_highlight(int offset);
 
 void squeak();
-int tone(int n);
+void tone(int n);
 void draw_char(int x, int y, char c);
 void draw_block(int x, int y);
 const char *get_char(char c);
