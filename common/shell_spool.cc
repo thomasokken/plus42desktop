@@ -76,7 +76,7 @@ int hp2ascii(char *dst, const char *src, int srclen) {
             case  30:  esc = "\342\206\221"; break; // upward-pointing arrow
             case  31:  esc = "\342\200\242"; break; // bullet
             case 127:  esc = "\342\224\234"; break; // append sign
-            case 128:  esc = ":"; break;            // thin colon
+            case 128:  esc = "\342\210\266"; break; // thin colon
             case 129:  esc = "\312\217"; break;     // small-caps y
             case 130:  esc = "\316\251"; break;     // uppercase omega
             case 131:  esc = "\341\264\233"; break; // small-caps t
