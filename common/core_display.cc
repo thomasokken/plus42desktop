@@ -3863,9 +3863,23 @@ static int var2str_limited(vartype *v, char *buf, int buflen, int pixel_width) {
     return len;
 }
 
+#ifdef IPHONE
+void show_alpha_keyboard(bool show) {
+    static bool alpha_keyboard_visible = false;
+    if (alpha_keyboard_visible != show) {
+        alpha_keyboard_visible = show;
+        shell_show_alpha_keyboard(show);
+    }
+}
+#endif
+
 void redisplay(int mode) {
     if (eqn_draw())
         return;
+
+#ifdef IPHONE
+    show_alpha_keyboard(core_alpha_menu());
+#endif
 
     if (mode_clall) {
         clear_display();

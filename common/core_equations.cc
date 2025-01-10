@@ -1208,6 +1208,9 @@ bool eqn_draw() {
     if (!active)
         return false;
     clear_display();
+#ifdef IPHONE
+    bool alpha_menu = false;
+#endif
     if (current_error != ERR_NONE) {
         draw_string(0, 0, errors[current_error].text, errors[current_error].length);
         if (current_error == ERR_INVALID_EQUATION) {
@@ -1433,6 +1436,9 @@ bool eqn_draw() {
             if (edit.catalog_row >= edit.catsect_rows)
                 edit.catalog_row = edit.catsect_rows - 1;
         } else {
+#ifdef IPHONE
+            alpha_menu = edit.id >= MENU_ALPHA1 && edit.id <= MENU_ALPHA_MISC2;
+#endif
             draw_menu(false);
         }
     }
@@ -1459,6 +1465,10 @@ bool eqn_draw() {
             free(buf);
         }
     }
+
+#ifdef IPHONE
+    show_alpha_keyboard(alpha_menu);
+#endif
 
     flush_display();
     return true;

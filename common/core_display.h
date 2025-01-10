@@ -76,6 +76,10 @@ void redisplay(int mode = 0);
 bool display_header();
 int tvm_message(char *buf, int buflen);
 
+#ifdef IPHONE
+void show_alpha_keyboard(bool show);
+#endif
+
 int print_display();
 int print_program(pgm_index prgm, int4 pc, int4 lines, bool normal);
 void print_program_line(pgm_index prgm, int4 pc);
