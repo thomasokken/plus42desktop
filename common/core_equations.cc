@@ -1208,7 +1208,7 @@ bool eqn_draw() {
     if (!active)
         return false;
     clear_display();
-#ifdef IPHONE
+#if defined(ANDROID) || defined(IPHONE)
     bool alpha_menu = false;
 #endif
     if (current_error != ERR_NONE) {
@@ -1436,7 +1436,7 @@ bool eqn_draw() {
             if (edit.catalog_row >= edit.catsect_rows)
                 edit.catalog_row = edit.catsect_rows - 1;
         } else {
-#ifdef IPHONE
+#if defined(ANDROID) || defined(IPHONE)
             alpha_menu = edit.id >= MENU_ALPHA1 && edit.id <= MENU_ALPHA_MISC2;
 #endif
             draw_menu(false);
@@ -1466,7 +1466,7 @@ bool eqn_draw() {
         }
     }
 
-#ifdef IPHONE
+#if defined(ANDROID) || defined(IPHONE)
     show_alpha_keyboard(alpha_menu);
 #endif
 

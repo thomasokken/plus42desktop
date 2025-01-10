@@ -3863,7 +3863,7 @@ static int var2str_limited(vartype *v, char *buf, int buflen, int pixel_width) {
     return len;
 }
 
-#ifdef IPHONE
+#if defined(ANDROID) || defined(IPHONE)
 void show_alpha_keyboard(bool show) {
     static bool alpha_keyboard_visible = false;
     if (alpha_keyboard_visible != show) {
@@ -3877,7 +3877,7 @@ void redisplay(int mode) {
     if (eqn_draw())
         return;
 
-#ifdef IPHONE
+#if defined(ANDROID) || defined(IPHONE)
     show_alpha_keyboard(core_alpha_menu());
 #endif
 

@@ -76,7 +76,7 @@ void redisplay(int mode = 0);
 bool display_header();
 int tvm_message(char *buf, int buflen);
 
-#ifdef IPHONE
+#if defined(ANDROID) || defined(IPHONE)
 void show_alpha_keyboard(bool show);
 #endif
 
