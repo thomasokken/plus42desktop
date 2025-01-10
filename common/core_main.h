@@ -323,6 +323,13 @@ char *core_copy();
  */
 void core_paste(const char *s);
 
+/* core_get_char_pixels()
+ *
+ * Gets character pixels from the calculator's 8x5 characters, for the
+ * given UTF-8 encoded character, provided as a null-terminated string.
+ */
+void core_get_char_pixels(const char *ch, char *pixels);
+
 /* core_settings
  *
  * This is a struct that stores user-configurable core settings. The shell
