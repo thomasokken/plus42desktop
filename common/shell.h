@@ -215,6 +215,12 @@ void shell_print(const char *text, int length,
 
 #if defined(ANDROID) || defined(IPHONE)
 
+/* shell_alpha_keyboard_enabled()
+ *
+ * Checks whether the pop-up ALPHA keyboard is enabled.
+ */
+bool shell_alpha_keyboard_enabled();
+
 /* shell_show_alpha_keyboard()
  *
  * Requests the pop-up ALPHA keyboard to be shown or hidden.

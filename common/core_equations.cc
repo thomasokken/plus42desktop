@@ -1208,9 +1208,6 @@ bool eqn_draw() {
     if (!active)
         return false;
     clear_display();
-#if defined(ANDROID) || defined(IPHONE)
-    bool alpha_menu = false;
-#endif
     if (current_error != ERR_NONE) {
         draw_string(0, 0, errors[current_error].text, errors[current_error].length);
         if (current_error == ERR_INVALID_EQUATION) {
@@ -1436,9 +1433,6 @@ bool eqn_draw() {
             if (edit.catalog_row >= edit.catsect_rows)
                 edit.catalog_row = edit.catsect_rows - 1;
         } else {
-#if defined(ANDROID) || defined(IPHONE)
-            alpha_menu = edit.id >= MENU_ALPHA1 && edit.id <= MENU_ALPHA_MISC2;
-#endif
             draw_menu(false);
         }
     }
@@ -1467,7 +1461,7 @@ bool eqn_draw() {
     }
 
 #if defined(ANDROID) || defined(IPHONE)
-    show_alpha_keyboard(alpha_menu);
+    show_alpha_keyboard(edit_pos != -1);
 #endif
 
     flush_display();
@@ -2642,7 +2636,14 @@ static int keydown_list(int key, bool shift, int *repeat) {
             edit_pos = 0;
             update_skin_mode();
             display_pos = 0;
+#if defined(ANDROID) || defined(IPHONE)
+            if (shell_alpha_keyboard_enabled())
+                update_menu(MENU_NONE);
+            else
+                update_menu(MENU_ALPHA1);
+#else
             update_menu(MENU_ALPHA1);
+#endif
             restart_cursor();
             eqn_draw();
             return 1;

@@ -3878,7 +3878,7 @@ void redisplay(int mode) {
         return;
 
 #if defined(ANDROID) || defined(IPHONE)
-    show_alpha_keyboard(core_alpha_menu());
+    show_alpha_keyboard(core_alpha_menu() != 0);
 #endif
 
     if (mode_clall) {
