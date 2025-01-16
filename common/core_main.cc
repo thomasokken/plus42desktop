@@ -5086,6 +5086,8 @@ void core_paste(const char *buf) {
     redisplay();
 }
 
+#if defined(ANDROID) || defined(IPHONE)
+
 void core_get_char_pixels(const char *ch, char *pixels) {
     char hpbuf[6];
     int hplen = ascii2hp(hpbuf, 1, ch);
@@ -5095,6 +5097,8 @@ void core_get_char_pixels(const char *ch, char *pixels) {
     for (int i = 0; i < 5; i++)
         pixels[i] = bits[i];
 }
+
+#endif
 
 void set_alpha_entry(bool state) {
     mode_alpha_entry = state;
