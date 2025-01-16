@@ -3865,8 +3865,10 @@ static int var2str_limited(vartype *v, char *buf, int buflen, int pixel_width) {
 
 #if defined(ANDROID) || defined(IPHONE)
 void show_alpha_keyboard(bool show) {
-    static bool alpha_keyboard_visible = false;
-    if (alpha_keyboard_visible != show) {
+    static bool alpha_keyboard_visible;
+    static bool first = true;
+    if (first || alpha_keyboard_visible != show) {
+        first = false;
         alpha_keyboard_visible = show;
         shell_show_alpha_keyboard(show);
     }
