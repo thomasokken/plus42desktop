@@ -484,6 +484,7 @@ extern int mode_goose;
 extern bool mode_time_clktd;
 extern bool mode_time_clk24;
 extern int mode_wsize;
+extern bool mode_popup_unknown;
 extern bool mode_header;
 extern int mode_amort_seq;
 extern bool mode_plot_viewer;
