@@ -141,7 +141,9 @@ void core_init(int *rows, int *cols, int read_saved_state, const char *state_fil
     *rows = requested_disp_r;
     *cols = requested_disp_c;
     shell_set_skin_mode(eqn_alt_keys() ? flags.f.decimal_point ? 1 : 2 : 0);
+    #if defined(ANDROID) || defined(IPHONE)
     mode_popup_unknown = true;
+    #endif
 
     ann_hold = 1;
 }

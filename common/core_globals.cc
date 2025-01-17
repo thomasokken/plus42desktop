@@ -954,7 +954,9 @@ int mode_goose;
 bool mode_time_clktd;
 bool mode_time_clk24;
 int mode_wsize;
+#if defined(ANDROID) || defined(IPHONE)
 bool mode_popup_unknown = true;
+#endif
 bool mode_header;
 int mode_amort_seq;
 bool mode_plot_viewer;
