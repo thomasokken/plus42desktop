@@ -47,7 +47,7 @@
 #endif
 
 
-static const char bigchars[135][5] =
+static const char bigchars[136][5] =
     {
         { 0x08, 0x08, 0x2a, 0x08, 0x08 },
         { 0x22, 0x14, 0x08, 0x14, 0x22 },
@@ -183,10 +183,11 @@ static const char bigchars[135][5] =
         { 0x04, 0x04, 0x7c, 0x04, 0x04 },
         { 0x7c, 0x40, 0x40, 0x40, 0x40 },
         { 0x78, 0x14, 0x14, 0x14, 0x78 },
-        { 0x7f, 0x41, 0x22, 0x14, 0x08 }
+        { 0x7f, 0x41, 0x22, 0x14, 0x08 },
+        { 0x2a, 0x55, 0x2a, 0x14, 0x08 },
     };
 
-static const char smallchars[440] =
+static const char smallchars[444] =
     {
         0x00, 0x00, 0x00,
         0x5c,
@@ -321,9 +322,10 @@ static const char smallchars[440] =
         0x7c, 0x54, 0x00, 0x78, 0x48,
         0x78, 0x40, 0x40,
         0x70, 0x28, 0x70,
+        0x28, 0x54, 0x28, 0x10,
     };
 
-static short smallchars_offset[134] =
+static short smallchars_offset[135] =
     {
           0,
           3,
@@ -459,9 +461,10 @@ static short smallchars_offset[134] =
         434,
         437,
         440,
+        444,
     };
 
-static unsigned char smallchars_map[135] =
+static unsigned char smallchars_map[136] =
     {
         /*   0 */  70,
         /*   1 */  71,
@@ -598,6 +601,7 @@ static unsigned char smallchars_map[135] =
         /* 132 */ 131,
         /* 133 */ 132,
         /* 134 */ 127,
+        /* 135 */ 133,
     };
 
 #if defined(WINDOWS) && !defined(__GNUC__)
@@ -1162,7 +1166,7 @@ void draw_char(int x, int y, char c) {
     unsigned char uc = (unsigned char) c;
     if (x < 0 || x >= disp_c || y < 0 || y >= disp_r)
         return;
-    if (uc > 134)
+    if (uc > 135)
         uc -= 128;
     X = x * 6;
     Y = y * 8;
@@ -1202,7 +1206,7 @@ void draw_block(int x, int y) {
 
 const char *get_char(char c) {
     unsigned char uc = (unsigned char) c;
-    if (uc > 134)
+    if (uc > 135)
         uc -= 128;
     return bigchars[uc];
 }
@@ -1227,7 +1231,7 @@ int draw_small_string(int x, int y, const char *s, int length, int max_width, bo
 
     while (n < length) {
         int c = (left_trunc ? s[length - n - 1] : s[n]) & 255;
-        if (c > 134)
+        if (c > 135)
             c &= 127;
         m = smallchars_map[c];
         int cw = smallchars_offset[m + 1] - smallchars_offset[m];
@@ -1292,7 +1296,7 @@ int small_string_width(const char *s, int length) {
     int w = 0;
     for (int n = 0; n < length; n++) {
         int c = s[n] & 255;
-        if (c > 134)
+        if (c > 135)
             c &= 127;
         int m = smallchars_map[c];
         int cw = smallchars_offset[m + 1] - smallchars_offset[m];
@@ -1652,7 +1656,10 @@ static int prgmline2buf(char *buf, int len, int4 line, int highlight,
         if (line < 10)
             char2buf(buf, len, &bufptr, '0');
         bufptr += int2string(line, buf + bufptr, len - bufptr);
-        char h = highlight == 0 ? ' ' : highlight == 2 && !current_prgm.is_editable() ? 134 : 6;
+        char h = highlight == 0 ? ' '
+                : highlight == 2 && !current_prgm.is_editable() ? 134
+                : highlight == 2 && current_prgm.is_locked() ? 135
+                : 6;
         char2buf(buf, len, &bufptr, h);
     }
 
@@ -2226,7 +2233,7 @@ static std::string get_incomplete_command() {
             char numbuf[10];
             int len = int2string(line, numbuf, 10);
             buf += std::string(numbuf, len);
-            buf += (char) (current_prgm.is_editable() ? 6 : 134);
+            buf += (char) (!current_prgm.is_editable() ? 134 : current_prgm.is_locked() ? 135 : 6);
         }
 
         if (incomplete_command == CMD_ASSIGNb) {

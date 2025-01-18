@@ -3302,6 +3302,7 @@ int ascii2hp(char *dst, int dstlen, const char *src, int srclen /* = -1 */) {
             case 0x029f: code = 132; break; // small-caps l
             case 0x1d00: code = 133; break; // small-caps a
             case 0x25b9: code = 134; break; // hollow right-pointing triangle
+            case 0x25ec: code = 135; break; // gray right-pointing triangle
             case 0x240a: code = 138; break; // LF symbol
             // Combining accents: apply them if they fit,
             // otherwise ignore them
@@ -5678,7 +5679,7 @@ void finish_xeq() {
 }
 
 bool start_alpha_prgm_line() {
-    if (flags.f.prgm_mode && !current_prgm.is_editable())
+    if (flags.f.prgm_mode && (current_prgm.is_locked() || !current_prgm.is_editable()))
         return false;
     incomplete_saved_pc = pc;
     incomplete_saved_highlight_row = prgm_highlight_row;

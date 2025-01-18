@@ -35,6 +35,10 @@ bool pgm_index::is_editable() {
     return dir == cwd->id;
 }
 
+bool pgm_index::is_locked() {
+    return dir_list[dir]->prgms[idx].locked;
+}
+
 // We cache vartype_real, vartype_complex, and vartype_string instances, to
 // cut down on the malloc/free overhead.
 

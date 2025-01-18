@@ -231,7 +231,7 @@ class GeneratorContext {
     }
 
     void store(prgm_struct *prgm, CodeMap *map) {
-        prgm->lclbl_invalid = 0;
+        prgm->lclbl_invalid = false;
         // Tack all the subroutines onto the main code
         for (int i = 0; i < queue.size(); i++) {
             addLine(-1, CMD_RTN);

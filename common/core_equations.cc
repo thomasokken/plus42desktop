@@ -2228,6 +2228,10 @@ static int keydown_sto_overwrite(int key, bool shift, int *repeat) {
                         show_error(ERR_RESTRICTED_OPERATION);
                         return 1;
                     }
+                    if (current_prgm.is_locked()) {
+                        show_error(ERR_PROGRAM_LOCKED);
+                        return 1;
+                    }
                     arg_struct arg;
                     arg.type = ARGTYPE_XSTR;
                     arg.length = edit_len > 65535 ? 65535 : edit_len;

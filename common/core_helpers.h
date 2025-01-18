@@ -60,7 +60,7 @@ bool vartype_equals(const vartype *v1, const vartype *v2);
 int generic_comparison(const vartype *x, const vartype *y, char which);
 int anum(const char *text, int len, phloat *res);
 
-#define undefined_char(c) ((c) >= 135 && (c) != 138)
+#define undefined_char(c) ((c) >= 136 && (c) != 138)
 
 #define FLAGOP_SF 0
 #define FLAGOP_CF 1

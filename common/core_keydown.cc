@@ -2370,7 +2370,10 @@ void keydown_alpha_mode(int shift, int key) {
         if (flags.f.prgm_mode) {
             if (!mode_alpha_entry) {
                 if (!start_alpha_prgm_line()) {
-                    display_error(ERR_RESTRICTED_OPERATION);
+                    if (!current_prgm.is_editable())
+                        display_error(ERR_RESTRICTED_OPERATION);
+                    else
+                        display_error(ERR_PROGRAM_LOCKED);
                     redisplay();
                     return;
                 }
@@ -2432,7 +2435,10 @@ void keydown_alpha_mode(int shift, int key) {
     if (flags.f.prgm_mode) {
         if (!mode_alpha_entry) {
             if (!start_alpha_prgm_line()) {
-                display_error(ERR_RESTRICTED_OPERATION);
+                if (!current_prgm.is_editable())
+                    display_error(ERR_RESTRICTED_OPERATION);
+                else
+                    display_error(ERR_PROGRAM_LOCKED);
                 redisplay();
                 return;
             }
@@ -2502,13 +2508,26 @@ void keydown_alpha_mode(int shift, int key) {
                     finish_alpha_prgm_line();
             } else {
                 int4 line = pc2line(pc);
-                if (line != 0 && current_prgm.is_editable()
-                        && (current_prgm.idx != dir_list[current_prgm.dir]->prgms_count - 1
-                            || !dir_list[current_prgm.dir]->prgms[current_prgm.idx].is_end(pc))) {
-                    delete_command(pc);
-                    pc = line2pc(line - 1);
+                if (line != 0) {
+                    if (current_prgm.idx == dir_list[current_prgm.dir]->prgms_count - 1
+                            && dir_list[current_prgm.dir]->prgms[current_prgm.idx].is_end(pc)) {
+                        // .END.
+                        pc = line2pc(line - 1);
+                        move_prgm_highlight(-1);
+                    } else if (!current_prgm.is_editable()) {
+                        display_error(ERR_RESTRICTED_OPERATION);
+                    } else if (current_prgm.is_locked()) {
+                        display_error(ERR_PROGRAM_LOCKED);
+                    } else if (current_prgm.idx < dir_list[current_prgm.dir]->prgms_count - 1
+                            && dir_list[current_prgm.dir]->prgms[current_prgm.idx].is_end(pc)
+                            && dir_list[current_prgm.dir]->prgms[current_prgm.idx + 1].locked) {
+                        display_error(ERR_NEXT_PROGRAM_LOCKED);
+                    } else {
+                        delete_command(pc);
+                        pc = line2pc(line - 1);
+                        move_prgm_highlight(-1);
+                    }
                 }
-                move_prgm_highlight(-1);
                 if (mode_alphamenu != MENU_ALPHA1
                         && mode_alphamenu != MENU_ALPHA2)
                     set_menu(MENULEVEL_ALPHA, menus[mode_alphamenu].parent);
@@ -2542,8 +2561,10 @@ void keydown_alpha_mode(int shift, int key) {
                 if (start_alpha_prgm_line()) {
                     entered_string[0] = 127;
                     entered_string_length = 1;
-                } else
+                } else if (!current_prgm.is_editable())
                     display_error(ERR_RESTRICTED_OPERATION);
+                else
+                    display_error(ERR_PROGRAM_LOCKED);
             }
         } else {
             if (shift || mode_alpha_entry) {
@@ -2669,10 +2690,17 @@ void keydown_normal_mode(int shift, int key) {
         /* Entering number entry mode */
         if (deferred_print)
             print_command(CMD_NULL, NULL);
-        if (flags.f.prgm_mode && !current_prgm.is_editable()) {
-            display_error(ERR_RESTRICTED_OPERATION);
-            redisplay();
-            return;
+        if (flags.f.prgm_mode) {
+            if (!current_prgm.is_editable()) {
+                display_error(ERR_RESTRICTED_OPERATION);
+                redisplay();
+                return;
+            }
+            if (current_prgm.is_locked()) {
+                display_error(ERR_PROGRAM_LOCKED);
+                redisplay();
+                return;
+            }
         }
         cmdline_length = 0;
         cmdline_unit = -1;
@@ -2713,13 +2741,21 @@ void keydown_normal_mode(int shift, int key) {
         int4 line = pc2line(pc);
         if (line == 0)
             return;
-        if (!current_prgm.is_editable()) {
+        if (current_prgm.idx == dir_list[current_prgm.dir]->prgms_count - 1
+                && dir_list[current_prgm.dir]->prgms[current_prgm.idx].is_end(pc)) {
+            // .END.
+            pc = line2pc(line - 1);
+            move_prgm_highlight(-1);
+        } else if (!current_prgm.is_editable()) {
             display_error(ERR_RESTRICTED_OPERATION);
+        } else if (current_prgm.is_locked()) {
+            display_error(ERR_PROGRAM_LOCKED);
+        } else if (current_prgm.idx < dir_list[current_prgm.dir]->prgms_count - 1
+                && dir_list[current_prgm.dir]->prgms[current_prgm.idx].is_end(pc)
+                && dir_list[current_prgm.dir]->prgms[current_prgm.idx + 1].locked) {
+            display_error(ERR_NEXT_PROGRAM_LOCKED);
         } else {
-            if (current_prgm.is_editable()
-                    && (current_prgm.idx != dir_list[current_prgm.dir]->prgms_count - 1
-                    || !dir_list[current_prgm.dir]->prgms[current_prgm.idx].is_end(pc)))
-                delete_command(pc);
+            delete_command(pc);
             pc = line2pc(line - 1);
             move_prgm_highlight(-1);
         }

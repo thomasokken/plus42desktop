@@ -85,6 +85,8 @@ extern FILE *gfile;
 #define ERR_VARIABLE_EXISTS        49
 #define ERR_TOO_MANY_ARGUMENTS     50
 #define ERR_NO_SOLUTION_FOUND      51
+#define ERR_PROGRAM_LOCKED         52
+#define ERR_NEXT_PROGRAM_LOCKED    53
 
 #define RTNERR_MAX 8
 
@@ -379,7 +381,8 @@ struct var_struct {
 struct prgm_struct {
     int4 capacity;
     int4 size;
-    int lclbl_invalid;
+    bool lclbl_invalid;
+    bool locked;
     unsigned char *text;
     equation_data *eq_data;
     inline bool is_end(int4 pc) {
@@ -687,6 +690,7 @@ bool store_command(int4 pc, int command, arg_struct *arg, const char *num_str);
 void store_command_after(int4 *pc, int command, arg_struct *arg, const char *num_str);
 int x2line();
 int a2line(bool append);
+int prgm_lock(bool lock);
 int4 pc2line(int4 pc);
 int4 line2pc(int4 line);
 int4 global_pc2line(pgm_index prgm, int4 pc);

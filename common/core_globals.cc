@@ -100,6 +100,8 @@ const error_spec errors[] = {
     { /* VARIABLE_EXISTS */        "Variable Exists",         15 },
     { /* TOO_MANY_ARGUMENTS */     "Too Many Arguments",      18 },
     { /* NO_SOLUTION_FOUND */      "No Solution Found",       17 },
+    { /* PROGRAM_LOCKED */         "Program Locked",          14 },
+    { /* NEXT_PROGRAM_LOCKED */    "Next Program Locked",     19 },
 };
 
 
@@ -1099,9 +1101,10 @@ bool no_keystrokes_yet;
  * Version 39: 1.1.5  Code mapping fix for N+U; requires eqn reparse
  * Version 40: 1.1.11 Use local var for Integ() param; requires eqn reparse
  * Version 41: 1.1.15 Global visibility fix for VIEW(); requires eqn reparse
- * Version 42: 1.1.18 Remember cat position for UNITS key in ASSIGN
+ * Version 42: 1.1.17a Remember cat position for UNITS key in ASSIGN
+ * Version 43: 1.1.18 Program locking
  */
-#define PLUS42_VERSION 42
+#define PLUS42_VERSION 43
 
 
 /*******************/
@@ -1835,6 +1838,9 @@ static bool persist_directory(directory *dir) {
         goto fail;
     for (int i = 0; i < dir->prgms_count; i++)
         core_export_programs(1, &i, NULL);
+    for (int i = 0; i < dir->prgms_count; i++)
+        if (!write_bool(dir->prgms[i].locked))
+            goto fail;
     if (!write_int(dir->children_count))
         goto fail;
     for (int i = 0; i < dir->children_count; i++) {
@@ -1910,6 +1916,10 @@ static bool unpersist_directory(directory **d) {
             goto fail;
         core_import_programs(nprogs, NULL);
         rebuild_label_table();
+        if (ver >= 43)
+            for (int i = 0; i < dir->prgms_count; i++)
+                if (!read_bool(&dir->prgms[i].locked))
+                    goto fail;
     }
 
     if (ver >= 9) {
@@ -2493,6 +2503,7 @@ static bool make_prgm_space(directory *dir, int n) {
     for (int i = dir->prgms_capacity; i < new_prgms_capacity; i++) {
         new_prgms[i].text = NULL;
         new_prgms[i].eq_data = NULL;
+        new_prgms[i].locked = false;
     }
     dir->prgms = new_prgms;
     dir->prgms_capacity = new_prgms_capacity;
@@ -2681,7 +2692,8 @@ void goto_dot_dot(bool force_new) {
     current_prgm.set(cwd->id, idx);
     cwd->prgms[idx].capacity = 0;
     cwd->prgms[idx].size = 0;
-    cwd->prgms[idx].lclbl_invalid = 1;
+    cwd->prgms[idx].lclbl_invalid = true;
+    cwd->prgms[idx].locked = false;
     cwd->prgms[idx].text = NULL;
     command = CMD_END;
     arg.type = ARGTYPE_NONE;
@@ -2921,7 +2933,7 @@ void get_next_command(int4 *pc, int *command, arg_struct *arg, int find_target, 
             prgm->text[orig_pc + i] = target_pc;
             target_pc >>= 8;
         }
-        prgm->lclbl_invalid = 0;
+        prgm->lclbl_invalid = false;
     }
 }
 
@@ -3011,7 +3023,7 @@ static void invalidate_lclbls(pgm_index idx, bool force) {
             }
             pc2 += get_command_length(idx, pc2);
         }
-        prgm->lclbl_invalid = 1;
+        prgm->lclbl_invalid = true;
     }
 }
 
@@ -3081,9 +3093,15 @@ bool store_command(int4 pc, int command, arg_struct *arg, const char *num_str) {
     directory *dir = dir_list[current_prgm.dir];
     prgm_struct *prgm = dir->prgms + current_prgm.idx;
 
-    if (flags.f.prgm_mode && !current_prgm.is_editable()) {
-        display_error(ERR_RESTRICTED_OPERATION);
-        return false;
+    if (flags.f.prgm_mode) {
+        if (!current_prgm.is_editable()) {
+            display_error(ERR_RESTRICTED_OPERATION);
+            return false;
+        }
+        if (current_prgm.is_locked()) {
+            display_error(ERR_PROGRAM_LOCKED);
+            return false;
+        }
     }
 
     /* We should never be called with pc = -1, but just to be safe... */
@@ -3402,6 +3420,8 @@ static bool ensure_prgm_space(int n) {
 int x2line() {
     if (!current_prgm.is_editable())
         return ERR_RESTRICTED_OPERATION;
+    if (current_prgm.is_locked())
+        return ERR_PROGRAM_LOCKED;
     switch (stack[sp]->type) {
         case TYPE_REAL: {
             if (!ensure_prgm_space(2 + sizeof(phloat)))
@@ -3470,6 +3490,8 @@ int x2line() {
 int a2line(bool append) {
     if (!current_prgm.is_editable())
         return ERR_RESTRICTED_OPERATION;
+    if (current_prgm.is_locked())
+        return ERR_PROGRAM_LOCKED;
     if (reg_alpha_length == 0) {
         squeak();
         return ERR_NONE;
@@ -3507,6 +3529,13 @@ int a2line(bool append) {
         len -= len2;
         maxlen = 14;
     }
+    return ERR_NONE;
+}
+
+int prgm_lock(bool lock) {
+    if (!flags.f.prgm_mode || current_prgm.dir != cwd->id)
+        return ERR_RESTRICTED_OPERATION;
+    dir_list[current_prgm.dir]->prgms[current_prgm.idx].locked = lock;
     return ERR_NONE;
 }
 

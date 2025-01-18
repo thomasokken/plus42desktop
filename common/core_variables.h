@@ -60,6 +60,7 @@ struct pgm_index {
         return dir != that.dir || idx != that.idx;
     }
     bool is_editable();
+    bool is_locked();
 };
 
 #define TYPE_NULL 0

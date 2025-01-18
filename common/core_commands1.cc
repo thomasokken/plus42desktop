@@ -795,6 +795,8 @@ int docmd_del(arg_struct *arg) {
         return ERR_INVALID_TYPE;
     if (!current_prgm.is_editable())
         return ERR_RESTRICTED_OPERATION;
+    if (current_prgm.is_locked())
+        return ERR_PROGRAM_LOCKED;
     clear_prgm_lines(arg->val.num);
     return ERR_NONE;
 }
