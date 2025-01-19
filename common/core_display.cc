@@ -1166,7 +1166,7 @@ void draw_char(int x, int y, char c) {
     unsigned char uc = (unsigned char) c;
     if (x < 0 || x >= disp_c || y < 0 || y >= disp_r)
         return;
-    if (uc > 135)
+    if (undefined_char(uc) || uc == 138)
         uc -= 128;
     X = x * 6;
     Y = y * 8;
@@ -1206,7 +1206,7 @@ void draw_block(int x, int y) {
 
 const char *get_char(char c) {
     unsigned char uc = (unsigned char) c;
-    if (uc > 135)
+    if (undefined_char(uc) || uc == 138)
         uc -= 128;
     return bigchars[uc];
 }
@@ -1231,7 +1231,7 @@ int draw_small_string(int x, int y, const char *s, int length, int max_width, bo
 
     while (n < length) {
         int c = (left_trunc ? s[length - n - 1] : s[n]) & 255;
-        if (c > 135)
+        if (undefined_char(c) || c == 138)
             c &= 127;
         m = smallchars_map[c];
         int cw = smallchars_offset[m + 1] - smallchars_offset[m];
@@ -1296,7 +1296,7 @@ int small_string_width(const char *s, int length) {
     int w = 0;
     for (int n = 0; n < length; n++) {
         int c = s[n] & 255;
-        if (c > 135)
+        if (undefined_char(c) || c == 138)
             c &= 127;
         int m = smallchars_map[c];
         int cw = smallchars_offset[m + 1] - smallchars_offset[m];
