@@ -2226,10 +2226,12 @@ static int keydown_sto_overwrite(int key, bool shift, int *repeat) {
                 case DIALOG_STO_OVERWRITE_PRGM: {
                     if (!current_prgm.is_editable()) {
                         show_error(ERR_RESTRICTED_OPERATION);
+                        dialog = DIALOG_NONE;
                         return 1;
                     }
                     if (current_prgm.is_locked()) {
                         show_error(ERR_PROGRAM_LOCKED);
+                        dialog = DIALOG_NONE;
                         return 1;
                     }
                     arg_struct arg;
