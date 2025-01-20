@@ -2642,14 +2642,10 @@ static int keydown_list(int key, bool shift, int *repeat) {
             edit_pos = 0;
             update_skin_mode();
             display_pos = 0;
-#if defined(ANDROID) || defined(IPHONE)
             if (shell_alpha_keyboard_enabled())
                 update_menu(MENU_NONE);
             else
                 update_menu(MENU_ALPHA1);
-#else
-            update_menu(MENU_ALPHA1);
-#endif
             restart_cursor();
             eqn_draw();
             return 1;
