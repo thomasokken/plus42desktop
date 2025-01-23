@@ -4,7 +4,7 @@
 # Two rows of keys added by Thomas Okken.
 
 Skin: 0,0,320,584
-Display: 29,60 2 3 9EA48D 242A26
+Display: 29,60 2 3 E4EBCB 071E22
 Flags: 7
 
 Annunciator: 1 30,45,15,13 345,47
@@ -232,3 +232,43 @@ GtkKey: Alt 6 : 48
 GtkKey: Alt asciicircum : 49
 GtkKey: Alt CShift 6 : 49
 GtkKey: u : 42
+
+DroidKey: a : 50
+DroidKey: A : 51
+DroidKey: CShift a : 51
+DroidKey: v : 52
+DroidKey: V : 53
+DroidKey: CShift v : 53
+DroidKey: q : 54
+DroidKey: Q : 55
+DroidKey: CShift q : 55
+DroidKey: o : 56
+DroidKey: O : 57
+DroidKey: CShift o : 57
+DroidKey: l : 58
+DroidKey: L : 59
+DroidKey: CShift l : 59
+DroidKey: x : 60
+DroidKey: X : 61
+DroidKey: CShift x : 61
+DroidKey: g : 61
+
+DroidKey: Alt 1 : 38
+DroidKey: Alt Shift 1 : 39
+DroidKey: Alt CShift 1 : 39
+DroidKey: Alt 2 : 40
+DroidKey: Alt Shift 2 : 41
+DroidKey: Alt CShift 2 : 41
+DroidKey: Alt 3 : 42
+DroidKey: Alt Shift 3 : 43
+DroidKey: Alt CShift 3 : 43
+DroidKey: Alt 4 : 44
+DroidKey: Alt Shift 4 : 45
+DroidKey: Alt CShift 4 : 45
+DroidKey: Alt 5 : 46
+DroidKey: Alt Shift 5 : 47
+DroidKey: Alt CShift 5 : 47
+DroidKey: Alt 6 : 48
+DroidKey: Alt Shift 6 : 49
+DroidKey: Alt CShift 6 : 49
+DroidKey: u : 42
