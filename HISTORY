@@ -12,7 +12,7 @@
   using the LOCK and UNLOCK functions. See the Free42 web site for details.
 * Improved display contrast in the built-in skins.
 * Android and iOS versions: Pop-up ALPHA keyboard, for easier text entry.
-* GTK version: Dark Mode support.
+* Linux version: Dark Mode support.
 
 2025-01-01: release 1.1.17b (Android only)
 
