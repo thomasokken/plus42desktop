@@ -1290,12 +1290,7 @@ bool is_custom_menu_unit(const char *text, int length) {
     vartype *dummy2;
     std::string dummy3;
     for (std::map<std::string, int>::iterator iter = up->elem.begin(); iter != up->elem.end(); iter++) {
-        if (find_unit(iter->first, &dummy1, &dummy2, &dummy3) != NULL)
-            continue;
-        const char *t = iter->first.c_str();
-        int sz = iter->first.length();
-        vloc v = lookup_var(t, sz);
-        if (v.not_found() || v.value()->type != TYPE_UNIT) {
+        if (find_unit(iter->first, &dummy1, &dummy2, &dummy3) == NULL) {
             delete up;
             return false;
         }
