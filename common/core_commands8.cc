@@ -1286,11 +1286,11 @@ bool is_custom_menu_unit(const char *text, int length) {
     UnitProduct *up = UnitParser::parse(std::string(text, length), &errpos);
     if (up == NULL)
         return false;
-    int dummy1;
-    vartype *dummy2;
-    std::string dummy3;
+    int exp;
+    vartype *user;
+    std::string un;
     for (std::map<std::string, int>::iterator iter = up->elem.begin(); iter != up->elem.end(); iter++) {
-        if (find_unit(iter->first, &dummy1, &dummy2, &dummy3) == NULL) {
+        if (find_unit(iter->first, &exp, &user, &un) == NULL && user == NULL) {
             delete up;
             return false;
         }
