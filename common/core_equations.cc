@@ -2953,6 +2953,8 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
                             if (edit_pos > 0 && edit_pos == edit_len && edit_pos % disp_c == 0) {
                                 edit_pos -= disp_c;
                                 display_pos -= disp_c;
+                                if (display_pos < 0)
+                                    display_pos = 0;
                             } else {
                                 edit_pos -= disp_c;
                                 if (edit_pos <= display_pos) {
