@@ -398,7 +398,6 @@ void skin_menu_update(GtkWidget *w) {
 
 void skin_load(int *width, int *height, int *rows, int *cols, int *flags) {
     char line[1024];
-    int lineno = 0;
     bool force_builtin = false;
 
     static int last_req_rows, last_req_cols;
@@ -464,6 +463,8 @@ void skin_load(int *width, int *height, int *rows, int *cols, int *flags) {
     int alt_pixel_height = -1;
     int max_r = -1;
     int dup_first_y = 0, dup_last_y = 0;
+
+    int lineno = 0;
 
     while (skin_gets(line, 1024)) {
         lineno++;

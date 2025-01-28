@@ -348,10 +348,7 @@ static void skin_close() {
 
 void skin_load(long *width, long *height, int *rows, int *cols, int *flags) {
     char line[1024];
-    int kmcap = 0;
-    int lineno = 0;
     bool force_builtin = false;
-    int f = 0;
 
     static int last_req_rows, last_req_cols;
     if (*rows == -1) {
@@ -413,15 +410,19 @@ void skin_load(long *width, long *height, int *rows, int *cols, int *flags) {
         free(keymap);
     keymap = NULL;
     keymap_length = 0;
+    int kmcap = 0;
     
     int disp_rows = 2;
     int disp_cols = 22;
+    int fl = 0;
     
     int alt_disp_y = -1;
     CGFloat alt_pixel_height = -1;
     int max_r = -1;
     int dup_first_y = 0, dup_last_y = 0;
-    
+
+    int lineno = 0;
+
     while (skin_gets(line, 1024)) {
         lineno++;
         if (*line == 0)
@@ -621,7 +622,7 @@ void skin_load(long *width, long *height, int *rows, int *cols, int *flags) {
         } else if (strncasecmp(line, "flags:", 6) == 0) {
             int t;
             if (sscanf(line + 6, "%d", &t) == 1)
-                f = t;
+                fl = t;
         } else if (strncasecmp(line, "altbkgd:", 8) == 0) {
             int mode;
             int src_x, src_y, src_width, src_height;
@@ -791,7 +792,7 @@ void skin_load(long *width, long *height, int *rows, int *cols, int *flags) {
     
     *width = skin.width;
     *height = skin.height;
-    *flags = f;
+    *flags = fl;
     
     /********************************/
     /* (Re)build the display bitmap */
