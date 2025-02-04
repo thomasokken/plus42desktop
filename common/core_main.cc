@@ -4358,18 +4358,6 @@ static void paste_programs(const char *buf) {
                 int byte2 = ((a << 6) | b) & 255;
                 decode_xrom(byte1, byte2, &cmd, &arg);
                 goto store;
-            } else if ((string_equals(hpbuf + hppos, cmd_end - hppos - 1, "FNC", 3)
-                    || string_equals(hpbuf + hppos, cmd_end - hppos - 1, "FUNC", 4))
-                    && hpbuf[cmd_end - 1] >= '0'
-                    && hpbuf[cmd_end - 1] <= '2') {
-                cmd = CMD_FUNC;
-                arg.type = ARGTYPE_NUM;
-                switch (hpbuf[cmd_end - 1]) {
-                    case '0': arg.val.num =  0; break;
-                    case '1': arg.val.num = 11; break;
-                    case '2': arg.val.num = 21; break;
-                }
-                goto store;
             } else {
                 // Number or bust!
                 if (nexttoken(hpbuf, hppos, hpend, &tok_start, &tok_end)) {
