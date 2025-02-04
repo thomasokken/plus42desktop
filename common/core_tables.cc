@@ -62,7 +62,7 @@
 // XROM 30,37-63 (a7a5-a7bf) (Card Reader)
 // XROM 31,00-63 (a7c0-a7ff) (Data Logger)
 
-// Available XROMs: a7dc, a7dd, a7e0, a7f5, a7fa, a7fb
+// Available XROMs: a7dc, a7dd, a7e0, a7fa, a7fb
 // Time Module: a681-a6a3, of which we're only using some; see below.
 
 const command_spec cmd_array[] =
