@@ -1950,6 +1950,8 @@ static bool unpersist_directory(directory **d) {
                 goto fail;
             if (fread(dir->children[i].name, 1, dir->children[i].length, gfile) != dir->children[i].length)
                 goto fail;
+            if (ver < 44)
+                switch_30_and_94(dir->children[i].name, dir->children[i].length);
             directory *child;
             if (!unpersist_directory(&child))
                 goto fail;
