@@ -560,7 +560,7 @@ static bool is_name_char(char c) {
     return c != '+' && c != '-' && c != 1 /* mul */
         && c != 0 /* div */     && c != '('
         && c != ')' && c != '<' && c != '>'
-        && c != '^' && c != ':' && c != '=' && c != ' '
+        && c != 30 /* ^ */ && c != ':' && c != '=' && c != ' '
         && c != 12 /* NE */ && c != 9 /* LE */
         && c != 11 /* GE */ && c != '['
         && c != ']';
@@ -640,7 +640,7 @@ struct eqn_name_entry {
  * These functions deviate from that pattern:
  */
 static eqn_name_entry eqn_name[] = {
-    { CMD_Y_POW_X,   1, "^"        },
+    { CMD_Y_POW_X,   1, "\036"     },
     { CMD_ADD,       1, "+"        },
     { CMD_SUB,       1, "-"        },
     { CMD_MUL,       1, "\001"     },
@@ -1216,7 +1216,7 @@ bool eqn_draw() {
             draw_key(1, 0, 0, "EDIT", 4);
             draw_key(2, 0, 0, "DELET", 5);
             draw_key(3, 0, 0, "NEW", 3);
-            draw_key(4, 0, 0, "\036", 1, true);
+            draw_key(4, 0, 0, "^", 1, true);
             draw_key(5, 0, 0, "\016", 1, true);
         } else
             draw_key(1, 0, 0, "OK", 2);
@@ -1401,7 +1401,7 @@ bool eqn_draw() {
                 draw_key(4, 0, 0, "\017>", 2);
             } else {
                 draw_key(1, 0, 0, "\020", 1);
-                draw_key(2, 0, 0, "\036", 1);
+                draw_key(2, 0, 0, "^", 1);
                 draw_key(3, 0, 0, "\016", 1);
                 draw_key(4, 0, 0, "\017", 1);
             }

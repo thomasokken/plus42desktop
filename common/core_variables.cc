@@ -288,8 +288,8 @@ vartype *new_unit(phloat value, const char *text, int4 length) {
             c = '/';
         else if (c == '\1')
             c = '*';
-        else if (c == '\36')
-            c = '^';
+        else if (c == '^')
+            c = '\36';
         u->text[i] = c;
     }
     u->length = length;

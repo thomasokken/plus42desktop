@@ -2345,3 +2345,13 @@ void leave_matrix_editor() {
     matedit_stack = NULL;
     matedit_stack_depth = 0;
 }
+
+void switch_30_and_94(char *text, int length) {
+    for (int i = 0; i < length; i++) {
+        char c = text[i];
+        if (c == 30)
+            text[i] = 94;
+        else if (c == 94)
+            text[i] = 30;
+    }
+}

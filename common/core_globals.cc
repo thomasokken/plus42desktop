@@ -115,7 +115,7 @@ const menu_spec menus[] = {
                         { MENU_ALPHA_WXYZ,   4, "WXYZ"  } } },
     { /* MENU_ALPHA2 */ MENU_NONE, MENU_ALPHA1, MENU_ALPHA1,
                       { { MENU_ALPHA_PAREN, 5, "( [ {"        },
-                        { MENU_ALPHA_ARROW, 3, "\020\036\016" },
+                        { MENU_ALPHA_ARROW, 3, "\020^\016" },
                         { MENU_ALPHA_COMP,  5, "< = >"        },
                         { MENU_ALPHA_MATH1, 4, "MATH"         },
                         { MENU_ALPHA_PUNC1, 4, "PUNC"         },
@@ -192,11 +192,11 @@ const menu_spec menus[] = {
                         { MENU_NONE, 1, "}" } } },
     { /* MENU_ALPHA_ARROW */ MENU_ALPHA2, MENU_NONE, MENU_NONE,
                       { { MENU_NONE, 1, "\020" },
-                        { MENU_NONE, 1, "\036" },
+                        { MENU_NONE, 1, "^"    },
                         { MENU_NONE, 1, "\016" },
                         { MENU_NONE, 1, "\017" },
                         { MENU_NONE, 1, " "    },
-                        { MENU_NONE, 1, "^"    } } },
+                        { MENU_NONE, 1, "\036" } } },
     { /* MENU_ALPHA_COMP */ MENU_ALPHA2, MENU_NONE, MENU_NONE,
                       { { MENU_NONE, 1, "="    },
                         { MENU_NONE, 1, "\014" },
@@ -1103,8 +1103,9 @@ bool no_keystrokes_yet;
  * Version 41: 1.1.15 Global visibility fix for VIEW(); requires eqn reparse
  * Version 42: 1.1.17a Remember cat position for UNITS key in ASSIGN
  * Version 43: 1.1.18 Program locking
+ * Version 44: 1.2.3  Switching character codes 30 and 94
  */
-#define PLUS42_VERSION 43
+#define PLUS42_VERSION 44
 
 
 /*******************/
@@ -1475,6 +1476,8 @@ bool unpersist_vartype(vartype **v) {
                 free_vartype((vartype *) s);
                 return false;
             }
+            if (ver < 44)
+                switch_30_and_94(s->txt(), len);
             *v = (vartype *) s;
             return true;
         }
@@ -1524,6 +1527,8 @@ bool unpersist_vartype(vartype **v) {
                             free(p);
                             break;
                         }
+                        if (ver < 44)
+                            switch_30_and_94((char *) (p + 1), len);
                         *p = len;
                         *(int4 **) &rm->array->data[i] = p;
                         rm->array->is_string[i] = 2;
@@ -1532,6 +1537,8 @@ bool unpersist_vartype(vartype **v) {
                         *t = len;
                         if (fread(t + 1, 1, len, gfile) != len)
                             break;
+                        if (ver < 44)
+                            switch_30_and_94(t + 1, len);
                     }
                 }
                 success = true;
@@ -1703,7 +1710,8 @@ bool unpersist_vartype(vartype **v) {
                     goto eq_fail;
                 if (fread(eqd->text, 1, eqd->length, gfile) != eqd->length)
                     goto eq_fail;
-
+                if (ver < 44)
+                    switch_30_and_94(eqd->text, eqd->length);
             }
             int cmsize;
             if (!read_int(&cmsize))
@@ -1779,6 +1787,8 @@ bool unpersist_vartype(vartype **v) {
                 free(u->text);
                 goto unit_fail;
             }
+            if (ver < 44)
+                switch_30_and_94(u->text, len);
             u->type = TYPE_UNIT;
             u->length = len;
             *v = (vartype *) u;
@@ -1810,6 +1820,8 @@ bool unpersist_vartype(vartype **v) {
             char name[7];
             if (fread(name, 1, length, gfile) != length)
                 return false;
+            if (ver < 44)
+                switch_30_and_94(name, length);
             *v = new_var_ref(dir, name, length);
             return *v != NULL;
         }
@@ -1889,6 +1901,8 @@ static bool unpersist_directory(directory **d) {
             goto fail;
         if (fread(vs.name, 1, vs.length, gfile) != vs.length)
             goto fail;
+        if (ver < 44)
+            switch_30_and_94(vs.name, vs.length);
         if (ver < 9) {
             if (!read_int2(&vs.level))
                 goto fail;
@@ -2094,6 +2108,8 @@ static bool unpersist_globals() {
         reg_alpha_length = 0;
         goto done;
     }
+    if (ver < 44)
+        switch_30_and_94(reg_alpha, reg_alpha_length);
     if (!read_int4(&mode_sigma_reg)) {
         mode_sigma_reg = 11;
         goto done;
@@ -2248,6 +2264,8 @@ static bool unpersist_globals() {
                 goto done;
             if (fread(local_vars[i].name, 1, local_vars[i].length, gfile) != local_vars[i].length)
                 goto done;
+            if (ver < 44)
+                switch_30_and_94(local_vars[i].name, local_vars[i].length);
             if (!read_int2(&local_vars[i].level))
                 goto done;
             if (!read_int2(&local_vars[i].flags))
@@ -2361,6 +2379,8 @@ static bool unpersist_globals() {
         goto varmenu_fail;
     if (fread(varmenu, 1, 7, gfile) != 7)
         goto varmenu_fail;
+    if (ver < 44)
+        switch_30_and_94(varmenu, varmenu_length);
     if (!read_int(&varmenu_rows))
         goto varmenu_fail;
     if (!read_int(&varmenu_row)) {
@@ -2376,6 +2396,8 @@ static bool unpersist_globals() {
                 || fread(varmenu_labeltext[i], 1, c, gfile) != c)
             goto done;
         varmenu_labellength[i] = c;
+        if (ver < 44)
+            switch_30_and_94(varmenu_labeltext[i], varmenu_labellength[i]);
     }
     if (!read_int(&varmenu_role))
         goto done;

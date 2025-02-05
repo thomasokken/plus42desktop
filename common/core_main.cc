@@ -2187,7 +2187,7 @@ static void decode_suffix(int cmd, int suffix, arg_struct *arg) {
     }
 }
 
-static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **xstr_buf, int *xstr_len) {
+static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **xstr_buf, int *xstr_len, bool sw_30_94) {
     int pos = 0;
     int byte1 = buf[pos++];
     int byte2 = buf[pos++];
@@ -2249,6 +2249,8 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
                 *cmd = CMD_NONE;
                 return;
             }
+            if (sw_30_94)
+                switch_30_and_94(*xstr_buf, *xstr_len);
             arg->type = ARGTYPE_XSTR;
             arg->length = *xstr_len;
             arg->val.xstr = *xstr_buf;
@@ -2319,6 +2321,8 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
                     arg->val.text[1] = key;
                     for (i = 2; i < arg->length; i++)
                         arg->val.text[i] = buf[pos++];
+                    if (sw_30_94)
+                        switch_30_and_94(arg->val.text, arg->length);
                     return;
                 }
                 *cmd += key - 1;
@@ -2362,7 +2366,13 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
             goto xrom_string;
         }
     }
+
+    if (sw_30_94 && (arg->type == ARGTYPE_STR || arg->type == ARGTYPE_IND_STR))
+        switch_30_and_94(arg->val.text, arg->length);
 }
+
+// From core_globals.cc: version of state being imported
+extern int4 ver;
 
 void core_import_programs(int num_progs, const char *raw_file_name) {
     int byte1, byte2, suffix;
@@ -2486,6 +2496,8 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
                     arg.val.text[i] = suffix;
                 }
                 arg.length = str_len;
+                if (raw_file_name == NULL && ver < 44)
+                    switch_30_and_94(arg.val.text, arg.length);
             } else if (byte1 == 0x1F) {
                 /* "W" function (see HP-41C instruction table */
                 goto skip;
@@ -2562,7 +2574,7 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
                         goto done;
                     buf[i + 1] = c;
                 }
-                decode_string(buf, &cmd, &arg, &xstr_buf, &xstr_len);
+                decode_string(buf, &cmd, &arg, &xstr_buf, &xstr_len, raw_file_name == NULL && ver < 44);
                 if (cmd == CMD_CANCELLED)
                     goto done;
                 if (cmd == CMD_NONE)
@@ -3265,7 +3277,7 @@ int ascii2hp(char *dst, int dstlen, const char *src, int srclen /* = -1 */) {
             case 0x00f6: code =  28; break; // lowercase o with umlaut
             case 0x00dc:                    // uppercase u with umlaut
             case 0x00fc: code =  29; break; // lowercase u with umlaut
-            case 0x2191: code =  30; break; // upward-pointing arrow
+            case '^':    code =  30; break; // caret
             case 0x00b7:                    // middle dot (Emu42)
             case 0x2022: code =  31; break; // bullet
             case 0x201c:                    // left curly double quote
@@ -3273,6 +3285,7 @@ int ascii2hp(char *dst, int dstlen, const char *src, int srclen /* = -1 */) {
             case 0x2018:                    // left curly single quote
             case 0x2019: code =  39; break; // right curly single quote
             case 0x2212: code =  45; break; // minus sign
+            case 0x2191: code =  94; break; // upward-pointing arrow
             case 0x22a2:                    // right tack sign (i41CX)
             case 0x22a6:                    // assertion sign (Emu42)
             case 0x251c: code = 127; break; // append sign
@@ -4332,7 +4345,7 @@ static void paste_programs(const char *buf) {
                         }
                     }
                     buf[0] = 0xf0 + length;
-                    decode_string(buf, &cmd, &arg, &xstr_buf, &xstr_len);
+                    decode_string(buf, &cmd, &arg, &xstr_buf, &xstr_len, false);
                     if (cmd == CMD_CANCELLED) {
                         display_error(ERR_INSUFFICIENT_MEMORY);
                         redisplay();

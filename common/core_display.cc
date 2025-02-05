@@ -79,7 +79,7 @@ static const char bigchars[136][5] =
         { 0x1f, 0x15, 0x71, 0x50, 0x50 },
         { 0x3c, 0x43, 0x42, 0x43, 0x3c },
         { 0x3c, 0x41, 0x40, 0x41, 0x3c },
-        { 0x04, 0x02, 0x7f, 0x02, 0x04 },
+        { 0x04, 0x02, 0x01, 0x02, 0x04 },
         { 0x3c, 0x3c, 0x3c, 0x3c, 0x3c },
         { 0x00, 0x00, 0x00, 0x00, 0x00 },
         { 0x00, 0x00, 0x5f, 0x00, 0x00 },
@@ -143,7 +143,7 @@ static const char bigchars[136][5] =
         { 0x00, 0x7f, 0x41, 0x41, 0x00 },
         { 0x02, 0x04, 0x08, 0x10, 0x20 },
         { 0x00, 0x41, 0x41, 0x7f, 0x00 },
-        { 0x04, 0x02, 0x01, 0x02, 0x04 },
+        { 0x04, 0x02, 0x7f, 0x02, 0x04 },
         { 0x80, 0x80, 0x80, 0x80, 0x80 },
         { 0x00, 0x03, 0x04, 0x00, 0x00 },
         { 0x20, 0x54, 0x54, 0x54, 0x78 },
@@ -496,7 +496,7 @@ static unsigned char smallchars_map[136] =
         /*  27 */ 130,
         /*  28 */  89,
         /*  29 */  90,
-        /*  30 */  62,
+        /*  30 */ 124,
         /*  31 */  95,
         /*  32 */   0,
         /*  33 */   1,
@@ -560,7 +560,7 @@ static unsigned char smallchars_map[136] =
         /*  91 */  59,
         /*  92 */  60,
         /*  93 */  61,
-        /*  94 */ 124,
+        /*  94 */  62,
         /*  95 */  63,
         /*  96 */  64,
         /*  97 */  98,
@@ -778,6 +778,8 @@ bool unpersist_display(int ver) {
         for (int j = 0; j < 6; j++) {
             if (!read_int(&custommenu_length[i][j])) return false;
             if (fread(custommenu_label[i][j], 1, 7, gfile) != 7) return false;
+            if (ver < 44)
+                switch_30_and_94(custommenu_label[i][j], custommenu_length[i][j]);
         }
     }
     for (int i = 0; i < 9; i++)
@@ -788,6 +790,8 @@ bool unpersist_display(int ver) {
     for (int i = 0; i < 6; i++) {
         if (!read_int(&progmenu_length[i])) return false;
         if (fread(progmenu_label[i], 1, 7, gfile) != 7) return false;
+        if (ver < 44)
+            switch_30_and_94(progmenu_label[i], progmenu_length[i]);
     }
     int r, c;
     if (ver < 13) {
@@ -1486,7 +1490,7 @@ void draw_key(int n, int highlight, int hide_meta,
         /* <- */
         special_key[n] = 1;
     else if (string_equals(s, length, "<\20", 2)
-          || string_equals(s, length, "\36", 1))
+          || string_equals(s, length, "^", 1))
         /* <<- or up */
         special_key[n] = 2;
     else if (string_equals(s, length, "\17", 1))
@@ -3351,8 +3355,8 @@ int draw_eqn_catalog(int section, int row, int *item) {
 
 const char *unit_menu_text[] = {
     /* LENG  */ "m\0cm\0mm\0yd\0ft\0in\0Mpc\0pc\0lyr\0au\0km\0mi\0nmi\0miUS\0chain\0rd\0fath\0ftUS\0mil\0\21\0\24\0fermi\0",
-    /* AREA  */ "m^2\0cm^2\0b\0yd^2\0ft^2\0in^2\0km^2\0ha\0a\0mi^2\0miUS^2\0acre\0",
-    /* VOL   */ "m^3\0st\0cm^3\0yd^3\0ft^3\0in^3\0l\0galUK\0galC\0gal\0qt\0pt\0ml\0cu\0ozfl\0ozUK\0tbsp\0tsp\0bbl\0bu\0pk\0fbm\0",
+    /* AREA  */ "m\0362\0cm\0362\0b\0yd\0362\0ft\0362\0in\0362\0km\0362\0ha\0a\0mi\0362\0miUS\0362\0acre\0",
+    /* VOL   */ "m\0363\0st\0cm\0363\0yd\0363\0ft\0363\0in\0363\0l\0galUK\0galC\0gal\0qt\0pt\0ml\0cu\0ozfl\0ozUK\0tbsp\0tsp\0bbl\0bu\0pk\0fbm\0",
     /* TIME  */ "yr\0d\0h\0min\0s\0Hz\0",
     /* SPEED */ "m/s\0cm/s\0ft/s\0kph\0mph\0knot\0c\0ga\0",
     /* MASS  */ "kg\0g\0lb\0oz\0slug\0lbt\0ton\0tonUK\0t\0ozt\0ct\0grain\0u\0mol\0",

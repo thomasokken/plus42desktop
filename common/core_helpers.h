@@ -132,5 +132,7 @@ vartype_list *get_path();
 int matedit_get(vartype **res);
 void leave_matrix_editor();
 
+void switch_30_and_94(char *text, int length);
+
 
 #endif
