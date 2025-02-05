@@ -640,13 +640,13 @@ struct eqn_name_entry {
  * These functions deviate from that pattern:
  */
 static eqn_name_entry eqn_name[] = {
-    { CMD_Y_POW_X,   1, "\036"     },
+    { CMD_Y_POW_X,   1, "\36"      },
     { CMD_ADD,       1, "+"        },
     { CMD_SUB,       1, "-"        },
-    { CMD_MUL,       1, "\001"     },
-    { CMD_DIV,       1, "\000"     },
-    { CMD_SIGMAADD,  2, "\005("    },
-    { CMD_SIGMASUB,  2, "\003("    },
+    { CMD_MUL,       1, "\1"       },
+    { CMD_DIV,       1, "\0"       },
+    { CMD_SIGMAADD,  2, "\5("      },
+    { CMD_SIGMASUB,  2, "\3("      },
     { CMD_INV,       4, "INV("     },
     { CMD_SQUARE,    3, "SQ("      },
     { CMD_E_POW_X,   4, "EXP("     },
@@ -1123,37 +1123,37 @@ void eqn_paste(const char *buf) {
 
 static void draw_print1_menu() {
     draw_key(0, 0, 0, "EQ", 2);
-    draw_key(1, 0, 0, "LISTE", 5);
+    draw_key(1, 0, 0, "LISTEQ", 6);
     draw_key(2, 0, 0, "VARS", 4);
-    draw_key(3, 0, 0, "LISTV", 5);
-    draw_key(4, 0, 0, "PRST", 4);
+    draw_key(3, 0, 0, "LISTVARS", 8);
+    draw_key(4, 0, 0, "PRSTK", 5);
     draw_key(5, 0, 0, "ADV", 3);
 }
 
 static void draw_print2_menu() {
     if (flags.f.printer_exists) {
-        draw_key(0, 0, 0, "PON\037", 4);
-        draw_key(1, 0, 0, "POFF", 4);
+        draw_key(0, 0, 1, "P\322ON\37", 5);
+        draw_key(1, 0, 1, "P\322OFF", 5);
     } else {
-        draw_key(0, 0, 0, "PON", 3);
-        draw_key(1, 0, 0, "POFF\037", 5);
+        draw_key(0, 0, 1, "P\322ON", 4);
+        draw_key(1, 0, 1, "P\322OFF\37", 6);
     }
     if (!flags.f.trace_print && !flags.f.normal_print)
-        draw_key(2, 0, 0, "MAN\037", 4);
+        draw_key(2, 0, 0, "MAN\37", 4);
     else
         draw_key(2, 0, 0, "MAN", 3);
     if (!flags.f.trace_print && flags.f.normal_print)
-        draw_key(3, 0, 0, "NOR\037", 4);
+        draw_key(3, 0, 1, "NOR\315\37", 5);
     else
         draw_key(3, 0, 0, "NORM", 4);
     if (flags.f.trace_print && !flags.f.normal_print)
-        draw_key(4, 0, 0, "TRAC\037", 5);
+        draw_key(4, 0, 1, "TRAC\305\37", 6);
     else
         draw_key(4, 0, 0, "TRACE", 5);
     if (flags.f.trace_print && flags.f.normal_print)
-        draw_key(5, 0, 0, "STRA\037", 5);
+        draw_key(5, 0, 1, "STRA\303\305\37", 7);
     else
-        draw_key(5, 0, 0, "STRAC", 5);
+        draw_key(5, 0, 1, "STRAC\305", 6);
 }
 
 void eqn_set_selected_row(int row) {
@@ -1217,7 +1217,7 @@ bool eqn_draw() {
             draw_key(2, 0, 0, "DELET", 5);
             draw_key(3, 0, 0, "NEW", 3);
             draw_key(4, 0, 0, "^", 1, true);
-            draw_key(5, 0, 0, "\016", 1, true);
+            draw_key(5, 0, 0, "\16", 1, true);
         } else
             draw_key(1, 0, 0, "OK", 2);
     } else if (dialog == DIALOG_SAVE_CONFIRM) {
@@ -1395,15 +1395,15 @@ bool eqn_draw() {
         if (edit.id == MENU_NONE) {
             draw_key(0, 0, 0, "DEL", 3);
             if (disp_r == 2) {
-                draw_key(1, 0, 0, "<\020", 2);
-                draw_key(2, 0, 0, "\020", 1);
-                draw_key(3, 0, 0, "\017", 1);
-                draw_key(4, 0, 0, "\017>", 2);
+                draw_key(1, 0, 0, "<\20", 2);
+                draw_key(2, 0, 0, "\20", 1);
+                draw_key(3, 0, 0, "\17", 1);
+                draw_key(4, 0, 0, "\17>", 2);
             } else {
-                draw_key(1, 0, 0, "\020", 1);
+                draw_key(1, 0, 0, "\20", 1);
                 draw_key(2, 0, 0, "^", 1);
-                draw_key(3, 0, 0, "\016", 1);
-                draw_key(4, 0, 0, "\017", 1);
+                draw_key(3, 0, 0, "\16", 1);
+                draw_key(4, 0, 0, "\17", 1);
             }
             draw_key(5, 0, 0, "ALPHA", 5);
         } else if (edit.id == MENU_PRINT1) {
@@ -3554,7 +3554,7 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
                 if (shift)
                     squeak();
                 else
-                    insert_text("\030", 1);
+                    insert_text("\30", 1);
                 break;
             }
             case KEY_BSP: {

@@ -1670,7 +1670,7 @@ static int finish_integ() {
         char *buf = (char *) malloc(disp_c);
         freer f(buf);
         int bufptr = 0;
-        string2buf(buf, disp_c, &bufptr, "\003=", 2);
+        string2buf(buf, disp_c, &bufptr, "\3=", 2);
         bufptr += vartype2string(x, buf + bufptr, disp_c - bufptr);
         draw_message(0, buf, bufptr);
         if ((flags.f.trace_print || flags.f.normal_print) && flags.f.printer_exists)

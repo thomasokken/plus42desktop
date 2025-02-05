@@ -1040,7 +1040,7 @@ int docmd_pgminti(arg_struct *arg) {
         varmenu_role = 2;
         set_menu(MENULEVEL_APP, MENU_VARMENU);
         set_appmenu_exitcallback(4);
-        draw_message(0, "Set Vars; Select \003var", 21, false);
+        draw_message(0, "Set Vars; Select \3var", 21, false);
         mode_varmenu = true;
         return ERR_NONE;
     } else
@@ -1065,7 +1065,7 @@ int docmd_eqninti(arg_struct *arg) {
         varmenu_role = 2;
         set_menu(MENULEVEL_APP, MENU_VARMENU);
         set_appmenu_exitcallback(4);
-        draw_message(0, "Set Vars; Select \003var", 21, false);
+        draw_message(0, "Set Vars; Select \3var", 21, false);
         mode_varmenu = true;
         return ERR_NONE;
     } else
