@@ -1,3 +1,14 @@
+2025-02-07: release 1.2.3
+
+* Fixed crash when trying to load invalid skins.
+* Added IDENT function. This returns the app's version number as a negative
+  integer, in -aabbccdd format, with 1.2.3f formatted as -1020306, for example.
+  The number is negative in order to distinguish Plus42 from Free42, which
+  returns positive numbers from IDENT.
+* XROMs are now decoded immediately when pasting.
+* Switched ^ and ↑ in the character set. The change is transparent to the user,
+  but it restores code compatibility with the encoding of ↑ in Free42.
+
 2025-01-26: release 1.2.2
 
 * User-defined units with SI prefixes didn't work in the CUSTOM menu. Fixed.
