@@ -544,6 +544,16 @@ int docmd_fstack(arg_struct *arg) {
     return err;
 }
 
+int docmd_embed(arg_struct *arg) {
+    equation_data *eqd = eq_dir->prgms[arg->val.num].eq_data;
+    if (eqd == NULL)
+        return ERR_NONEXISTENT;
+    vartype *v = new_equation(eqd);
+    if (v == NULL)
+        return ERR_INSUFFICIENT_MEMORY;
+    return recall_result(v);
+}
+
 static int get_sum(int n) {
     vartype *v = recall_var("REGS", 4);
     if (v == NULL)

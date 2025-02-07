@@ -391,14 +391,7 @@ void free_vartype(vartype *v) {
         }
         case TYPE_EQUATION: {
             vartype_equation *eq = (vartype_equation *) v;
-            if (--(eq->data->refcount) == 0) {
-                int eqn_index = eq->data->eqn_index;
-                equation_deleted(eqn_index);
-                free(eq_dir->prgms[eqn_index].text);
-                eq_dir->prgms[eqn_index].text = NULL;
-                eq_dir->prgms[eqn_index].eq_data = NULL;
-                delete eq->data;
-            }
+            remove_equation_reference(eq->data->eqn_index);
             free(eq);
             break;
         }
@@ -1288,4 +1281,16 @@ void reparse_all_equations() {
             prgm->eq_data = old_prgm.eq_data;
         }
     }
+}
+
+void remove_equation_reference(int4 id) {
+    equation_data *eqd = eq_dir->prgms[id].eq_data;
+    if (--(eqd->refcount) > 0)
+        return;
+    equation_deleted(id);
+    count_embed_references(eq_dir, id, false);
+    free(eq_dir->prgms[id].text);
+    eq_dir->prgms[id].text = NULL;
+    eq_dir->prgms[id].eq_data = NULL;
+    delete eqd;
 }

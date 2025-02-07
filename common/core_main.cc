@@ -1009,6 +1009,16 @@ static void export_hp42s(int index) {
                     cmdbuf[cmdlen++] = (char) 0xF7;
                     cmdbuf[cmdlen++] = arg.val.num >> 8;
                     cmdbuf[cmdlen++] = arg.val.num;
+                } else if (cmd == CMD_EMBED) {
+                    // TODO: This is only valid when writing to a state file.
+                    // When exporting, this should be a string-valued EMBED.
+                    cmdbuf[cmdlen++] = (char) 0xF6;
+                    cmdbuf[cmdlen++] = (char) 0xA7;
+                    cmdbuf[cmdlen++] = (char) 0x69;
+                    cmdbuf[cmdlen++] = arg.val.num >> 24;
+                    cmdbuf[cmdlen++] = arg.val.num >> 16;
+                    cmdbuf[cmdlen++] = arg.val.num >> 8;
+                    cmdbuf[cmdlen++] = arg.val.num;
                 } else if (cmd == CMD_LBL) {
                     if (arg.type == ARGTYPE_NUM) {
                         if (arg.val.num <= 14)
@@ -1892,7 +1902,7 @@ static int hp42ext[] = {
     CMD_PUTMI   | 0x2000,
     CMD_GETLI   | 0x2000,
     CMD_PUTLI   | 0x2000,
-    CMD_NULL    | 0x4000,
+    CMD_EMBED   | 0x3000, /* Embed with eqn id */
     CMD_NULL    | 0x4000,
     CMD_NULL    | 0x4000,
     CMD_NULL    | 0x4000,
@@ -2342,24 +2352,31 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
                 decode_suffix(*cmd, suffix, arg);
             } else if (byte2 == 0x032 || byte2 == 0x033) {
                 /* GTOL/XEQL */
+                *cmd = byte2 == 0x032 ? CMD_GTOL : CMD_XEQL;
+                two_byte_num:
                 if (byte1 != 0x0F3)
                     goto xrom_string;
                 int hi = buf[pos++];
                 int lo = buf[pos++];
                 int sz = (hi << 8) | lo;
-                *cmd = byte2 == 0x032 ? CMD_GTOL : CMD_XEQL;
                 arg->type = ARGTYPE_NUM;
                 arg->val.num = sz;
+            } else if (byte2 == 0x069) {
+                /* EMBED with eqn id */
+                // TODO: This should be prevented when importing. Equation IDs
+                // are only valid within the context of loading a state file.
+                if (byte1 != 0x0F5)
+                    goto xrom_string;
+                int4 id = 0;
+                for (int i = 0; i < 4; i++)
+                    id = (id << 8) | buf[pos++];
+                *cmd = CMD_EMBED;
+                arg->type = ARGTYPE_NUM;
+                arg->val.num = id;
             } else /* byte2 == 0x0F7 */ {
                 /* SIZE */
-                if (byte1 != 0x0F3)
-                    goto xrom_string;
-                int hi = buf[pos++];
-                int lo = buf[pos++];
-                int sz = (hi << 8) | lo;
                 *cmd = CMD_SIZE;
-                arg->type = ARGTYPE_NUM;
-                arg->val.num = sz;
+                goto two_byte_num;
             }
         } else /* flag == 4 */ {
             /* Unknown value; store as string XROM */

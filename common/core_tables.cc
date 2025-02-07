@@ -459,7 +459,7 @@ const command_spec cmd_array[] =
     { /* PMEXEC */      NULL,              "",                    0x44, 0x00, 0x00, 0x00,  0, ARG_OTHER,  0, NA_T },
     { /* PGMVAR */      docmd_pgmvar,      "PGMVAR",              0x00, 0x40, 0xf2, 0x30,  6, ARG_PRGM,   0, NA_T },
     { /* VARMNU1 */     docmd_varmnu1,     "V\301\322MN\3251",    0x00, 0x42, 0xf2, 0x31,  7, ARG_PRGM,   0, NA_T },
-    { /* X2LINE */      docmd_x2line,      "X2LINE",              0x42, 0x00, 0x00, 0x00,  6, ARG_NONE,   1, 0x93 },
+    { /* X2LINE */      docmd_x2line,      "X2LINE",              0x42, 0x00, 0x00, 0x00,  6, ARG_NONE,   1, 0xd3 },
     { /* A2LINE */      docmd_a2line,      "A2LINE",              0x42, 0x00, 0x00, 0x00,  6, ARG_NONE,   0, NA_T },
     { /* A2PLINE */     docmd_a2pline,     "A2+LINE",             0x42, 0x00, 0x00, 0x00,  7, ARG_NONE,   0, NA_T },
     { /* RCOMPLX */     docmd_rcomplx,     "RC\317\315P\314X",    0x00, 0x00, 0xa7, 0xf8,  7, ARG_NONE,   0, NA_T },
@@ -584,6 +584,7 @@ const command_spec cmd_array[] =
     { /* RAISE */       docmd_raise,       "RAISE",               0x00, 0x34, 0xf2, 0x3d,  5, ARG_NUM9,   0, NA_T },
     { /* DIRECT */      docmd_direct,      "D\311R\305CT",        0x00, 0x00, 0xa2, 0x7e,  6, ARG_NONE,   0, NA_T },
     { /* NUMERIC */     docmd_numeric,     "NUM\305\322\311\303", 0x00, 0x00, 0xa2, 0x7f,  7, ARG_NONE,   0, NA_T },
+    { /* EMBED */       docmd_embed,       "",                    0x24, 0x00, 0x00, 0x00,  0, ARG_OTHER,  0, NA_T },
 
     /* Units */
     { /* CONVERT */     docmd_convert,     "CONV\305\322\324",    0x00, 0x00, 0xa6, 0xf1,  7, ARG_NONE,   2, 0x81 },

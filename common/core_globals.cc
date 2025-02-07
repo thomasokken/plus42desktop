@@ -790,19 +790,27 @@ directory::~directory() {
     if (matedit_mode == 3 && matedit_dir == id)
         leave_matrix_editor();
 
-    unmap_dir(id);
-    for (int i = 0; i < vars_count; i++)
-        free_vartype(vars[i].value);
-    free(vars);
-    for (int i = 0; i < prgms_count; i++) {
-        delete prgms[i].eq_data;
-        free(prgms[i].text);
+    if (this != eq_dir) {
+        // The equation directory contains no variables and no children.
+        // It does contain programs, but those are generated code, which
+        // gets cleaned up when the owning equation objects are deleted.
+        // Thus, none of the following cleanup logic should be executed
+        // for this particular directory.
+        for (int i = 0; i < vars_count; i++)
+            free_vartype(vars[i].value);
+        free(vars);
+        for (int i = 0; i < prgms_count; i++) {
+            count_embed_references(this, i, false);
+            delete prgms[i].eq_data;
+            free(prgms[i].text);
+        }
+        free(prgms);
+        free(labels);
+        for (int i = 0; i < children_count; i++)
+            delete children[i].dir;
+        free(children);
     }
-    free(prgms);
-    free(labels);
-    for (int i = 0; i < children_count; i++)
-        delete children[i].dir;
-    free(children);
+    unmap_dir(id);
 }
 
 directory *directory::clone() {
@@ -2582,19 +2590,18 @@ int clear_prgm(const arg_struct *arg) {
             prgm.set(cwd->id, cwd->labels[i].prgm);
         }
     }
-    return clear_prgm_by_index(prgm);
-}
 
-int clear_prgm_by_index(pgm_index prgm) {
     int i, j;
     if (prgm.dir == eq_dir->id || prgm.idx < 0)
         return ERR_LABEL_NOT_FOUND;
     clear_all_rtns();
+    directory *dir = dir_list[prgm.dir];
+    count_embed_references(dir, prgm.idx, false);
     if (prgm == current_prgm)
         pc = -1;
     else if (current_prgm.dir == prgm.dir && current_prgm.idx > prgm.idx)
         current_prgm.set(current_prgm.dir, current_prgm.idx - 1);
-    directory *dir = dir_list[prgm.dir];
+
     free(dir->prgms[prgm.idx].text);
     for (i = prgm.idx; i < dir->prgms_count - 1; i++)
         dir->prgms[i] = dir->prgms[i + 1];
@@ -2623,12 +2630,6 @@ int clear_prgm_by_index(pgm_index prgm) {
     return ERR_NONE;
 }
 
-int clear_prgm_by_int_index(int prgm) {
-    pgm_index idx;
-    idx.set(cwd->id, prgm);
-    return clear_prgm_by_index(idx);
-}
-
 void clear_prgm_lines(int4 count) {
     int4 frompc, deleted, i, j;
     if (pc == -1)
@@ -2642,6 +2643,8 @@ void clear_prgm_lines(int4 count) {
             pc -= 2;
             break;
         }
+        if (command == CMD_EMBED)
+            remove_equation_reference(arg.val.num);
         count--;
     }
     deleted = pc - frompc;
@@ -3051,6 +3054,42 @@ static void invalidate_lclbls(pgm_index idx, bool force) {
     }
 }
 
+void count_embed_references(directory *dir, int prgm, bool up) {
+    int4 pc = 0;
+    int command;
+    arg_struct arg;
+    
+    if (dir->prgms[prgm].text == NULL)
+        return;
+
+    while (true) {
+        pgm_index saved_prgm = current_prgm;
+        current_prgm.set(dir->id, prgm);
+        get_next_command(&pc, &command, &arg, 0, NULL);
+        current_prgm = saved_prgm;
+
+        if (command == CMD_END)
+            break;
+        if (command == CMD_EMBED) {
+            int4 id = arg.val.num;
+            equation_data *eqd = eq_dir->prgms[id].eq_data;
+            if (eqd != NULL)
+                if (up)
+                    eqd->refcount++;
+                else
+                    remove_equation_reference(id);
+        }
+    }
+}
+
+static void count_embed_references(directory *dir, bool up) {
+    for (int i = 0; i < dir->children_count; i++)
+        count_embed_references(dir->children[i].dir, up);
+
+    for (int i = 0; i < dir->prgms_count; i++)
+        count_embed_references(dir, i, up);
+}
+
 void delete_command(int4 pc) {
     directory *dir = dir_list[current_prgm.dir];
     prgm_struct *prgm = dir->prgms + current_prgm.idx;
@@ -3094,6 +3133,14 @@ void delete_command(int4 pc) {
         invalidate_lclbls(current_prgm, true);
         draw_varmenu();
         return;
+    }
+
+    if (command == CMD_EMBED) {
+        int4 pc2 = pc;
+        arg_struct arg;
+        get_next_command(&pc2, &command, &arg, 0, NULL);
+        if (eq_dir->prgms[arg.val.num].eq_data != NULL)
+            remove_equation_reference(arg.val.num);
     }
 
     for (pos = pc; pos < prgm->size - length; pos++)
@@ -3484,6 +3531,17 @@ int x2line() {
             arg.length = len;
             arg.val.xstr = s->txt();
             store_command_after(&pc, CMD_XSTR, &arg, NULL);
+            return ERR_NONE;
+        }
+        case TYPE_EQUATION: {
+            if (!ensure_prgm_space(7))
+                return ERR_INSUFFICIENT_MEMORY;
+            vartype_equation *eq = (vartype_equation *) stack[sp];
+            arg_struct arg;
+            arg.type = ARGTYPE_NUM;
+            arg.val.num = eq->data->eqn_index;
+            store_command_after(&pc, CMD_EMBED, &arg, NULL);
+            eq->data->refcount++;
             return ERR_NONE;
         }
         case TYPE_UNIT: {
@@ -5178,6 +5236,10 @@ static bool load_state2(bool *clear, bool *too_new) {
         if (flags.f.prgm_mode && current_prgm.dir == 1)
             force_redisplay = true;
     }
+
+    // Update equation reference counts to account for all EMBED instructions
+    count_embed_references(eq_dir, true);
+    count_embed_references(root, true);
 
     return true;
 }

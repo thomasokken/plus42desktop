@@ -2067,9 +2067,9 @@ static int keydown_rcl(int key, bool shift, int *repeat) {
             arg_struct arg;
             get_next_command(&pc, &cmd, &arg, 0, NULL);
             pc = oldpc;
-            if (cmd != CMD_XSTR || arg.length == 0) {
-                squeak();
-            } else {
+            if (cmd == CMD_XSTR) {
+                if (arg.length == 0)
+                    goto no_eq;
                 edit_buf = (char *) malloc(arg.length);
                 if (edit_buf == NULL) {
                     edit_capacity = edit_len = 0;
@@ -2079,6 +2079,22 @@ static int keydown_rcl(int key, bool shift, int *repeat) {
                     edit_capacity = edit_len = arg.length;
                     goto store;
                 }
+            } else if (cmd == CMD_EMBED) {
+                equation_data *eqd = eq_dir->prgms[arg.val.num].eq_data;
+                if (eqd == NULL)
+                    goto no_eq;
+                edit_buf = (char *) malloc(eqd->length);
+                if (edit_buf == NULL) {
+                    edit_capacity = edit_len = 0;
+                    show_error(ERR_INSUFFICIENT_MEMORY);
+                } else {
+                    memcpy(edit_buf, eqd->text, eqd->length);
+                    edit_capacity = edit_len = eqd->length;
+                    goto store;
+                }
+            } else {
+                no_eq:
+                squeak();
             }
             break;
         }
@@ -2169,7 +2185,7 @@ static int keydown_sto(int key, bool shift, int *repeat) {
             arg_struct arg;
             get_next_command(&pc, &cmd, &arg, 0, NULL);
             pc = oldpc;
-            if (cmd == CMD_XSTR)
+            if (cmd == CMD_XSTR || cmd == CMD_EMBED)
                 goto done;
             else
                 return keydown_sto_overwrite(KEY_SIGMA, false, NULL);
@@ -2234,15 +2250,24 @@ static int keydown_sto_overwrite(int key, bool shift, int *repeat) {
                         dialog = DIALOG_NONE;
                         return 1;
                     }
+                    vartype *v = eqns->array->data[selected_row];
                     arg_struct arg;
-                    arg.type = ARGTYPE_XSTR;
-                    arg.length = edit_len > 65535 ? 65535 : edit_len;
-                    arg.val.xstr = edit_buf;
+                    int cmd;
+                    if (v->type == TYPE_STRING) {
+                        arg.type = ARGTYPE_XSTR;
+                        arg.length = edit_len > 65535 ? 65535 : edit_len;
+                        arg.val.xstr = edit_buf;
+                        cmd = CMD_XSTR;
+                    } else {
+                        arg.type = ARGTYPE_NUM;
+                        arg.val.num = ((vartype_equation *) v)->data->eqn_index;
+                        cmd = CMD_EMBED;
+                    }
                     if (key == KEY_SIGMA) {
-                        store_command_after(&pc, CMD_XSTR, &arg, NULL);
+                        store_command_after(&pc, cmd, &arg, NULL);
                     } else {
                         delete_command(pc);
-                        store_command(pc, CMD_XSTR, &arg, NULL);
+                        store_command(pc, cmd, &arg, NULL);
                     }
                     break;
                 }

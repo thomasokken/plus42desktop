@@ -552,6 +552,7 @@ static int ref_move_copy(bool copy) {
             new_prgms[new_prgms_count].capacity = cwd->id;
             new_prgms[new_prgms_count].size = i;
             new_prgms[new_prgms_count].text = NULL;
+            count_embed_references(cwd, new_prgms_count, true);
             new_prgms_count++;
             skip3:
             first = false;
