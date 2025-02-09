@@ -218,20 +218,27 @@ const menu_spec menus[] = {
                         { MENU_NONE, 1, " "    },
                         { MENU_NONE, 1, " "    },
                         { MENU_NONE, 1, " "    } } },
-    { /* MENU_ALPHA_PUNC1 */ MENU_ALPHA2, MENU_ALPHA_PUNC2, MENU_ALPHA_PUNC2,
+    { /* MENU_ALPHA_PUNC1 */ MENU_ALPHA2, MENU_ALPHA_PUNC2, MENU_ALPHA_PUNC3,
                       { { MENU_NONE, 1, ","  },
                         { MENU_NONE, 1, ";"  },
                         { MENU_NONE, 1, ":"  },
                         { MENU_NONE, 1, "!"  },
                         { MENU_NONE, 1, "?"  },
                         { MENU_NONE, 1, "\"" } } },
-    { /* MENU_ALPHA_PUNC2 */ MENU_ALPHA2, MENU_ALPHA_PUNC1, MENU_ALPHA_PUNC1,
+    { /* MENU_ALPHA_PUNC2 */ MENU_ALPHA2, MENU_ALPHA_PUNC3, MENU_ALPHA_PUNC1,
                       { { MENU_NONE, 1, "\32" },
                         { MENU_NONE, 1, "_"   },
                         { MENU_NONE, 1, "`"   },
                         { MENU_NONE, 1, "'"   },
                         { MENU_NONE, 1, "\10" },
                         { MENU_NONE, 1, "\12" } } },
+    { /* MENU_ALPHA_PUNC3 */ MENU_ALPHA2, MENU_ALPHA_PUNC1, MENU_ALPHA_PUNC2,
+                      { { MENU_NONE, 1, "\210" },
+                        { MENU_NONE, 1, "\211" },
+                        { MENU_NONE, 1, " "    },
+                        { MENU_NONE, 1, " "    },
+                        { MENU_NONE, 1, " "    },
+                        { MENU_NONE, 1, " "    } } },
     { /* MENU_ALPHA_MISC1 */ MENU_ALPHA2, MENU_ALPHA_MISC2, MENU_ALPHA_MISC2,
                       { { MENU_NONE, 1, "$"   },
                         { MENU_NONE, 1, "*"   },
@@ -1112,8 +1119,9 @@ bool no_keystrokes_yet;
  * Version 42: 1.1.17a Remember cat position for UNITS key in ASSIGN
  * Version 43: 1.1.18 Program locking
  * Version 44: 1.2.3  Switching character codes 30 and 94
+ * Version 45: 1.2.4  Added guillemets to ALPHA menu
  */
-#define PLUS42_VERSION 44
+#define PLUS42_VERSION 45
 
 
 /*******************/
@@ -5077,6 +5085,15 @@ static bool load_state2(bool *clear, bool *too_new) {
         if (mode_transientmenu >= 31 && mode_transientmenu <= 87) mode_transientmenu++;
         if (mode_alphamenu >= 31 && mode_alphamenu <= 87) mode_alphamenu++;
         if (mode_commandmenu >= 31 && mode_commandmenu <= 87) mode_commandmenu++;
+    }
+    if (ver < 45) {
+        // inserted MENU_ALPHA_PUNC3
+        if (mode_appmenu >= 18 && mode_appmenu <= 88) mode_appmenu++;
+        if (mode_auxmenu >= 18 && mode_auxmenu <= 88) mode_auxmenu++;
+        if (mode_plainmenu >= 18 && mode_plainmenu <= 88) mode_plainmenu++;
+        if (mode_transientmenu >= 18 && mode_transientmenu <= 88) mode_transientmenu++;
+        if (mode_alphamenu >= 18 && mode_alphamenu <= 88) mode_alphamenu++;
+        if (mode_commandmenu >= 18 && mode_commandmenu <= 88) mode_commandmenu++;
     }
     if (!read_bool(&mode_running)) return false;
     if (ver < 28)
