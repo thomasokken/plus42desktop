@@ -677,6 +677,7 @@ extern bool no_keystrokes_yet;
 int4 new_eqn_idx();
 void clear_rtns_vars_and_prgms();
 int clear_prgm(const arg_struct *arg);
+int clear_prgm_by_int_index(int prgm);
 void clear_prgm_lines(int4 count);
 void goto_dot_dot(bool force_new);
 int mvar_prgms_exist();

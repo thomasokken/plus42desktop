@@ -2575,6 +2575,8 @@ void clear_rtns_vars_and_prgms() {
     dir_list_clear();
 }
 
+static int clear_prgm_by_index(pgm_index prgm);
+
 int clear_prgm(const arg_struct *arg) {
     pgm_index prgm;
     if (arg->type == ARGTYPE_LBLINDEX) {
@@ -2598,7 +2600,10 @@ int clear_prgm(const arg_struct *arg) {
             prgm.set(cwd->id, cwd->labels[i].prgm);
         }
     }
+    return clear_prgm_by_index(prgm);
+}
 
+static int clear_prgm_by_index(pgm_index prgm) {
     int i, j;
     if (prgm.dir == eq_dir->id || prgm.idx < 0)
         return ERR_LABEL_NOT_FOUND;
@@ -2636,6 +2641,12 @@ int clear_prgm(const arg_struct *arg) {
     }
     update_catalog();
     return ERR_NONE;
+}
+
+int clear_prgm_by_int_index(int prgm) {
+    pgm_index idx;
+    idx.set(cwd->id, prgm);
+    return clear_prgm_by_index(idx);
 }
 
 void clear_prgm_lines(int4 count) {
