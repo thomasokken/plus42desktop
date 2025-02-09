@@ -56,6 +56,7 @@ int docmd_eval(arg_struct *arg) {
         current_prgm.set(eq_dir->id, eq->data->eqn_index);
         pc = 0;
         store_stack_reference((vartype *) eq);
+        save_csld();
         return ERR_NONE;
     } else {
         clear_all_rtns();
@@ -63,6 +64,7 @@ int docmd_eval(arg_struct *arg) {
         current_prgm.set(eq_dir->id, eq->data->eqn_index);
         pc = 0;
         store_stack_reference((vartype *) eq);
+        save_csld();
         return ERR_RUN;
     }
 }
@@ -81,6 +83,7 @@ int docmd_evaln(arg_struct *arg) {
         current_prgm.set(eq_dir->id, eq->data->eqn_index);
         pc = 0;
         store_stack_reference((vartype *) eq);
+        save_csld();
         return ERR_NONE;
     } else {
         clear_all_rtns();
@@ -88,6 +91,7 @@ int docmd_evaln(arg_struct *arg) {
         current_prgm.set(eq_dir->id, eq->data->eqn_index);
         pc = 0;
         store_stack_reference((vartype *) eq);
+        save_csld();
         return ERR_RUN;
     }
 }
