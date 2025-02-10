@@ -2113,6 +2113,7 @@ static bool persist_globals() {
 }
 
 bool loading_state = false;
+bool saving_state = false;
 
 static bool unpersist_globals() {
     int i;
@@ -5404,7 +5405,9 @@ bool save_state() {
     shared_data = NULL;
 
     bool success;
+    saving_state = true;
     save_state2(&success);
+    saving_state = false;
 
     free(shared_data);
     return success;

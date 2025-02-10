@@ -972,6 +972,7 @@ static void export_hp42s(int index) {
         code_std_1 = cmd_array[cmd].code1;
         code_std_2 = cmd_array[cmd].code2;
         cmdlen = 0;
+        char final_xstr_opcode;
         switch (code_flags) {
             case 1:
                 /* A command that requires some special attention */
@@ -1010,15 +1011,21 @@ static void export_hp42s(int index) {
                     cmdbuf[cmdlen++] = arg.val.num >> 8;
                     cmdbuf[cmdlen++] = arg.val.num;
                 } else if (cmd == CMD_EMBED) {
-                    // TODO: This is only valid when writing to a state file.
-                    // When exporting, this should be a string-valued EMBED.
-                    cmdbuf[cmdlen++] = (char) 0xF6;
-                    cmdbuf[cmdlen++] = (char) 0xA7;
-                    cmdbuf[cmdlen++] = (char) 0x69;
-                    cmdbuf[cmdlen++] = arg.val.num >> 24;
-                    cmdbuf[cmdlen++] = arg.val.num >> 16;
-                    cmdbuf[cmdlen++] = arg.val.num >> 8;
-                    cmdbuf[cmdlen++] = arg.val.num;
+                    if (saving_state) {
+                        cmdbuf[cmdlen++] = (char) 0xF6;
+                        cmdbuf[cmdlen++] = (char) 0xA7;
+                        cmdbuf[cmdlen++] = (char) 0x69;
+                        cmdbuf[cmdlen++] = arg.val.num >> 24;
+                        cmdbuf[cmdlen++] = arg.val.num >> 16;
+                        cmdbuf[cmdlen++] = arg.val.num >> 8;
+                        cmdbuf[cmdlen++] = arg.val.num;
+                    } else {
+                        equation_data *eqd = eq_dir->prgms[arg.val.num].eq_data;
+                        final_xstr_opcode = eqd->compatMode ? 0x7e : 0x76;
+                        arg.val.xstr = eqd->text;
+                        arg.length = eqd->length > 65535 ? 65535 : eqd->length;
+                        goto do_xstr2;
+                    }
                 } else if (cmd == CMD_LBL) {
                     if (arg.type == ARGTYPE_NUM) {
                         if (arg.val.num <= 14)
@@ -1153,6 +1160,8 @@ static void export_hp42s(int index) {
                     }
                 } else if (cmd == CMD_XSTR) {
                     do_xstr:
+                    final_xstr_opcode = 0x41;
+                    do_xstr2:
                     int len = arg.length;
                     if (len == 0) {
                         cmdbuf[cmdlen++] = (char) 0xF2;
@@ -1172,7 +1181,7 @@ static void export_hp42s(int index) {
                             int slen = len <= 13 ? len : 13;
                             buf[buflen++] = (char) (0xF2 + slen);
                             buf[buflen++] = (char) 0xA7;
-                            buf[buflen++] = (char) (slen < len ? 0x49 : 0x41);
+                            buf[buflen++] = (char) (slen < len ? 0x49 : final_xstr_opcode);
                             memcpy(buf + buflen, ptr, slen);
                             buflen += slen;
                             ptr += slen;
@@ -1400,6 +1409,11 @@ int4 core_program_size(int prgm_index) {
                     if (n == 0)
                         n = 1;
                     size += arg.length + n * 3;
+                } else if (cmd == CMD_EMBED) {
+                    equation_data *eqd = eq_dir->prgms[arg.val.num].eq_data;
+                    int len = eqd->length > 65535 ? 65535 : eqd->length;
+                    int n = (len + 12) / 13;
+                    size += len + n * 3;
                 } else if (cmd == CMD_GTOL || cmd == CMD_XEQL) {
                     size += 5;
                 } else {
@@ -1917,7 +1931,7 @@ static int hp42ext[] = {
     CMD_PUTMI | 0x0000,
     CMD_GETLI | 0x0000,
     CMD_PUTLI | 0x0000,
-    CMD_NULL  | 0x4000,
+    CMD_EMBED | 0x0000, /* Embed with text, STD mode */
     CMD_NULL  | 0x4000,
     CMD_YAXIS | 0x1000,
     CMD_LCLV  | 0x1000,
@@ -1925,7 +1939,7 @@ static int hp42ext[] = {
     CMD_PUTMI | 0x1000,
     CMD_GETLI | 0x1000,
     CMD_PUTLI | 0x1000,
-    CMD_NULL  | 0x4000,
+    CMD_EMBED | 0x1000, /* Embed with text, COMP mode */
     CMD_NULL  | 0x4000,
 
     /* 80-8F */

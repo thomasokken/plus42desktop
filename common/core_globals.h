@@ -260,6 +260,7 @@ extern const menu_spec menus[];
 
 /* Suppress menu updates while state loading is in progress */
 extern bool loading_state;
+extern bool saving_state;
 
 
 /* Registers */
