@@ -1120,8 +1120,9 @@ bool no_keystrokes_yet;
  * Version 43: 1.1.18 Program locking
  * Version 44: 1.2.3  Switching character codes 30 and 94
  * Version 45: 1.2.4  Added guillemets to ALPHA menu
+ * Version 46: 1.2.4  No more lazy equation saving
  */
-#define PLUS42_VERSION 45
+#define PLUS42_VERSION 46
 
 
 /*******************/
@@ -1375,46 +1376,7 @@ bool persist_vartype(vartype *v) {
         }
         case TYPE_EQUATION: {
             vartype_equation *eq = (vartype_equation *) v;
-            int data_index = -1;
-            bool must_write = true;
-            if (eq->data->refcount > 1) {
-                int n = shared_data_search(eq->data);
-                if (n == -1) {
-                    // data_index == -2 indicates a new shared equation
-                    data_index = -2;
-                    if (!shared_data_grow())
-                        return false;
-                    shared_data[shared_data_count++] = eq->data;
-                } else {
-                    // data_index >= 0 refers to a previously shared equation
-                    data_index = n;
-                    must_write = false;
-                }
-            }
-            write_int(data_index);
-            if (must_write) {
-                equation_data *eqd = eq->data;
-                int i = eqd->eqn_index;
-                directory *saved_cwd = cwd;
-                cwd = eq_dir;
-                core_export_programs(1, &i, NULL);
-                cwd = saved_cwd;
-                if (!write_int(eqd->eqn_index))
-                    return false;
-                if (!write_int4(eqd->length))
-                    return false;
-                if (fwrite(eqd->text, 1, eqd->length, gfile) != eqd->length)
-                    return false;
-                int cmsize = eqd->map == NULL ? 0 : eqd->map->getSize();
-                if (!write_int(cmsize))
-                    return false;
-                if (cmsize > 0)
-                    if (fwrite(eqd->map->getData(), 1, cmsize, gfile) != cmsize)
-                        return false;
-                if (!write_bool(eqd->compatMode))
-                    return false;
-            }
-            return true;
+            return write_int4(eq->data->eqn_index);
         }
         case TYPE_UNIT: {
             vartype_unit *u = (vartype_unit *) v;
@@ -1449,6 +1411,95 @@ bool persist_vartype(vartype *v) {
 // Using global for 'ver' so we don't have to pass it around all the time
 
 int4 ver;
+
+static equation_data *unpersist_equation_data() {
+    int4 eqn_index;
+    directory *saved_cwd = cwd;
+    pgm_index saved_prgm = current_prgm;
+    int4 saved_pc = pc;
+    cwd = eq_dir;
+    current_prgm.set(1, 0);
+    core_import_programs(1, NULL);
+    cwd = saved_cwd;
+    current_prgm = saved_prgm;
+    pc = saved_pc;
+    if (!read_int4(&eqn_index))
+        return NULL;
+    /* The equation code was loaded as the last program in the eq_dir
+     * directory, which means its effective equation index is now
+     * prgms_count - 1. If that happens to match the saved equation id,
+     * great; if not, we'll have to rearrange things to make the program
+     * index agree with the equation id.
+     */
+    if (eqn_index < eq_dir->prgms_count - 1) {
+        prgm_struct *lprgm = eq_dir->prgms + --(eq_dir->prgms_count);
+        eq_dir->prgms[eqn_index] = *lprgm;
+        lprgm->text = NULL;
+        lprgm->eq_data = NULL;
+    } else if (eqn_index > eq_dir->prgms_count - 1) {
+        if (eqn_index + 1 > eq_dir->prgms_capacity) {
+            int oc = eq_dir->prgms_capacity;
+            int nc = eqn_index + 11;
+            prgm_struct *newprgms = (prgm_struct *) realloc(eq_dir->prgms, nc * sizeof(prgm_struct));
+            if (newprgms == NULL)
+                return NULL;
+            eq_dir->prgms = newprgms;
+            eq_dir->prgms_capacity = nc;
+            for (int i = oc; i < eq_dir->prgms_capacity; i++) {
+                eq_dir->prgms[i].text = NULL;
+                eq_dir->prgms[i].eq_data = NULL;
+            }
+        }
+        prgm_struct *lprgm = eq_dir->prgms + (eq_dir->prgms_count - 1);
+        eq_dir->prgms_count = eqn_index + 1;
+        eq_dir->prgms[eqn_index] = *lprgm;
+        lprgm->text = NULL;
+        lprgm->eq_data = NULL;
+    }
+    equation_data *eqd = new (std::nothrow) equation_data;
+    if (eqd == NULL)
+        return NULL;
+    eqd->refcount = 0;
+    eqd->eqn_index = eqn_index;
+    if (!read_int4(&eqd->length)) {
+        eq_fail:
+        delete eqd;
+        return NULL;
+    }
+    if (eqd->length > 0) {
+        eqd->text = (char *) malloc(eqd->length);
+        if (eqd->text == NULL)
+            goto eq_fail;
+        if (fread(eqd->text, 1, eqd->length, gfile) != eqd->length)
+            goto eq_fail;
+        if (ver < 44)
+            switch_30_and_94(eqd->text, eqd->length);
+    }
+    int cmsize;
+    if (!read_int(&cmsize))
+        goto eq_fail;
+    if (cmsize > 0) {
+        char *cmdata = (char *) malloc(cmsize);
+        if (cmdata == NULL)
+            goto eq_fail;
+        if (fread(cmdata, 1, cmsize, gfile) != cmsize) {
+            cm_fail:
+            free(cmdata);
+            goto eq_fail;
+        }
+        eqd->map = new (std::nothrow) CodeMap(cmdata, cmsize);
+        if (eqd->map == NULL)
+            goto cm_fail;
+    }
+    if (!read_bool(&eqd->compatMode))
+        goto eq_fail;
+    eq_dir->prgms[eqn_index].eq_data = eqd;
+    if (eqd->length > 0) {
+        int errpos;
+        eqd->ev = Parser::parse(std::string(eqd->text, eqd->length), &eqd->compatMode, &eqd->compatModeEmbedded, &errpos);
+    }
+    return eqd;
+}
 
 bool unpersist_vartype(vartype **v) {
     char type;
@@ -1647,6 +1698,20 @@ bool unpersist_vartype(vartype **v) {
             return true;
         }
         case TYPE_EQUATION: {
+            if (ver >= 46) {
+                int4 id;
+                if (!read_int4(&id))
+                    return false;
+                equation_data *eqd;
+                if (id >= eq_dir->prgms_count || (eqd = eq_dir->prgms[id].eq_data) == NULL)
+                    *v = new_string("<Missing Equation>", 18);
+                else if (eqd->length > 0 && eqd->ev == NULL)
+                    *v = new_string(eqd->text, eqd->length);
+                else
+                    *v = new_equation(eqd);
+                return *v != NULL;
+            }
+
             int data_index;
             if (!read_int(&data_index))
                 return false;
@@ -1660,128 +1725,32 @@ bool unpersist_vartype(vartype **v) {
                     return true;
                 }
             }
-            int4 eqn_index;
-            directory *saved_cwd = cwd;
-            pgm_index saved_prgm = current_prgm;
-            int4 saved_pc = pc;
-            cwd = eq_dir;
-            current_prgm.set(1, 0);
-            core_import_programs(1, NULL);
-            cwd = saved_cwd;
-            current_prgm = saved_prgm;
-            pc = saved_pc;
-            if (!read_int4(&eqn_index))
+            equation_data *eqd = unpersist_equation_data();
+            if (eqd == NULL)
                 return false;
-            /* The equation code was loaded as the last program in the eq_dir
-             * directory, which means its effective equation index is now
-             * prgms_count - 1. If that happens to match the saved equation id,
-             * great; if not, we'll have to rearrange things to make the program
-             * index agree with the equation id.
-             */
-            if (eqn_index < eq_dir->prgms_count - 1) {
-                prgm_struct *lprgm = eq_dir->prgms + --(eq_dir->prgms_count);
-                eq_dir->prgms[eqn_index] = *lprgm;
-                lprgm->text = NULL;
-                lprgm->eq_data = NULL;
-            } else if (eqn_index > eq_dir->prgms_count - 1) {
-                if (eqn_index + 1 > eq_dir->prgms_capacity) {
-                    int oc = eq_dir->prgms_capacity;
-                    int nc = eqn_index + 11;
-                    prgm_struct *newprgms = (prgm_struct *) realloc(eq_dir->prgms, nc * sizeof(prgm_struct));
-                    if (newprgms == NULL)
-                        return false;
-                    eq_dir->prgms = newprgms;
-                    eq_dir->prgms_capacity = nc;
-                    for (int i = oc; i < eq_dir->prgms_capacity; i++) {
-                        eq_dir->prgms[i].text = NULL;
-                        eq_dir->prgms[i].eq_data = NULL;
-                    }
-                }
-                prgm_struct *lprgm = eq_dir->prgms + (eq_dir->prgms_count - 1);
-                eq_dir->prgms_count = eqn_index + 1;
-                eq_dir->prgms[eqn_index] = *lprgm;
-                lprgm->text = NULL;
-                lprgm->eq_data = NULL;
-            }
-            vartype_equation *eq = (vartype_equation *) malloc(sizeof(vartype_equation));
-            if (eq == NULL)
+            if (eqd->length > 0 && eqd->ev == NULL) {
+                // Parse error while everything else looked OK; this is
+                // probably an equation that was valid at some point but
+                // no longer is, because of a parser change. In a perfect
+                // world, that would never happen, but sometimes, bug fixes
+                // break equations that relied on those bugs.
+                // When this happens, we return a string object instead,
+                // and hope for the best. It's better than the dreaded
+                // State File Corrupt, anyway.
+                *v = new_string(eqd->text, eqd->length);
+            } else
+                *v = new_equation(eqd);
+            if (*v == NULL)
                 return false;
-            eq->type = TYPE_EQUATION;
-            equation_data *eqd = new (std::nothrow) equation_data;
-            if (eqd == NULL) {
-                free(eq);
-                return false;
-            }
-            eq->data = eqd;
-            eqd->refcount = 1;
-            eqd->eqn_index = eqn_index;
-            if (!read_int4(&eqd->length)) {
-                eq_fail:
-                free_vartype((vartype *) eq);
-                return false;
-            }
-            if (eqd->length > 0) {
-                eqd->text = (char *) malloc(eqd->length);
-                if (eqd->text == NULL)
-                    goto eq_fail;
-                if (fread(eqd->text, 1, eqd->length, gfile) != eqd->length)
-                    goto eq_fail;
-                if (ver < 44)
-                    switch_30_and_94(eqd->text, eqd->length);
-            }
-            int cmsize;
-            if (!read_int(&cmsize))
-                goto eq_fail;
-            if (cmsize > 0) {
-                char *cmdata = (char *) malloc(cmsize);
-                if (cmdata == NULL)
-                    goto eq_fail;
-                if (fread(cmdata, 1, cmsize, gfile) != cmsize) {
-                    cm_fail:
-                    free(cmdata);
-                    goto eq_fail;
-                }
-                eqd->map = new (std::nothrow) CodeMap(cmdata, cmsize);
-                if (eqd->map == NULL)
-                    goto cm_fail;
-            }
-            if (!read_bool(&eqd->compatMode))
-                goto eq_fail;
-            if (eqd->length > 0) {
-                int errpos;
-                eqd->ev = Parser::parse(std::string(eqd->text, eqd->length), &eqd->compatMode, &eqd->compatModeEmbedded, &errpos);
-                if (eqd->ev == NULL) {
-                    // Parse error while everything else looked OK; this is
-                    // probably an equation that was valid at some point but
-                    // no longer is, because of a parser change. In a perfect
-                    // world, that would never happen, but sometimes, bug fixes
-                    // break equations that relied on those bugs.
-                    // When this happens, we return a string object instead,
-                    // and hope for the best. It's better than the dreaded
-                    // State File Corrupt, anyway.
-                    vartype *s = new_string(eqd->text, eqd->length);
-                    free_vartype((vartype *) eq);
-                    if (s == NULL)
-                        return false;
-                    if (data_index == -2) {
-                        if (!shared_data_grow()) {
-                            free_vartype(s);
-                            return false;
-                        }
-                        shared_data[shared_data_count++] = s;
-                    }
-                    *v = s;
-                    return true;
-                }
-            }
+
             bool shared = data_index == -2;
             if (shared) {
-                if (!shared_data_grow())
-                    goto eq_fail;
-                shared_data[shared_data_count++] = eq;
+                if (!shared_data_grow()) {
+                    free_vartype(*v);
+                    return false;
+                }
+                shared_data[shared_data_count++] = *v;
             }
-            eq_dir->prgms[eqn_index].eq_data = eqd;
-            *v = (vartype *) eq;
             return true;
         }
         case TYPE_UNIT: {
@@ -2009,6 +1978,39 @@ static bool persist_globals() {
         goto done;
     if (!write_int(mode_message_lines))
         goto done;
+
+    {
+        int n_eq = 0;
+        for (int i = 0; i < eq_dir->prgms_count; i++)
+            if (eq_dir->prgms[i].eq_data != NULL)
+                n_eq++;
+        if (!write_int(n_eq))
+            goto done;
+        for (int i = 0; i < eq_dir->prgms_count; i++) {
+            equation_data *eqd = eq_dir->prgms[i].eq_data;
+            if (eqd == NULL)
+                continue;
+            directory *saved_cwd = cwd;
+            cwd = eq_dir;
+            core_export_programs(1, &i, NULL);
+            cwd = saved_cwd;
+            if (!write_int(eqd->eqn_index))
+                return false;
+            if (!write_int4(eqd->length))
+                return false;
+            if (fwrite(eqd->text, 1, eqd->length, gfile) != eqd->length)
+                return false;
+            int cmsize = eqd->map == NULL ? 0 : eqd->map->getSize();
+            if (!write_int(cmsize))
+                return false;
+            if (cmsize > 0)
+                if (fwrite(eqd->map->getData(), 1, cmsize, gfile) != cmsize)
+                    return false;
+            if (!write_bool(eqd->compatMode))
+                return false;
+        }
+    }
+
     if (!write_int(sp))
         goto done;
     for (int i = 0; i <= sp; i++)
@@ -2197,6 +2199,15 @@ static bool unpersist_globals() {
     dir_list_clear();
     eq_dir = new directory(1);
     map_dir(1, eq_dir);
+
+    if (ver >= 46) {
+        int n_eq;
+        if (!read_int(&n_eq))
+            goto done;
+        for (int i = 0; i < n_eq; i++)
+            if (unpersist_equation_data() == NULL)
+                goto done;
+    }
 
     if (!read_int(&sp)) {
         sp = -1;
@@ -5267,8 +5278,18 @@ static bool load_state2(bool *clear, bool *too_new) {
     }
 
     // Update equation reference counts to account for all EMBED instructions
-    count_embed_references(eq_dir, true);
     count_embed_references(root, true);
+    for (int i = 0; i < eq_dir->prgms_count; i++) {
+        /* Remove orphaned equations */
+        equation_data *eqd = eq_dir->prgms[i].eq_data;
+        if (eqd != NULL && eqd->refcount == 0) {
+            delete eqd;
+            eq_dir->prgms[i].eq_data = NULL;
+            free(eq_dir->prgms[i].text);
+            eq_dir->prgms[i].text = NULL;
+        }
+    }
+    count_embed_references(eq_dir, true);
 
     return true;
 }
