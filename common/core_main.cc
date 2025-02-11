@@ -115,9 +115,8 @@ static void handle_pending_equations() {
         }
         int errpos;
         eqd = new_equation_data(peq->text, peq->length, peq->compatMode, &errpos, -1);
-        if (eqd == NULL) {
-            /* TODO: Error message */
-            no_mem:
+        if (eqd == NULL && errpos == -1) {
+            /* TODO: Insufficient Memory message */
             delete_pending_equations();
             return;
         }
@@ -125,9 +124,16 @@ static void handle_pending_equations() {
         pgm_index saved_prgm = current_prgm;
         current_prgm = peq->idx;
         arg_struct arg;
-        arg.type = ARGTYPE_NUM;
-        arg.val.num = eqd->eqn_index;
-        store_command_after(&peq->pc, CMD_EMBED, &arg, NULL);
+        if (eqd != NULL) {
+            arg.type = ARGTYPE_NUM;
+            arg.val.num = eqd->eqn_index;
+            store_command_after(&peq->pc, CMD_EMBED, &arg, NULL);
+        } else {
+            arg.type = ARGTYPE_XSTR;
+            arg.length = peq->length;
+            arg.val.xstr = peq->text;
+            store_command_after(&peq->pc, CMD_XSTR, &arg, NULL);
+        }
         current_prgm = saved_prgm;
 
         eq_queue = peq->next;
@@ -2269,7 +2275,7 @@ static void decode_suffix(int cmd, int suffix, arg_struct *arg) {
     }
 }
 
-static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **xstr_buf, int *xstr_len, int *eq_mode, bool sw_30_94) {
+static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **xstr_buf, int *xstr_len, int *eq_mode, bool *after_end, bool force_new, bool sw_30_94) {
     int pos = 0;
     int byte1 = buf[pos++];
     int byte2 = buf[pos++];
@@ -2347,6 +2353,11 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
                 pending_equation *peq = (pending_equation *) malloc(sizeof(pending_equation));
                 if (peq == NULL)
                     goto no_mem;
+                
+                if (*after_end) {
+                    goto_dot_dot(force_new);
+                    *after_end = false;
+                }
 
                 peq->idx = current_prgm;
                 peq->pc = pc;
@@ -2699,7 +2710,7 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
                         goto done;
                     buf[i + 1] = c;
                 }
-                decode_string(buf, &cmd, &arg, &xstr_buf, &xstr_len, &eq_mode, raw_file_name == NULL && ver < 44);
+                decode_string(buf, &cmd, &arg, &xstr_buf, &xstr_len, &eq_mode, &pending_end, true, raw_file_name == NULL && ver < 44);
                 if (cmd == CMD_CANCELLED)
                     goto done;
                 if (cmd == CMD_NONE)
@@ -4141,6 +4152,11 @@ static void paste_programs(const char *buf) {
                 goto no_mem;
             }
             memcpy(txt, hpbuf + hppos + 1, len);
+            
+            if (after_end) {
+                goto_dot_dot(false);
+                after_end = false;
+            }
 
             peq->idx = current_prgm;
             peq->pc = pc;
@@ -4511,7 +4527,7 @@ static void paste_programs(const char *buf) {
                         }
                     }
                     buf[0] = 0xf0 + length;
-                    decode_string(buf, &cmd, &arg, &xstr_buf, &xstr_len, &eq_mode, false);
+                    decode_string(buf, &cmd, &arg, &xstr_buf, &xstr_len, &eq_mode, &after_end, false, false);
                     if (cmd == CMD_CANCELLED)
                         goto no_mem;
                     if (cmd == CMD_NONE)
