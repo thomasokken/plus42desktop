@@ -2081,8 +2081,6 @@ static int keydown_rcl(int key, bool shift, int *repeat) {
                 }
             } else if (cmd == CMD_EMBED) {
                 equation_data *eqd = eq_dir->prgms[arg.val.num].eq_data;
-                if (eqd == NULL)
-                    goto no_eq;
                 edit_buf = (char *) malloc(eqd->length);
                 if (edit_buf == NULL) {
                     edit_capacity = edit_len = 0;

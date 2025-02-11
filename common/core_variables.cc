@@ -198,7 +198,7 @@ vartype *new_list(int4 size) {
     return (vartype *) list;
 }
 
-static equation_data *new_equation_data(const char *text, int4 length, bool compat_mode, int *errpos, int eqn_index) {
+equation_data *new_equation_data(const char *text, int4 length, bool compat_mode, int *errpos, int eqn_index) {
     *errpos = -1;
     if (eqn_index == -1) {
         eqn_index = new_eqn_idx();

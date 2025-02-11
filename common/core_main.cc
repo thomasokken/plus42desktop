@@ -79,6 +79,63 @@ bool force_redisplay = false;
 
 core_settings_struct core_settings;
 
+struct pending_equation {
+    pgm_index idx;
+    int4 pc;
+    int4 length;
+    char *text;
+    pending_equation *next;
+    bool compatMode;
+};
+
+static pending_equation *eq_queue = NULL;
+
+static void delete_pending_equations() {
+    while (eq_queue != NULL) {
+        pending_equation *peq = eq_queue;
+        eq_queue = peq->next;
+        free(peq->text);
+        free(peq);
+    }
+}
+
+static void handle_pending_equations() {
+    while (eq_queue != NULL) {
+        pending_equation *peq = eq_queue;
+        equation_data *eqd;
+        for (int i = 0; i < eq_dir->prgms_count; i++) {
+            eqd = eq_dir->prgms[i].eq_data;
+            if (eqd == NULL)
+                continue;
+            if (eqd->compatMode != peq->compatMode)
+                continue;
+            if (!string_equals(eqd->text, eqd->length, peq->text, peq->length))
+                continue;
+            goto insert;
+        }
+        int errpos;
+        eqd = new_equation_data(peq->text, peq->length, peq->compatMode, &errpos, -1);
+        if (eqd == NULL) {
+            /* TODO: Error message */
+            no_mem:
+            delete_pending_equations();
+            return;
+        }
+        insert:
+        pgm_index saved_prgm = current_prgm;
+        current_prgm = peq->idx;
+        arg_struct arg;
+        arg.type = ARGTYPE_NUM;
+        arg.val.num = eqd->eqn_index;
+        store_command_after(&peq->pc, CMD_EMBED, &arg, NULL);
+        current_prgm = saved_prgm;
+
+        eq_queue = peq->next;
+        free(peq->text);
+        free(peq);
+    }
+}
+
 void core_init(int *rows, int *cols, int read_saved_state, const char *state_file_name) {
 
     /* Possible values for read_saved_state:
@@ -972,7 +1029,6 @@ static void export_hp42s(int index) {
         code_std_1 = cmd_array[cmd].code1;
         code_std_2 = cmd_array[cmd].code2;
         cmdlen = 0;
-        char final_xstr_opcode;
         switch (code_flags) {
             case 1:
                 /* A command that requires some special attention */
@@ -1011,20 +1067,24 @@ static void export_hp42s(int index) {
                     cmdbuf[cmdlen++] = arg.val.num >> 8;
                     cmdbuf[cmdlen++] = arg.val.num;
                 } else if (cmd == CMD_EMBED) {
-                    if (saving_state) {
-                        cmdbuf[cmdlen++] = (char) 0xF6;
-                        cmdbuf[cmdlen++] = (char) 0xA7;
-                        cmdbuf[cmdlen++] = (char) 0x69;
-                        cmdbuf[cmdlen++] = arg.val.num >> 24;
-                        cmdbuf[cmdlen++] = arg.val.num >> 16;
-                        cmdbuf[cmdlen++] = arg.val.num >> 8;
-                        cmdbuf[cmdlen++] = arg.val.num;
-                    } else {
+                    int4 id = saving_state ? arg.val.num
+                            : eq_dir->prgms[arg.val.num].eq_data->compatMode ? -2 : -1;
+                    cmdbuf[cmdlen++] = (char) 0xF6;
+                    cmdbuf[cmdlen++] = (char) 0xA7;
+                    cmdbuf[cmdlen++] = (char) 0x69;
+                    cmdbuf[cmdlen++] = id >> 24;
+                    cmdbuf[cmdlen++] = id >> 16;
+                    cmdbuf[cmdlen++] = id >> 8;
+                    cmdbuf[cmdlen++] = id;
+                    if (!saving_state) {
+                        /* Flush cmdbuf, because the XSTR logic bypasses it */
+                        for (i = 0; i < cmdlen; i++)
+                            buf[buflen++] = cmdbuf[i];
+                        cmdlen = 0;
                         equation_data *eqd = eq_dir->prgms[arg.val.num].eq_data;
-                        final_xstr_opcode = eqd->compatMode ? 0x7e : 0x76;
                         arg.val.xstr = eqd->text;
                         arg.length = eqd->length > 65535 ? 65535 : eqd->length;
-                        goto do_xstr2;
+                        goto do_xstr;
                     }
                 } else if (cmd == CMD_LBL) {
                     if (arg.type == ARGTYPE_NUM) {
@@ -1160,8 +1220,6 @@ static void export_hp42s(int index) {
                     }
                 } else if (cmd == CMD_XSTR) {
                     do_xstr:
-                    final_xstr_opcode = 0x41;
-                    do_xstr2:
                     int len = arg.length;
                     if (len == 0) {
                         cmdbuf[cmdlen++] = (char) 0xF2;
@@ -1181,7 +1239,7 @@ static void export_hp42s(int index) {
                             int slen = len <= 13 ? len : 13;
                             buf[buflen++] = (char) (0xF2 + slen);
                             buf[buflen++] = (char) 0xA7;
-                            buf[buflen++] = (char) (slen < len ? 0x49 : final_xstr_opcode);
+                            buf[buflen++] = (char) (slen < len ? 0x49 : 0x41);
                             memcpy(buf + buflen, ptr, slen);
                             buflen += slen;
                             ptr += slen;
@@ -1413,7 +1471,7 @@ int4 core_program_size(int prgm_index) {
                     equation_data *eqd = eq_dir->prgms[arg.val.num].eq_data;
                     int len = eqd->length > 65535 ? 65535 : eqd->length;
                     int n = (len + 12) / 13;
-                    size += len + n * 3;
+                    size += len + n * 3 + 7;
                 } else if (cmd == CMD_GTOL || cmd == CMD_XEQL) {
                     size += 5;
                 } else {
@@ -1916,7 +1974,7 @@ static int hp42ext[] = {
     CMD_PUTMI   | 0x2000,
     CMD_GETLI   | 0x2000,
     CMD_PUTLI   | 0x2000,
-    CMD_EMBED   | 0x3000, /* Embed with eqn id */
+    CMD_EMBED   | 0x3000,
     CMD_NULL    | 0x4000,
     CMD_NULL    | 0x4000,
     CMD_NULL    | 0x4000,
@@ -1931,7 +1989,7 @@ static int hp42ext[] = {
     CMD_PUTMI | 0x0000,
     CMD_GETLI | 0x0000,
     CMD_PUTLI | 0x0000,
-    CMD_EMBED | 0x0000, /* Embed with text, STD mode */
+    CMD_NULL  | 0x4000,
     CMD_NULL  | 0x4000,
     CMD_YAXIS | 0x1000,
     CMD_LCLV  | 0x1000,
@@ -1939,7 +1997,7 @@ static int hp42ext[] = {
     CMD_PUTMI | 0x1000,
     CMD_GETLI | 0x1000,
     CMD_PUTLI | 0x1000,
-    CMD_EMBED | 0x1000, /* Embed with text, COMP mode */
+    CMD_NULL  | 0x4000,
     CMD_NULL  | 0x4000,
 
     /* 80-8F */
@@ -2211,7 +2269,7 @@ static void decode_suffix(int cmd, int suffix, arg_struct *arg) {
     }
 }
 
-static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **xstr_buf, int *xstr_len, bool sw_30_94) {
+static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **xstr_buf, int *xstr_len, int *eq_mode, bool sw_30_94) {
     int pos = 0;
     int byte1 = buf[pos++];
     int byte2 = buf[pos++];
@@ -2261,8 +2319,10 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
             // it may encode a string of up to 65535 characters, while
             // instructions are limited to 16 bytes, giving a payload
             // of up to 13 characters per instruction.
-            char *newbuf = (char *) realloc(*xstr_buf, *xstr_len + arg->length);
+            char *newbuf;
+            newbuf = (char *) realloc(*xstr_buf, *xstr_len + arg->length);
             if (newbuf == NULL && *xstr_len + arg->length != 0) {
+                no_mem:
                 *cmd = CMD_CANCELLED;
                 return;
             }
@@ -2275,9 +2335,31 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
             }
             if (sw_30_94)
                 switch_30_and_94(*xstr_buf, *xstr_len);
-            arg->type = ARGTYPE_XSTR;
-            arg->length = *xstr_len;
-            arg->val.xstr = *xstr_buf;
+            
+            if (*eq_mode == 0) {
+                arg->type = ARGTYPE_XSTR;
+                arg->length = *xstr_len;
+                arg->val.xstr = *xstr_buf;
+            } else {
+                /* Imported equation */
+
+                /* Queue up equation, to be parsed later and inserted into the code */
+                pending_equation *peq = (pending_equation *) malloc(sizeof(pending_equation));
+                if (peq == NULL)
+                    goto no_mem;
+
+                peq->idx = current_prgm;
+                peq->pc = pc;
+                peq->length = *xstr_len;
+                peq->text = *xstr_buf;
+                peq->compatMode = *eq_mode == 2;
+                peq->next = eq_queue;
+                eq_queue = peq;
+
+                *xstr_buf = NULL;
+                *xstr_len = 0;
+                *cmd = CMD_NONE;
+            }
         }
     } else {
         /* Parameterized HP-42S extension */
@@ -2376,17 +2458,28 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
                 arg->type = ARGTYPE_NUM;
                 arg->val.num = sz;
             } else if (byte2 == 0x069) {
-                /* EMBED with eqn id */
-                // TODO: This should be prevented when importing. Equation IDs
-                // are only valid within the context of loading a state file.
+                /* EMBED */
                 if (byte1 != 0x0F5)
                     goto xrom_string;
                 int4 id = 0;
                 for (int i = 0; i < 4; i++)
                     id = (id << 8) | buf[pos++];
-                *cmd = CMD_EMBED;
-                arg->type = ARGTYPE_NUM;
-                arg->val.num = id;
+                if (id == -1) {
+                    *eq_mode = 1;
+                    *cmd = CMD_NONE;
+                } else if (id == -2) {
+                    *eq_mode = 2;
+                    *cmd = CMD_NONE;
+                } else if (id < 0 || !loading_state) {
+                    *cmd = CMD_XSTR;
+                    arg->type = ARGTYPE_XSTR;
+                    arg->length = 18;
+                    arg->val.xstr = "<Missing Equation>";
+                } else {
+                    *cmd = CMD_EMBED;
+                    arg->type = ARGTYPE_NUM;
+                    arg->val.num = id;
+                }
             } else /* byte2 == 0x0F7 */ {
                 /* SIZE */
                 *cmd = CMD_SIZE;
@@ -2411,6 +2504,7 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
     int done_flag = 0;
     arg_struct arg;
     bool pending_end;
+    int eq_mode = 0;
 
     if (raw_file_name != NULL) {
 #ifdef IPHONE
@@ -2605,7 +2699,7 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
                         goto done;
                     buf[i + 1] = c;
                 }
-                decode_string(buf, &cmd, &arg, &xstr_buf, &xstr_len, raw_file_name == NULL && ver < 44);
+                decode_string(buf, &cmd, &arg, &xstr_buf, &xstr_len, &eq_mode, raw_file_name == NULL && ver < 44);
                 if (cmd == CMD_CANCELLED)
                     goto done;
                 if (cmd == CMD_NONE)
@@ -2616,6 +2710,7 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
             goto_dot_dot(true);
             pending_end = false;
         }
+        eq_mode = 0;
         if (cmd == CMD_END) {
             if (num_progs > 0 && --num_progs == 0)
                 break;
@@ -2643,6 +2738,8 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
         fclose(gfile);
     }
     free(xstr_buf);
+
+    handle_pending_equations();
 }
 
 static int complex2buf(char *buf, phloat re, phloat im, bool always_rect, const char *format = NULL) {
@@ -3779,9 +3876,19 @@ static void paste_programs(const char *buf) {
     int cmd;
     arg_struct arg;
     char numbuf[50];
+    int eq_mode = 0;
     
     char *xstr_buf = NULL;
     int xstr_len = 0;
+    
+    if (false) {
+        no_mem:
+        display_error(ERR_INSUFFICIENT_MEMORY);
+        redisplay();
+        free(xstr_buf);
+        delete_pending_equations();
+        return;
+    }
 
     while (!done) {
         int end = pos;
@@ -3798,11 +3905,8 @@ static void paste_programs(const char *buf) {
         alen = end - pos;
         if (alen > 255) {
             hpbuf = (char *) malloc(alen + 4);
-            if (hpbuf == NULL) {
-                display_error(ERR_INSUFFICIENT_MEMORY);
-                redisplay();
-                return;
-            }
+            if (hpbuf == NULL)
+                goto no_mem;
         } else {
             hpbuf = hpbuf_s;
         }
@@ -4017,6 +4121,35 @@ static void paste_programs(const char *buf) {
                 if (arg.length > 0)
                     arg.val.text[0] &= 127;
             }
+        } else if (hppos < hpend && (hpbuf[hppos] == '\'' || hpbuf[hppos] == '`')) {
+            char quot = hpbuf[hppos];
+            int lastquote = -1;
+            for (int i = hppos + 1; i < hpend; i++)
+                if (hpbuf[i] == quot)
+                    lastquote = i;
+            if (lastquote == -1)
+                goto line_done;
+            
+            /* Queue up equation, to be parsed later and inserted into the code */
+            pending_equation *peq = (pending_equation *) malloc(sizeof(pending_equation));
+            if (peq == NULL)
+                goto no_mem;
+            int len = lastquote - hppos - 1;
+            char *txt = (char *) malloc(len);
+            if (txt == NULL) {
+                free(peq);
+                goto no_mem;
+            }
+            memcpy(txt, hpbuf + hppos + 1, len);
+
+            peq->idx = current_prgm;
+            peq->pc = pc;
+            peq->length = len;
+            peq->text = txt;
+            peq->compatMode = quot == '`';
+            peq->next = eq_queue;
+            eq_queue = peq;
+            goto line_done;
         } else {
             // Not a string; try to find command
             int cmd_end = hppos;
@@ -4378,13 +4511,9 @@ static void paste_programs(const char *buf) {
                         }
                     }
                     buf[0] = 0xf0 + length;
-                    decode_string(buf, &cmd, &arg, &xstr_buf, &xstr_len, false);
-                    if (cmd == CMD_CANCELLED) {
-                        display_error(ERR_INSUFFICIENT_MEMORY);
-                        redisplay();
-                        free(xstr_buf);
-                        return;
-                    }
+                    decode_string(buf, &cmd, &arg, &xstr_buf, &xstr_len, &eq_mode, false);
+                    if (cmd == CMD_CANCELLED)
+                        goto no_mem;
                     if (cmd == CMD_NONE)
                         goto line_done;
                     goto store;
@@ -4484,6 +4613,7 @@ static void paste_programs(const char *buf) {
         if (after_end)
             goto_dot_dot(false);
         after_end = cmd == CMD_END;
+        eq_mode = 0;
         if (!after_end) {
             store_command_after(&pc, cmd, &arg, numbuf);
             free(xstr_buf);
@@ -4506,6 +4636,7 @@ static void paste_programs(const char *buf) {
     }
     
     free(xstr_buf);
+    handle_pending_equations();
 }
 
 static int get_token(const char *buf, int *pos, int *start) {

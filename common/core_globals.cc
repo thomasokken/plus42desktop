@@ -3104,11 +3104,10 @@ void count_embed_references(directory *dir, int prgm, bool up) {
         if (command == CMD_EMBED) {
             int4 id = arg.val.num;
             equation_data *eqd = eq_dir->prgms[id].eq_data;
-            if (eqd != NULL)
-                if (up)
-                    eqd->refcount++;
-                else
-                    remove_equation_reference(id);
+            if (up)
+                eqd->refcount++;
+            else
+                remove_equation_reference(id);
         }
     }
 }
@@ -3170,8 +3169,7 @@ void delete_command(int4 pc) {
         int4 pc2 = pc;
         arg_struct arg;
         get_next_command(&pc2, &command, &arg, 0, NULL);
-        if (eq_dir->prgms[arg.val.num].eq_data != NULL)
-            remove_equation_reference(arg.val.num);
+        remove_equation_reference(arg.val.num);
     }
 
     for (pos = pc; pos < prgm->size - length; pos++)
@@ -3468,6 +3466,8 @@ bool store_command(int4 pc, int command, arg_struct *arg, const char *num_str) {
     } else {
         memcpy(prgm->text + pc, buf, bufptr);
     }
+    if (command == CMD_EMBED && !loading_state)
+        eq_dir->prgms[arg->val.num].eq_data->refcount++;
     prgm->size += bufptr;
     if (command != CMD_END && flags.f.printer_exists && (flags.f.trace_print || flags.f.normal_print))
         print_program_line(current_prgm, pc);
@@ -3572,7 +3572,6 @@ int x2line() {
             arg.type = ARGTYPE_NUM;
             arg.val.num = eq->data->eqn_index;
             store_command_after(&pc, CMD_EMBED, &arg, NULL);
-            eq->data->refcount++;
             return ERR_NONE;
         }
         case TYPE_UNIT: {

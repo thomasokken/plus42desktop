@@ -226,6 +226,7 @@ vloc lookup_var(const char *name, int namelength, bool no_locals = false, bool n
 vartype *recall_var(const char *name, int namelength, bool *writable = NULL);
 vartype *recall_global_var(const char *name, int namelength, bool *writable = NULL);
 equation_data *find_equation_data(const char *name, int namelength);
+equation_data *new_equation_data(const char *text, int4 length, bool compat_mode, int *errpos, int eqn_index);
 std::vector<std::string> get_equation_names();
 std::vector<int> get_equation_indexes();
 int store_params();

@@ -4623,14 +4623,10 @@ int command2buf(char *buf, int len, int cmd, const arg_struct *arg) {
         char2buf(buf, len, &bufptr, '0' + instr % 10);
     } else if (cmd == CMD_EMBED) {
         equation_data *eqd = eq_dir->prgms[arg->val.num].eq_data;
-        if (eqd == NULL) {
-            string2buf(buf, len, &bufptr, "<Missing Equation>", 18);
-        } else {
-            char quot = eqd->compatMode ? '`' : '\'';
-            char2buf(buf, len, &bufptr, quot);
-            string2buf(buf, len, &bufptr, eqd->text, eqd->length);
-            char2buf(buf, len, &bufptr, quot);
-        }
+        char quot = eqd->compatMode ? '`' : '\'';
+        char2buf(buf, len, &bufptr, quot);
+        string2buf(buf, len, &bufptr, eqd->text, eqd->length);
+        char2buf(buf, len, &bufptr, quot);
     } else if (cmdspec->argtype != ARG_NONE) {
         if (cmdspec->name_length > 0)
             char2buf(buf, len, &bufptr, ' ');
