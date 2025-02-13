@@ -1052,31 +1052,31 @@ static void export_hp42s(int index) {
                     char byte2;
                     if (arg.type != ARGTYPE_NUM || arg.val.num <= 9)
                         goto normal;
-                    cmdbuf[cmdlen++] = (char) 0xF1;
+                    cmdbuf[cmdlen++] = (char) 0xf1;
                     if (arg.val.num == 10) {
                         switch (cmd) {
-                            case CMD_FIX: byte2 = (char) 0xD5; break;
-                            case CMD_SCI: byte2 = (char) 0xD6; break;
-                            case CMD_ENG: byte2 = (char) 0xD7; break;
+                            case CMD_FIX: byte2 = (char) 0xd5; break;
+                            case CMD_SCI: byte2 = (char) 0xd6; break;
+                            case CMD_ENG: byte2 = (char) 0xd7; break;
                         }
                     } else {
                         switch (cmd) {
-                            case CMD_FIX: byte2 = (char) 0xE5; break;
-                            case CMD_SCI: byte2 = (char) 0xE6; break;
-                            case CMD_ENG: byte2 = (char) 0xE7; break;
+                            case CMD_FIX: byte2 = (char) 0xe5; break;
+                            case CMD_SCI: byte2 = (char) 0xe6; break;
+                            case CMD_ENG: byte2 = (char) 0xe7; break;
                         }
                     }
                     cmdbuf[cmdlen++] = byte2;
                 } else if (cmd == CMD_SIZE) {
-                    cmdbuf[cmdlen++] = (char) 0xF3;
-                    cmdbuf[cmdlen++] = (char) 0xF7;
+                    cmdbuf[cmdlen++] = (char) 0xf3;
+                    cmdbuf[cmdlen++] = (char) 0xf7;
                     cmdbuf[cmdlen++] = arg.val.num >> 8;
                     cmdbuf[cmdlen++] = arg.val.num;
                 } else if (cmd == CMD_EMBED) {
                     int4 id = saving_state ? arg.val.num
                             : eq_dir->prgms[arg.val.num].eq_data->compatMode ? -2 : -1;
-                    cmdbuf[cmdlen++] = (char) 0xF6;
-                    cmdbuf[cmdlen++] = (char) 0xA7;
+                    cmdbuf[cmdlen++] = (char) 0xf6;
+                    cmdbuf[cmdlen++] = (char) 0xa7;
                     cmdbuf[cmdlen++] = (char) 0x69;
                     cmdbuf[cmdlen++] = id >> 24;
                     cmdbuf[cmdlen++] = id >> 16;
@@ -1099,9 +1099,9 @@ static void export_hp42s(int index) {
                         else
                             goto normal;
                     } else if (arg.type == ARGTYPE_STR) {
-                        cmdbuf[cmdlen++] = (char) 0xC0;
+                        cmdbuf[cmdlen++] = (char) 0xc0;
                         cmdbuf[cmdlen++] = 0x00;
-                        cmdbuf[cmdlen++] = 0xF1 + arg.length;
+                        cmdbuf[cmdlen++] = 0xf1 + arg.length;
                         cmdbuf[cmdlen++] = 0x00;
                         for (i = 0; i < arg.length; i++)
                             cmdbuf[cmdlen++] = arg.val.text[i];
@@ -1110,53 +1110,53 @@ static void export_hp42s(int index) {
                 } else if (cmd == CMD_INPUT) {
                     if (arg.type == ARGTYPE_IND_NUM
                             || arg.type == ARGTYPE_IND_STK)
-                        code_std_2 = 0xEE;
+                        code_std_2 = 0xee;
                     goto normal;
                 } else if (cmd == CMD_XEQ) {
                     if (arg.type == ARGTYPE_NUM || arg.type == ARGTYPE_STK
                                                 || arg.type == ARGTYPE_LCLBL) {
-                        code_std_1 = 0xE0;
+                        code_std_1 = 0xe0;
                         code_std_2 = 0x00;
                         goto normal;
                     } else if (arg.type == ARGTYPE_STR) {
-                        cmdbuf[cmdlen++] = 0x1E;
-                        cmdbuf[cmdlen++] = 0xF0 + arg.length;
+                        cmdbuf[cmdlen++] = 0x1e;
+                        cmdbuf[cmdlen++] = 0xf0 + arg.length;
                         for (i = 0; i < arg.length; i++)
                             cmdbuf[cmdlen++] = arg.val.text[i];
                     } else
                         goto normal;
                 } else if (cmd == CMD_GTO) {
                     if (arg.type == ARGTYPE_NUM && arg.val.num <= 14) {
-                        cmdbuf[cmdlen++] = 0xB1 + arg.val.num;
+                        cmdbuf[cmdlen++] = 0xb1 + arg.val.num;
                         cmdbuf[cmdlen++] = 0x00;
                     } else if (arg.type == ARGTYPE_NUM
                                         || arg.type == ARGTYPE_STK
                                         || arg.type == ARGTYPE_LCLBL) {
-                        code_std_1 = 0xD0;
+                        code_std_1 = 0xd0;
                         code_std_2 = 0x00;
                         goto normal;
                     } else if (arg.type == ARGTYPE_IND_NUM
                                         || arg.type == ARGTYPE_IND_STK) {
-                        cmdbuf[cmdlen++] = (char) 0xAE;
+                        cmdbuf[cmdlen++] = (char) 0xae;
                         if (arg.type == ARGTYPE_IND_NUM)
                             arg.type = ARGTYPE_NUM;
                         else
                             arg.type = ARGTYPE_STK;
                         goto non_string_suffix;
                     } else if (arg.type == ARGTYPE_STR) {
-                        cmdbuf[cmdlen++] = 0x1D;
-                        cmdbuf[cmdlen++] = 0xF0 + arg.length;
+                        cmdbuf[cmdlen++] = 0x1d;
+                        cmdbuf[cmdlen++] = 0xf0 + arg.length;
                         for (i = 0; i < arg.length; i++)
                             cmdbuf[cmdlen++] = arg.val.text[i];
                     } else
                         goto normal;
                 } else if (cmd == CMD_END) {
-                    cmdbuf[cmdlen++] = (char) 0xC0;
+                    cmdbuf[cmdlen++] = (char) 0xc0;
                     cmdbuf[cmdlen++] = 0x00;
-                    cmdbuf[cmdlen++] = 0x0D;
+                    cmdbuf[cmdlen++] = 0x0d;
                 } else if (cmd == CMD_N_PLUS_U) {
-                    cmdbuf[cmdlen++] = 0xA6;
-                    cmdbuf[cmdlen++] = 0xF7;
+                    cmdbuf[cmdlen++] = 0xa6;
+                    cmdbuf[cmdlen++] = 0xf7;
                     if (arg.type != ARGTYPE_NONE)
                         goto do_number;
                 } else if (cmd == CMD_NUMBER) {
@@ -1171,11 +1171,11 @@ static void export_hp42s(int index) {
                         if (c >= '0' && c <= '9')
                             cmdbuf[cmdlen++] = 0x10 + c - '0';
                         else if (c == '.' || c == ',')
-                            cmdbuf[cmdlen++] = 0x1A;
+                            cmdbuf[cmdlen++] = 0x1a;
                         else if (c == 24)
-                            cmdbuf[cmdlen++] = 0x1B;
+                            cmdbuf[cmdlen++] = 0x1b;
                         else if (c == '-')
-                            cmdbuf[cmdlen++] = 0x1C;
+                            cmdbuf[cmdlen++] = 0x1c;
                         else
                             /* Should not happen */
                             continue;
@@ -1188,12 +1188,12 @@ static void export_hp42s(int index) {
                         goto do_xstr;
                     }
                 } else if (cmd == CMD_STRING) {
-                    cmdbuf[cmdlen++] = 0xF0 + arg.length;
+                    cmdbuf[cmdlen++] = 0xf0 + arg.length;
                     for (i = 0; i < arg.length; i++)
                         cmdbuf[cmdlen++] = arg.val.text[i];
                 } else if (cmd >= CMD_ASGN01 && cmd <= CMD_ASGN18) {
-                    cmdbuf[cmdlen++] = 0xF2 + arg.length;
-                    cmdbuf[cmdlen++] = (char) 0xC0;
+                    cmdbuf[cmdlen++] = 0xf2 + arg.length;
+                    cmdbuf[cmdlen++] = (char) 0xc0;
                     for (i = 0; i < arg.length; i++)
                         cmdbuf[cmdlen++] = arg.val.text[i];
                     cmdbuf[cmdlen++] = cmd - CMD_ASGN01;
@@ -1202,25 +1202,25 @@ static void export_hp42s(int index) {
                     int keyg = cmd <= CMD_KEY9G;
                     int keynum = cmd - (keyg ? CMD_KEY1G : CMD_KEY1X) + 1;
                     if (arg.type == ARGTYPE_STR || arg.type == ARGTYPE_IND_STR){
-                        cmdbuf[cmdlen++] = 0xF2 + arg.length;
-                        cmdbuf[cmdlen++] = keyg ? 0xC3 : 0xC2;
+                        cmdbuf[cmdlen++] = 0xf2 + arg.length;
+                        cmdbuf[cmdlen++] = keyg ? 0xc3 : 0xc2;
                         if (arg.type == ARGTYPE_IND_STR)
                             cmdbuf[cmdlen - 1] += 8;
                         cmdbuf[cmdlen++] = keynum;
                         for (i = 0; i < arg.length; i++)
                             cmdbuf[cmdlen++] = arg.val.text[i];
                     } else {
-                        cmdbuf[cmdlen++] = (char) 0xF3;
-                        cmdbuf[cmdlen++] = keyg ? 0xE3 : 0xE2;
+                        cmdbuf[cmdlen++] = (char) 0xf3;
+                        cmdbuf[cmdlen++] = keyg ? 0xe3 : 0xe2;
                         cmdbuf[cmdlen++] = keynum;
                         goto non_string_suffix;
                     }
                 } else if (cmd == CMD_XROM) {
                     if (arg.type == ARGTYPE_NUM) {
-                        cmdbuf[cmdlen++] = (char) (0xA0 + ((arg.val.num >> 8) & 7));
+                        cmdbuf[cmdlen++] = (char) (0xa0 + ((arg.val.num >> 8) & 7));
                         cmdbuf[cmdlen++] = (char) arg.val.num;
                     } else {
-                        cmdbuf[cmdlen++] = (char) (0xF0 + arg.length);
+                        cmdbuf[cmdlen++] = (char) (0xf0 + arg.length);
                         for (int i = 0; i < arg.length; i++)
                             cmdbuf[cmdlen++] = arg.val.text[i];
                     }
@@ -1228,8 +1228,8 @@ static void export_hp42s(int index) {
                     do_xstr:
                     int len = arg.length;
                     if (len == 0) {
-                        cmdbuf[cmdlen++] = (char) 0xF2;
-                        cmdbuf[cmdlen++] = (char) 0xA7;
+                        cmdbuf[cmdlen++] = (char) 0xf2;
+                        cmdbuf[cmdlen++] = (char) 0xa7;
                         cmdbuf[cmdlen++] = (char) 0x41;
                     } else {
                         /* Writing directly to 'buf' here, not using 'cmdbuf', */
@@ -1243,8 +1243,8 @@ static void export_hp42s(int index) {
                                 buflen = 0;
                             }
                             int slen = len <= 13 ? len : 13;
-                            buf[buflen++] = (char) (0xF2 + slen);
-                            buf[buflen++] = (char) 0xA7;
+                            buf[buflen++] = (char) (0xf2 + slen);
+                            buf[buflen++] = (char) 0xa7;
                             buf[buflen++] = (char) (slen < len ? 0x49 : 0x41);
                             memcpy(buf + buflen, ptr, slen);
                             buflen += slen;
@@ -1253,14 +1253,14 @@ static void export_hp42s(int index) {
                         }
                     }
                 } else if (cmd == CMD_GTOL) {
-                    cmdbuf[cmdlen++] = (char) 0xF4;
-                    cmdbuf[cmdlen++] = (char) 0xA7;
+                    cmdbuf[cmdlen++] = (char) 0xf4;
+                    cmdbuf[cmdlen++] = (char) 0xa7;
                     cmdbuf[cmdlen++] = (char) 0x32;
                     cmdbuf[cmdlen++] = arg.val.num >> 8;
                     cmdbuf[cmdlen++] = arg.val.num;
                 } else if (cmd == CMD_XEQL) {
-                    cmdbuf[cmdlen++] = (char) 0xF4;
-                    cmdbuf[cmdlen++] = (char) 0xA7;
+                    cmdbuf[cmdlen++] = (char) 0xf4;
+                    cmdbuf[cmdlen++] = (char) 0xa7;
                     cmdbuf[cmdlen++] = (char) 0x33;
                     cmdbuf[cmdlen++] = arg.val.num >> 8;
                     cmdbuf[cmdlen++] = arg.val.num;
@@ -1324,7 +1324,7 @@ static void export_hp42s(int index) {
                                 suffix = arg.val.lclbl - 'A' + 0x66;
                             else if (arg.val.lclbl >= 'a' &&
                                                         arg.val.lclbl <= 'e')
-                                suffix = arg.val.lclbl - 'a' + 0x7B;
+                                suffix = arg.val.lclbl - 'a' + 0x7b;
                             else
                                 /* Shouldn't happen */
                                 continue;
@@ -2244,12 +2244,12 @@ static void decode_xrom(int byte1, int byte2, int *cmd, arg_struct *arg) {
     /* Not found; insert XROM instruction */
     *cmd = CMD_XROM;
     arg->type = ARGTYPE_NUM;
-    arg->val.num = code & 0x07FF;
+    arg->val.num = code & 0x07ff;
 }
 
 static void decode_suffix(int cmd, int suffix, arg_struct *arg) {
     bool ind = (suffix & 0x080) != 0;
-    suffix &= 0x7F;
+    suffix &= 0x7f;
     if (!ind && (cmd == CMD_LBL || cmd == CMD_GTO || cmd == CMD_XEQ
                 || cmd >= CMD_KEY1G && cmd <= CMD_KEY9X)
             && suffix >= 102 && suffix <= 111) {
@@ -2291,7 +2291,7 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
         xrom_string:
         *cmd = CMD_XROM;
         string_2:
-        str_len = byte1 - 0x0F0;
+        str_len = byte1 - 0x0f0;
         pos--;
         arg->type = ARGTYPE_STR;
         do_string:
@@ -2313,7 +2313,7 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
                  */
                 for (i = arg->length; i > 0; i--)
                     arg->val.text[i] = arg->val.text[i - 1];
-                arg->val.text[0] = (char) 0xC0;
+                arg->val.text[0] = (char) 0xc0;
                 arg->val.text[arg->length + 1] = key;
                 arg->length += 2;
             } else {
@@ -2374,14 +2374,14 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
         }
     } else {
         /* Parameterized HP-42S extension */
-        if (byte1 == 0x0F1) {
+        if (byte1 == 0x0f1) {
             switch (byte2) {
-                case 0x0D5: *cmd = CMD_FIX; arg->val.num = 10; break;
-                case 0x0D6: *cmd = CMD_SCI; arg->val.num = 10; break;
-                case 0x0D7: *cmd = CMD_ENG; arg->val.num = 10; break;
-                case 0x0E5: *cmd = CMD_FIX; arg->val.num = 11; break;
-                case 0x0E6: *cmd = CMD_SCI; arg->val.num = 11; break;
-                case 0x0E7: *cmd = CMD_ENG; arg->val.num = 11; break;
+                case 0x0d5: *cmd = CMD_FIX; arg->val.num = 10; break;
+                case 0x0d6: *cmd = CMD_SCI; arg->val.num = 10; break;
+                case 0x0d7: *cmd = CMD_ENG; arg->val.num = 10; break;
+                case 0x0e5: *cmd = CMD_FIX; arg->val.num = 11; break;
+                case 0x0e6: *cmd = CMD_SCI; arg->val.num = 11; break;
+                case 0x0e7: *cmd = CMD_ENG; arg->val.num = 11; break;
                 default: goto xrom_string;
             }
             arg->type = ARGTYPE_NUM;
@@ -2394,33 +2394,33 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
         }
         *cmd = hp42ext[byte2];
         int flag = *cmd >> 12;
-        *cmd &= 0x0FFF;
+        *cmd &= 0x0fff;
         if (flag == 0 || flag == 1) {
             arg->type = flag == 0 ? ARGTYPE_STR
                                     : ARGTYPE_IND_STR;
-            str_len = byte1 - 0x0F1;
+            str_len = byte1 - 0x0f1;
             extra_extension = false;
             goto do_string;
         } else if (flag == 2) {
-            if (byte1 != 0x0F2)
+            if (byte1 != 0x0f2)
                 goto xrom_string;
             int suffix = buf[pos++];
             decode_suffix(*cmd, suffix, arg);
         } else if (flag == 3) {
-            if (byte2 == 0x0C0) {
+            if (byte2 == 0x0c0) {
                 /* ASSIGN */
-                str_len = byte1 - 0x0F2;
+                str_len = byte1 - 0x0f2;
                 assign = 1;
                 *cmd = CMD_ASGN01;
                 arg->type = ARGTYPE_STR;
                 goto do_string;
-            } else if (byte2 == 0x0C2 || byte2 == 0x0C3
-                    || byte2 == 0x0CA || byte2 == 0x0CB) {
+            } else if (byte2 == 0x0c2 || byte2 == 0x0c3
+                    || byte2 == 0x0ca || byte2 == 0x0cb) {
                 /* KEYG/KEYX name, KEYG/KEYX IND name */
-                str_len = byte1 - 0x0F2;
+                str_len = byte1 - 0x0f2;
                 if (str_len == 0)
                     goto xrom_string;
-                *cmd = byte2 == 0x0C2 || byte2 == 0x0CA
+                *cmd = byte2 == 0x0c2 || byte2 == 0x0ca
                         ? CMD_KEY1X : CMD_KEY1G;
                 int key;
                 key = buf[pos++];
@@ -2443,17 +2443,17 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
                     return;
                 }
                 *cmd += key - 1;
-                arg->type = byte2 == 0x0C2 || byte2 == 0x0C3
+                arg->type = byte2 == 0x0c2 || byte2 == 0x0c3
                             ? ARGTYPE_STR : ARGTYPE_IND_STR;
                 goto do_string;
-            } else if (byte2 == 0x0E2 || byte2 == 0x0E3) {
+            } else if (byte2 == 0x0e2 || byte2 == 0x0e3) {
                 /* KEYG/KEYX suffix */
-                if (byte1 != 0x0F3)
+                if (byte1 != 0x0f3)
                     goto xrom_string;
                 int key = buf[pos++];
                 if (key < 1 || key > 9)
                     goto bad_keyg_keyx;
-                *cmd = byte2 == 0x0E2 ? CMD_KEY1X : CMD_KEY1G;
+                *cmd = byte2 == 0x0e2 ? CMD_KEY1X : CMD_KEY1G;
                 *cmd += key - 1;
                 int suffix = buf[pos++];
                 decode_suffix(*cmd, suffix, arg);
@@ -2461,7 +2461,7 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
                 /* GTOL/XEQL */
                 *cmd = byte2 == 0x032 ? CMD_GTOL : CMD_XEQL;
                 two_byte_num:
-                if (byte1 != 0x0F3)
+                if (byte1 != 0x0f3)
                     goto xrom_string;
                 int hi = buf[pos++];
                 int lo = buf[pos++];
@@ -2470,7 +2470,7 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
                 arg->val.num = sz;
             } else if (byte2 == 0x069) {
                 /* EMBED */
-                if (byte1 != 0x0F5)
+                if (byte1 != 0x0f5)
                     goto xrom_string;
                 int4 id = 0;
                 for (int i = 0; i < 4; i++)
@@ -2491,7 +2491,7 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
                     arg->type = ARGTYPE_NUM;
                     arg->val.num = id;
                 }
-            } else /* byte2 == 0x0F7 */ {
+            } else /* byte2 == 0x0f7 */ {
                 /* SIZE */
                 *cmd = CMD_SIZE;
                 goto two_byte_num;
@@ -2573,7 +2573,7 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
             goto done;
         cmd = hp42tofree42[byte1];
         flag = cmd >> 12;
-        cmd &= 0x0FFF;
+        cmd &= 0x0fff;
         if (flag == 0) {
             arg.type = ARGTYPE_NONE;
         } else if (flag == 1) {
@@ -2590,21 +2590,21 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
             if (byte1 == 0x00)
                 /* NULL */
                 goto skip;
-            else if (byte1 >= 0x10 && byte1 <= 0x1C) {
+            else if (byte1 >= 0x10 && byte1 <= 0x1c) {
                 /* Number */
                 int numlen = 0;
                 do {
-                    if (byte1 == 0x1A)
+                    if (byte1 == 0x1a)
                         byte1 = '.';
-                    else if (byte1 == 0x1B)
+                    else if (byte1 == 0x1b)
                         byte1 = 'E';
-                    else if (byte1 == 0x1C)
+                    else if (byte1 == 0x1c)
                         byte1 = '-';
                     else
                         byte1 += '0' - 0x10;
                     numbuf[numlen++] = byte1;
                     byte1 = fgetc(gfile);
-                } while (byte1 >= 0x10 && byte1 <= 0x1C);
+                } while (byte1 >= 0x10 && byte1 <= 0x1c);
                 if (byte1 == EOF)
                     done_flag = 1;
                 else if (byte1 != 0x00)
@@ -2613,16 +2613,16 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
                 parse_number_line(numbuf, &arg.val_d);
                 cmd = CMD_NUMBER;
                 arg.type = ARGTYPE_DOUBLE;
-            } else if (byte1 == 0x1D || byte1 == 0x1E) {
-                cmd = byte1 == 0x1D ? CMD_GTO : CMD_XEQ;
+            } else if (byte1 == 0x1d || byte1 == 0x1e) {
+                cmd = byte1 == 0x1d ? CMD_GTO : CMD_XEQ;
                 str_len = fgetc(gfile);
                 if (str_len == EOF)
                     goto done;
-                else if (str_len < 0x0F1) {
+                else if (str_len < 0x0f1) {
                     ungetc(str_len, gfile);
                     goto skip;
                 } else
-                    str_len -= 0x0F0;
+                    str_len -= 0x0f0;
                 arg.type = ARGTYPE_STR;
                 do_string:
                 for (int i = 0; i < str_len; i++) {
@@ -2634,16 +2634,16 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
                 arg.length = str_len;
                 if (raw_file_name == NULL && ver < 44)
                     switch_30_and_94(arg.val.text, arg.length);
-            } else if (byte1 == 0x1F) {
+            } else if (byte1 == 0x1f) {
                 /* "W" function (see HP-41C instruction table */
                 goto skip;
-            } else if (byte1 >= 0x0A0 && byte1 <= 0x0A7) {
+            } else if (byte1 >= 0x0a0 && byte1 <= 0x0a7) {
                 /* XROM mm,nn */
                 byte2 = fgetc(gfile);
                 if (byte2 == EOF)
                     goto done;
                 decode_xrom(byte1, byte2, &cmd, &arg);
-            } else if (byte1 == 0x0AE) {
+            } else if (byte1 == 0x0ae) {
                 /* GTO/XEQ IND */
                 suffix = fgetc(gfile);
                 if (suffix == EOF)
@@ -2655,10 +2655,10 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
                     suffix |= 0x080;
                 }
                 decode_suffix(cmd, suffix, &arg);
-            } else if (byte1 == 0x0AF || byte1 == 0x0B0) {
+            } else if (byte1 == 0x0af || byte1 == 0x0b0) {
                 /* SPARE functions (see HP-41C instruction table */
                 goto skip;
-            } else if (byte1 >= 0x0B1 && byte1 <= 0x0BF) {
+            } else if (byte1 >= 0x0b1 && byte1 <= 0x0bf) {
                 /* 2-byte GTO */
                 byte2 = fgetc(gfile);
                 if (byte2 == EOF)
@@ -2666,7 +2666,7 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
                 cmd = CMD_GTO;
                 arg.type = ARGTYPE_NUM;
                 arg.val.num = (byte1 & 15) - 1;
-            } else if (byte1 >= 0x0C0 && byte1 <= 0x0CD) {
+            } else if (byte1 >= 0x0c0 && byte1 <= 0x0cd) {
                 /* GLOBAL */
                 byte2 = fgetc(gfile);
                 if (byte2 == EOF)
@@ -2674,13 +2674,13 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
                 str_len = fgetc(gfile);
                 if (str_len == EOF)
                     goto done;
-                if (str_len < 0x0F1) {
+                if (str_len < 0x0f1) {
                     /* END */
                     cmd = CMD_END;
                     arg.type = ARGTYPE_NONE;
                 } else {
                     /* LBL "" */
-                    str_len -= 0x0F1;
+                    str_len -= 0x0f1;
                     byte2 = fgetc(gfile);
                     if (byte2 == EOF)
                         goto done;
@@ -2688,7 +2688,7 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
                     arg.type = ARGTYPE_STR;
                     goto do_string;
                 }
-            } else if (byte1 >= 0x0D0 && byte1 <= 0x0EF) {
+            } else if (byte1 >= 0x0d0 && byte1 <= 0x0ef) {
                 /* 3-byte GTO & XEQ */
                 byte2 = fgetc(gfile);
                 if (byte2 == EOF)
@@ -2696,10 +2696,10 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
                 suffix = fgetc(gfile);
                 if (suffix == EOF)
                     goto done;
-                cmd = byte1 <= 0x0DF ? CMD_GTO : CMD_XEQ;
-                suffix &= 0x7F;
+                cmd = byte1 <= 0x0df ? CMD_GTO : CMD_XEQ;
+                suffix &= 0x7f;
                 decode_suffix(cmd, suffix, &arg);
-            } else /* byte1 >= 0xF1 && byte1 <= 0xFF */ {
+            } else /* byte1 >= 0xf1 && byte1 <= 0xff */ {
                 /* Strings and parameterized HP-42S extensions */
                 unsigned char buf[16];
                 buf[0] = byte1;
