@@ -3643,12 +3643,15 @@ void keydown_normal_mode(int shift, int key) {
                 send_it_off:
                 if (flags.f.prgm_mode &&
                         (cmd_array[pending_command].flags & FLAG_IMMED) == 0) {
+                    if (pending_command == CMD_EVAL && eqn_flip(pc))
+                        goto done;
                     store_command_after(&pc, pending_command,
                                             &pending_command_arg, NULL);
                     if (pending_command == CMD_END)
                         /* current_prgm was already incremented by store_command() */
                         pc = 0;
                     move_prgm_highlight(1);
+                    done:
                     pending_command = CMD_NONE;
                     if (level == MENULEVEL_TRANSIENT
                             || (level == MENULEVEL_PLAIN

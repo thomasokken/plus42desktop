@@ -3184,6 +3184,20 @@ void delete_command(int4 pc) {
     draw_varmenu();
 }
 
+bool eqn_flip(int4 pc) {
+    int4 pc2 = pc;
+    int cmd;
+    arg_struct arg;
+    get_next_command(&pc2, &cmd, &arg, 0, NULL);
+    if (cmd == CMD_EMBED) {
+        directory *dir = dir_list[current_prgm.dir];
+        prgm_struct *prgm = dir->prgms + current_prgm.idx;
+        prgm->text[pc + 1] ^= 4;
+        return true;
+    } else
+        return false;
+}
+
 bool store_command(int4 pc, int command, arg_struct *arg, const char *num_str) {
     unsigned char buf[100];
     int bufptr = 0;
