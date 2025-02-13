@@ -3938,13 +3938,15 @@ static void paste_programs(const char *buf) {
         // specifically, unnumbered number lines followed by comments.
         for (int i = 0; i < hpend; i++) {
             c = hpbuf[i];
-            if (c == '"')
+            if (c == '"' || c == '\'' || c == '`')
                 break;
             if (c == '@' || c == ';') {
                 hpend = i;
                 break;
             }
         }
+
+        cmd = CMD_NONE;
 
         // Skip leading whitespace and line number.
         int hppos;
@@ -4135,6 +4137,7 @@ static void paste_programs(const char *buf) {
                     arg.val.text[0] &= 127;
             }
         } else if (hppos < hpend && (hpbuf[hppos] == '\'' || hpbuf[hppos] == '`')) {
+            do_embed:
             char quot = hpbuf[hppos];
             int lastquote = -1;
             for (int i = hppos + 1; i < hpend; i++)
@@ -4165,6 +4168,7 @@ static void paste_programs(const char *buf) {
             peq->length = len;
             peq->text = txt;
             peq->compatMode = quot == '`';
+            peq->eval = cmd == CMD_EVAL;
             peq->next = eq_queue;
             eq_queue = peq;
             goto line_done;
@@ -4293,7 +4297,18 @@ static void paste_programs(const char *buf) {
                 arg.length = q2 - q1 - 1;
                 arg.val.xstr = hpbuf + q1 + 1;
                 goto store;
+            } else if (cmd == CMD_EVAL) {
+                for (int i = cmd_end; i < hpend; i++) {
+                    char c = hpbuf[i];
+                    if (c == '\'' || c == '`') {
+                        hppos = i;
+                        goto do_embed;
+                    } else if (c != ' ')
+                        break;
+                }
+                goto do_other;
             } else if (cmd != CMD_NONE) {
+                do_other:
                 int flags;
                 flags = cmd_array[cmd].flags;
                 arg.type = ARGTYPE_NONE;
