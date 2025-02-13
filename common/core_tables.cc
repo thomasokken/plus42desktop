@@ -564,7 +564,7 @@ const command_spec cmd_array[] =
     { /* FSTACK */      docmd_fstack,      "FST\301\303K",        0x00, 0x00, 0xa7, 0xb8,  6, ARG_NONE,   1, 0x01 },
     { /* PUTITEM */     docmd_putitem,     "PUTITEM",             0x00, 0x00, 0xa7, 0xb9,  7, ARG_NONE,   3, FUNC },
     { /* EVALN */       docmd_evaln,       "EV\301LN",            0x00, 0x43, 0xf2, 0x36,  5, ARG_EQN,    0, NA_T },
-    { /* EVALNi */      docmd_evalni,      "EV\301LN",            0x44, 0x00, 0x00, 0x00,  5, ARG_EQN,    0, NA_T },
+    { /* EVALNi */      docmd_evalni,      "EVAL",                0x44, 0x00, 0x00, 0x00,  4, ARG_EQN,    0, NA_T },
     { /* EQNSLV */      docmd_eqnslv,      "E\321\316SLV",        0x00, 0x44, 0xf2, 0x37,  6, ARG_EQN,    0, NA_T },
     { /* EQNINT */      docmd_eqnint,      "E\321\316INT",        0x00, 0x45, 0xf2, 0x38,  6, ARG_EQN,    0, NA_T },
     { /* EQNSLVi */     docmd_eqnslvi,     "E\321\316SLV",        0x44, 0x00, 0x00, 0x00,  6, ARG_EQN,    0, NA_T },

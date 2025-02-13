@@ -86,6 +86,7 @@ struct pending_equation {
     char *text;
     pending_equation *next;
     bool compatMode;
+    bool eval;
 };
 
 static pending_equation *eq_queue = NULL;
@@ -125,7 +126,7 @@ static void handle_pending_equations() {
         current_prgm = peq->idx;
         arg_struct arg;
         if (eqd != NULL) {
-            arg.type = ARGTYPE_NUM;
+            arg.type = peq->eval ? ARGTYPE_IND_NUM : ARGTYPE_NUM;
             arg.val.num = eqd->eqn_index;
             store_command_after(&peq->pc, CMD_EMBED, &arg, NULL);
         } else {
@@ -1077,7 +1078,7 @@ static void export_hp42s(int index) {
                             : eq_dir->prgms[arg.val.num].eq_data->compatMode ? -2 : -1;
                     cmdbuf[cmdlen++] = (char) 0xf6;
                     cmdbuf[cmdlen++] = (char) 0xa7;
-                    cmdbuf[cmdlen++] = (char) 0x69;
+                    cmdbuf[cmdlen++] = (char) (arg.type == ARGTYPE_NUM ? 0x76 : 0x7e);
                     cmdbuf[cmdlen++] = id >> 24;
                     cmdbuf[cmdlen++] = id >> 16;
                     cmdbuf[cmdlen++] = id >> 8;
@@ -1980,7 +1981,7 @@ static int hp42ext[] = {
     CMD_PUTMI   | 0x2000,
     CMD_GETLI   | 0x2000,
     CMD_PUTLI   | 0x2000,
-    CMD_EMBED   | 0x3000,
+    CMD_NULL    | 0x4000,
     CMD_NULL    | 0x4000,
     CMD_NULL    | 0x4000,
     CMD_NULL    | 0x4000,
@@ -1995,7 +1996,7 @@ static int hp42ext[] = {
     CMD_PUTMI | 0x0000,
     CMD_GETLI | 0x0000,
     CMD_PUTLI | 0x0000,
-    CMD_NULL  | 0x4000,
+    CMD_EMBED | 0x3000,
     CMD_NULL  | 0x4000,
     CMD_YAXIS | 0x1000,
     CMD_LCLV  | 0x1000,
@@ -2003,7 +2004,7 @@ static int hp42ext[] = {
     CMD_PUTMI | 0x1000,
     CMD_GETLI | 0x1000,
     CMD_PUTLI | 0x1000,
-    CMD_NULL  | 0x4000,
+    CMD_EMBED | 0x3000,
     CMD_NULL  | 0x4000,
 
     /* 80-8F */
@@ -2363,7 +2364,8 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
                 peq->pc = pc;
                 peq->length = *xstr_len;
                 peq->text = *xstr_buf;
-                peq->compatMode = *eq_mode == 2;
+                peq->compatMode = *eq_mode == 2 || *eq_mode == 4;
+                peq->eval = *eq_mode == 3 || *eq_mode == 4;
                 peq->next = eq_queue;
                 eq_queue = peq;
 
@@ -2468,7 +2470,7 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
                 int sz = (hi << 8) | lo;
                 arg->type = ARGTYPE_NUM;
                 arg->val.num = sz;
-            } else if (byte2 == 0x069) {
+            } else if (byte2 == 0x076 || byte2 == 0x7e) {
                 /* EMBED */
                 if (byte1 != 0x0f5)
                     goto xrom_string;
@@ -2476,10 +2478,10 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
                 for (int i = 0; i < 4; i++)
                     id = (id << 8) | buf[pos++];
                 if (id == -1) {
-                    *eq_mode = 1;
+                    *eq_mode = byte2 == 0x76 ? 1 : 3;
                     *cmd = CMD_NONE;
                 } else if (id == -2) {
-                    *eq_mode = 2;
+                    *eq_mode = byte2 == 0x76 ? 2 : 4;
                     *cmd = CMD_NONE;
                 } else if (id < 0 || !loading_state) {
                     *cmd = CMD_XSTR;
@@ -2488,7 +2490,7 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
                     arg->val.xstr = "<Missing Equation>";
                 } else {
                     *cmd = CMD_EMBED;
-                    arg->type = ARGTYPE_NUM;
+                    arg->type = byte2 == 0x76 ? ARGTYPE_NUM : ARGTYPE_IND_NUM;
                     arg->val.num = id;
                 }
             } else /* byte2 == 0x0f7 */ {

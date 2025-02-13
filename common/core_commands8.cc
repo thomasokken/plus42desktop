@@ -550,12 +550,20 @@ int docmd_fstack(arg_struct *arg) {
 
 int docmd_embed(arg_struct *arg) {
     equation_data *eqd = eq_dir->prgms[arg->val.num].eq_data;
-    if (eqd == NULL)
-        return ERR_NONEXISTENT;
     vartype *v = new_equation(eqd);
     if (v == NULL)
         return ERR_INSUFFICIENT_MEMORY;
-    return recall_result(v);
+    if (arg->type == ARGTYPE_NUM)
+        return recall_result(v);
+    int err = push_rtn_addr(current_prgm, pc);
+    if (err != ERR_NONE)
+        return err;
+    current_prgm.set(eq_dir->id, eqd->eqn_index);
+    pc = 0;
+    store_stack_reference(v);
+    free_vartype(v);
+    save_csld();
+    return ERR_NONE;
 }
 
 static int get_sum(int n) {

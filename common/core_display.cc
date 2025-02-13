@@ -4622,6 +4622,8 @@ int command2buf(char *buf, int len, int cmd, const arg_struct *arg) {
         char2buf(buf, len, &bufptr, '0' + instr / 10);
         char2buf(buf, len, &bufptr, '0' + instr % 10);
     } else if (cmd == CMD_EMBED) {
+        if (arg->type == ARGTYPE_IND_NUM)
+            string2buf(buf, len, &bufptr, "EVAL ", 5);
         equation_data *eqd = eq_dir->prgms[arg->val.num].eq_data;
         char quot = eqd->compatMode ? '`' : '\'';
         char2buf(buf, len, &bufptr, quot);

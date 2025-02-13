@@ -54,7 +54,9 @@ static int error_eqn_pos;
 #define DIALOG_STO_OVERWRITE_X 6
 #define DIALOG_STO_OVERWRITE_PRGM 7
 #define DIALOG_STO_OVERWRITE_ALPHA 8
-#define DIALOG_MODES 9
+#define DIALOG_STO_INSERT_PLAIN_OR_EVAL 9
+#define DIALOG_STO_OVERWRITE_PLAIN_OR_EVAL 10
+#define DIALOG_MODES 11
 static int dialog = DIALOG_NONE;
 static int dialog_min;
 static int dialog_max;
@@ -1252,6 +1254,12 @@ bool eqn_draw() {
         draw_key(0, 0, 0, "INSR", 4);
         draw_key(2, 0, 0, "OVER", 4);
         draw_key(4, 0, 0, "CNCL", 4);
+    } else if (dialog == DIALOG_STO_INSERT_PLAIN_OR_EVAL
+            || dialog == DIALOG_STO_OVERWRITE_PLAIN_OR_EVAL) {
+        draw_string(0, 0, "Plain eqn or EVAL?", 18);
+        draw_key(0, 0, 0, "PLAIN", 5);
+        draw_key(2, 0, 0, "EVAL", 4);
+        draw_key(4, 0, 0, "CNCL", 4);
     } else if (dialog == DIALOG_MODES) {
         const command_spec *cs = cmd_array + dialog_cmd;
         draw_string(0, 0, cs->name, cs->name_length);
@@ -1481,6 +1489,7 @@ static int keydown_delete_both_confirmation(int key, bool shift, int *repeat);
 static int keydown_rcl(int key, bool shift, int *repeat);
 static int keydown_sto(int key, bool shift, int *repeat);
 static int keydown_sto_overwrite(int key, bool shift, int *repeat);
+static int keydown_sto_plain_or_eval(int key, bool shift, int *repeat);
 
 /* eqn_keydown() return values:
  * 0: equation editor not active; caller should perform normal event processing
@@ -1555,6 +1564,9 @@ int eqn_keydown(int key, int *repeat) {
             || dialog == DIALOG_STO_OVERWRITE_PRGM
             || dialog == DIALOG_STO_OVERWRITE_ALPHA)
         return keydown_sto_overwrite(key, shift, repeat);
+    else if (dialog == DIALOG_STO_INSERT_PLAIN_OR_EVAL
+            || dialog == DIALOG_STO_OVERWRITE_PLAIN_OR_EVAL)
+        return keydown_sto_plain_or_eval(key, shift, repeat);
     else if (dialog == DIALOG_MODES)
         return keydown_modes_number(key, shift, repeat);
     else if (edit.id == MENU_PRINT1)
@@ -2177,6 +2189,16 @@ static int keydown_sto(int key, bool shift, int *repeat) {
         }
         case KEY_INV: {
             /* PRGM */
+            if (!current_prgm.is_editable()) {
+                show_error(ERR_RESTRICTED_OPERATION);
+                dialog = DIALOG_NONE;
+                goto done;
+            }
+            if (current_prgm.is_locked()) {
+                show_error(ERR_PROGRAM_LOCKED);
+                dialog = DIALOG_NONE;
+                goto done;
+            }
             dialog = DIALOG_STO_OVERWRITE_PRGM;
             int4 oldpc = pc;
             int cmd;
@@ -2238,36 +2260,15 @@ static int keydown_sto_overwrite(int key, bool shift, int *repeat) {
                     break;
                 }
                 case DIALOG_STO_OVERWRITE_PRGM: {
-                    if (!current_prgm.is_editable()) {
-                        show_error(ERR_RESTRICTED_OPERATION);
-                        dialog = DIALOG_NONE;
-                        return 1;
-                    }
-                    if (current_prgm.is_locked()) {
-                        show_error(ERR_PROGRAM_LOCKED);
-                        dialog = DIALOG_NONE;
-                        return 1;
-                    }
+                    if (key == KEY_SIGMA)
+                        dialog = DIALOG_STO_INSERT_PLAIN_OR_EVAL;
+                    else
+                        dialog = DIALOG_STO_OVERWRITE_PLAIN_OR_EVAL;
                     vartype *v = eqns->array->data[selected_row];
-                    arg_struct arg;
-                    int cmd;
-                    if (v->type == TYPE_STRING) {
-                        arg.type = ARGTYPE_XSTR;
-                        arg.length = edit_len > 65535 ? 65535 : edit_len;
-                        arg.val.xstr = edit_buf;
-                        cmd = CMD_XSTR;
-                    } else {
-                        arg.type = ARGTYPE_NUM;
-                        arg.val.num = ((vartype_equation *) v)->data->eqn_index;
-                        cmd = CMD_EMBED;
-                    }
-                    if (key == KEY_SIGMA) {
-                        store_command_after(&pc, cmd, &arg, NULL);
-                    } else {
-                        delete_command(pc);
-                        store_command(pc, cmd, &arg, NULL);
-                    }
-                    break;
+                    if (v->type == TYPE_STRING)
+                        return keydown_sto_plain_or_eval(KEY_SIGMA, false, NULL);
+                    eqn_draw();
+                    return 1;
                 }
                 case DIALOG_STO_OVERWRITE_ALPHA: {
                     char *ptr = edit_buf;
@@ -2293,6 +2294,43 @@ static int keydown_sto_overwrite(int key, bool shift, int *repeat) {
             free(edit_buf);
             edit_buf = NULL;
             edit_capacity = edit_len = 0;
+            goto done;
+        }
+        case KEY_LN:
+        case KEY_EXIT: {
+            /* CNCL */
+            done:
+            dialog = DIALOG_NONE;
+            eqn_draw();
+            break;
+        }
+    }
+    return 1;
+}
+
+static int keydown_sto_plain_or_eval(int key, bool shift, int *repeat) {
+    switch (key) {
+        case KEY_SIGMA: /* PLAIN */
+        case KEY_SQRT: /* EVAL */ {
+            vartype *v = eqns->array->data[selected_row];
+            arg_struct arg;
+            int cmd;
+            if (v->type == TYPE_STRING) {
+                arg.type = ARGTYPE_XSTR;
+                arg.length = edit_len > 65535 ? 65535 : edit_len;
+                arg.val.xstr = edit_buf;
+                cmd = CMD_XSTR;
+            } else {
+                arg.type = key == KEY_SIGMA ? ARGTYPE_NUM : ARGTYPE_IND_NUM;
+                arg.val.num = ((vartype_equation *) v)->data->eqn_index;
+                cmd = CMD_EMBED;
+            }
+            if (dialog == DIALOG_STO_INSERT_PLAIN_OR_EVAL) {
+                store_command_after(&pc, cmd, &arg, NULL);
+            } else {
+                delete_command(pc);
+                store_command(pc, cmd, &arg, NULL);
+            }
             goto done;
         }
         case KEY_LN:
