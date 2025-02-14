@@ -2559,9 +2559,10 @@ void core_import_programs(int num_progs, const char *raw_file_name) {
         pending_end = false;
     } else {
         current_prgm.set(cwd->id, cwd->prgms_count - 1);
-        pc = cwd->prgms[current_prgm.idx].size - 2;
         // No initial END needed if last program is empty
-        pending_end = pc > 0;
+        pending_end = cwd->prgms[current_prgm.idx].size > 2;
+        if (!pending_end)
+            pc = -1;
     }
 
     char numbuf[50];
