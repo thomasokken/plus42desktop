@@ -1759,6 +1759,16 @@ static int prgmline2buf(char *buf, int len, int4 line, int highlight,
             goto normal;
         memcpy(*xstr, buf, bufptr);
         bufptr += command2buf(*xstr + bufptr, arg->length + 7, cmd, arg);
+    } else if (cmd == CMD_EMBED && xstr != NULL) {
+        equation_data *eqd = eq_dir->prgms[arg->val.num].eq_data;
+        int eqlen = (arg->type == ARGTYPE_NUM ? 2 : 7) + eqd->length;
+        if (bufptr + eqlen <= len)
+            goto normal;
+        *xstr = (char *) malloc(bufptr + eqlen);
+        if (*xstr == NULL)
+            goto normal;
+        memcpy(*xstr, buf, bufptr);
+        bufptr += command2buf(*xstr + bufptr, eqlen, cmd, arg);
     } else {
         normal:
         bufptr += command2buf(buf + bufptr, len - bufptr, cmd, arg);
