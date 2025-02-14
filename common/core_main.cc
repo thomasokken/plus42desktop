@@ -4294,10 +4294,45 @@ static void paste_programs(const char *buf) {
                 }
                 if (q2 == -1)
                     goto line_done;
-                arg.type = ARGTYPE_XSTR;
-                arg.length = q2 - q1 - 1;
-                arg.val.xstr = hpbuf + q1 + 1;
-                goto store;
+                if (eq_mode == 0) {
+                    arg.type = ARGTYPE_XSTR;
+                    arg.length = q2 - q1 - 1;
+                    arg.val.xstr = hpbuf + q1 + 1;
+                    goto store;
+                } else {
+                    /* Imported equation */
+            
+                    /* Queue up equation, to be parsed later and inserted into the code */
+                    pending_equation *peq = (pending_equation *) malloc(sizeof(pending_equation));
+                    if (peq == NULL)
+                        goto no_mem;
+                    int len = q2 - q1 - 1;
+                    peq->text = (char *) malloc(len);
+                    if (peq->text == NULL) {
+                        free(peq);
+                        goto no_mem;
+                    }
+                    
+                    if (current_prgm.dir != cwd->id)
+                        current_prgm.set(cwd->id, 0);
+                    if (after_end) {
+                        goto_dot_dot(false);
+                        after_end = false;
+                    }
+                
+                    peq->idx = current_prgm;
+                    peq->pc = pc;
+                    peq->length = len;
+                    memcpy(peq->text, hpbuf + q1 + 1, len);
+                    peq->compatMode = eq_mode == 2 || eq_mode == 4;
+                    peq->eval = eq_mode == 3 || eq_mode == 4;
+                    peq->next = eq_queue;
+                    eq_queue = peq;
+                    
+                    cmd = CMD_NONE;
+                    eq_mode = 0;
+                    goto line_done;
+                }
             } else if (cmd == CMD_EVAL) {
                 for (int i = cmd_end; i < hpend; i++) {
                     char c = hpbuf[i];
