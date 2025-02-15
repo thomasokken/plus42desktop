@@ -950,7 +950,7 @@ int appmenu_exitcallback_3(int menuid, bool exitall) {
         if (varmenu_eqn != NULL) {
             if (mode_varmenu_whence == CATSECT_TOP)
                 set_menu(MENULEVEL_APP, MENU_NONE);
-            return eqn_start(mode_varmenu_whence);
+            return eqn_start(-1);
         }
         set_menu(MENULEVEL_APP, MENU_CATALOG);
         set_cat_section(CATSECT_PGM_SOLVE);
@@ -1007,7 +1007,7 @@ int docmd_eqnslvi(arg_struct *arg) {
 int appmenu_exitcallback_4(int menuid, bool exitall) {
     if (menuid == MENU_NONE && !exitall) {
         if (varmenu_eqn != NULL)
-            return eqn_start(CATSECT_PGM_INTEG);
+            return eqn_start(-1);
         set_menu(MENULEVEL_APP, MENU_CATALOG);
         set_cat_section(CATSECT_PGM_INTEG);
     } else

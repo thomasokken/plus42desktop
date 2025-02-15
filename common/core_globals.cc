@@ -1121,8 +1121,9 @@ bool no_keystrokes_yet;
  * Version 44: 1.2.3  Switching character codes 30 and 94
  * Version 45: 1.2.4  Added guillemets to ALPHA menu
  * Version 46: 1.2.4  No more lazy equation saving
+ * Version 47: 1.2.5  Fixed EQN mode exit behavior
  */
-#define PLUS42_VERSION 46
+#define PLUS42_VERSION 47
 
 
 /*******************/

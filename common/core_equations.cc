@@ -33,6 +33,7 @@
 
 static bool active = false;
 static int menu_whence;
+static int calc_command;
 
 static vartype_list *eqns;
 static int4 num_eqns;
@@ -404,6 +405,11 @@ bool unpersist_eqn(int4 ver) {
     start_eqn_cursor = false;
     if (!read_bool(&active)) return false;
     if (!read_int(&menu_whence)) return false;
+    if (ver >= 47) {
+        if (!read_int(&calc_command)) return false;
+    } else {
+        calc_command = CMD_EQNSLVi;
+    }
     bool have_eqns;
     if (!read_bool(&have_eqns)) return false;
     eqns = NULL;
@@ -495,6 +501,7 @@ bool unpersist_eqn(int4 ver) {
 bool persist_eqn() {
     if (!write_bool(active)) return false;
     if (!write_int(menu_whence)) return false;
+    if (!write_int(calc_command)) return false;
     if (!write_bool(eqns != NULL)) return false;
     if (!write_int(selected_row)) return false;
     if (!write_int(edit_pos)) return false;
@@ -920,8 +927,24 @@ static void set_catsect_no_top(int sect) {
 
 int eqn_start(int whence) {
     active = true;
-    menu_whence = whence;
     set_shift(false);
+    
+    if (whence == -1) {
+        if (menu_whence == CATSECT_TOP)
+            set_menu(MENULEVEL_APP, MENU_NONE);
+    } else {
+        menu_whence = whence;
+        if (menu_whence == CATSECT_PGM_SOLVE
+            || menu_whence == CATSECT_EQN_NAMED
+            || menu_whence == CATSECT_TOP) {
+            calc_command = CMD_EQNSLVi;
+        } else if (menu_whence == CATSECT_PGM_INTEG) {
+            calc_command = CMD_EQNINTi;
+        } else {
+            /* PGMMENU */
+            calc_command = CMD_PMEXEC;
+        }
+    }
 
     vartype *v = recall_var("EQNS", 4);
     if (v == NULL) {
@@ -2634,16 +2657,10 @@ static int keydown_list(int key, bool shift, int *repeat) {
             pending_command_arg.val.num = ((vartype_equation *) v)->data->eqn_index;
             if (params.size() == 0) {
                 pending_command = CMD_EVALNi;
-            } else if (menu_whence == CATSECT_PGM_SOLVE
-                    || menu_whence == CATSECT_EQN_NAMED
-                    || menu_whence == CATSECT_TOP) {
-                mode_varmenu_whence = menu_whence;
-                pending_command = CMD_EQNSLVi;
-            } else if (menu_whence == CATSECT_PGM_INTEG) {
-                pending_command = CMD_EQNINTi;
             } else {
-                /* PGMMENU */
-                pending_command = CMD_PMEXEC;
+                if (calc_command == CMD_EQNSLVi)
+                    mode_varmenu_whence = menu_whence;
+                pending_command = calc_command;
             }
             /* Note that we don't do active = false here, since at this point
              * it is still possible that the command will go to NULL, and in
@@ -2814,14 +2831,14 @@ static int keydown_list(int key, bool shift, int *repeat) {
         }
         case KEY_7:
         case KEY_8: {
-            if (shift) {
+            if (shift && (calc_command == CMD_EQNSLVi || calc_command == CMD_EQNINTi)) {
                 clear_row(0);
                 if (key == KEY_7) {
                     draw_string(0, 0, "SOLVER Menu Selected", 20);
-                    menu_whence = CATSECT_PGM_SOLVE;
+                    calc_command = CMD_EQNSLVi;
                 } else {
                     draw_string(0, 0, "\3f(x) Menu Selected", 19);
-                    menu_whence = CATSECT_PGM_INTEG;
+                    calc_command = CMD_EQNINTi;
                 }
                 flush_display();
                 timeout_action = 1;
