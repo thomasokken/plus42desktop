@@ -2759,25 +2759,47 @@ void goto_dot_dot(bool force_new) {
     pc = -1;
 }
 
-int mvar_prgms_exist() {
-    int i;
-    for (i = 0; i < cwd->labels_count; i++)
-        if (label_has_mvar(i))
-            return 1;
-    return 0;
+static bool mvar_prgms_exist(directory *dir) {
+    for (int i = 0; i < dir->labels_count; i++)
+        if (label_has_mvar(dir->id, i))
+            return true;
+    return false;
 }
 
-int label_has_mvar(int lblindex) {
-    pgm_index saved_prgm;
-    int4 pc;
+bool mvar_prgms_exist() {
+    directory *dir = cwd;
+    while (true) {
+        if (mvar_prgms_exist(dir))
+            return true;
+        if (dir == root)
+            break;
+        dir = dir->parent;
+    }
+    vartype_list *path = get_path();
+    if (path == NULL)
+        return false;
+    for (int i = 0; i < path->size; i++) {
+        vartype *v = path->array->data[i];
+        if (v->type != TYPE_DIR_REF)
+            continue;
+        vartype_dir_ref *r = (vartype_dir_ref *) v;
+        dir = get_dir(r->dir);
+        if (dir != NULL && mvar_prgms_exist(dir))
+            return true;
+    }
+    return false;
+}
+
+bool label_has_mvar(int4 dir_id, int lblindex) {
+    directory *dir = dir_list[dir_id];
+    if (dir->labels[lblindex].length == 0)
+        return false;
+    pgm_index saved_prgm = current_prgm;
+    current_prgm.set(dir->id, dir->labels[lblindex].prgm);
+    int4 pc = dir->labels[lblindex].pc;
+    pc += get_command_length(current_prgm, pc);
     int command;
     arg_struct arg;
-    if (cwd->labels[lblindex].length == 0)
-        return 0;
-    saved_prgm = current_prgm;
-    current_prgm.set(cwd->id, cwd->labels[lblindex].prgm);
-    pc = cwd->labels[lblindex].pc;
-    pc += get_command_length(current_prgm, pc);
     get_next_command(&pc, &command, &arg, 0, NULL);
     current_prgm = saved_prgm;
     return command == CMD_MVAR;
@@ -3785,7 +3807,7 @@ int4 find_local_label(const arg_struct *arg) {
     return -2;
 }
 
-static bool find_global_label_2(const arg_struct *arg, pgm_index *prgm, int4 *pc, int *idx) {
+bool find_global_label(const arg_struct *arg, pgm_index *prgm, int4 *pc, int *idx) {
     const char *name = arg->val.text;
     int namelen = arg->length;
 
@@ -3798,19 +3820,13 @@ static bool find_global_label_2(const arg_struct *arg, pgm_index *prgm, int4 *pc
     do {
         for (int i = dir->labels_count - 1; i >= 0; i--) {
             if (string_equals(dir->labels[i].name, dir->labels[i].length, name, namelen)) {
-                if (prgm != NULL)
-                    prgm->set(dir->id, dir->labels[i].prgm);
-                if (pc != NULL)
-                    *pc = dir->labels[i].pc;
+                prgm->set(dir->id, dir->labels[i].prgm);
+                *pc = dir->labels[i].pc;
                 if (idx != NULL)
                     *idx = i;
                 return true;
             }
         }
-        if (prgm == NULL)
-            // Note: prgm == NULL means we're being called on behalf of PGMSLVi
-            // or PGMINTi, and that means we should only search the current directory.
-            return false;
         dir = dir->parent;
     } while (dir != NULL);
 
@@ -3827,6 +3843,8 @@ static bool find_global_label_2(const arg_struct *arg, pgm_index *prgm, int4 *pc
                 if (string_equals(dir->labels[j].name, dir->labels[j].length, name, namelen)) {
                     prgm->set(dir->id, dir->labels[j].prgm);
                     *pc = dir->labels[j].pc;
+                    if (idx != NULL)
+                        *idx = j;
                     return true;
                 }
             }
@@ -3860,6 +3878,8 @@ static bool find_global_label_2(const arg_struct *arg, pgm_index *prgm, int4 *pc
                 if (string_equals(dir->labels[j].name, dir->labels[j].length, name, namelen)) {
                     prgm->set(dir->id, dir->labels[j].prgm);
                     *pc = dir->labels[j].pc;
+                    if (idx != NULL)
+                        *idx = j;
                     return true;
                 }
             }
@@ -3868,14 +3888,6 @@ static bool find_global_label_2(const arg_struct *arg, pgm_index *prgm, int4 *pc
     }
 
     return false;
-}
-
-bool find_global_label(const arg_struct *arg, pgm_index *prgm, int4 *pc) {
-    return find_global_label_2(arg, prgm, pc, NULL);
-}
-
-bool find_global_label_index(const arg_struct *arg, int *idx) {
-    return find_global_label_2(arg, NULL, NULL, idx);
 }
 
 int push_rtn_addr(pgm_index prgm, int4 pc) {

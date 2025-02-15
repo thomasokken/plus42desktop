@@ -962,10 +962,12 @@ int appmenu_exitcallback_3(int menuid, bool exitall) {
 int docmd_pgmslvi(arg_struct *arg) {
     if (arg->type == ARGTYPE_STR) {
         eqn_end();
+        pgm_index prgm;
+        int4 pc;
         int idx;
-        if (!find_global_label_index(arg, &idx))
+        if (!find_global_label(arg, &prgm, &pc, &idx))
             return ERR_LABEL_NOT_FOUND;
-        if (!label_has_mvar(idx))
+        if (!label_has_mvar(prgm.dir, idx))
             return ERR_NO_MENU_VARIABLES;
         set_solve_prgm(arg->val.text, arg->length);
         config_varmenu_lbl(arg->val.text, arg->length);
@@ -1029,10 +1031,12 @@ int appmenu_exitcallback_5(int menuid, bool exitall) {
 int docmd_pgminti(arg_struct *arg) {
     if (arg->type == ARGTYPE_STR) {
         eqn_end();
+        pgm_index prgm;
+        int4 pc;
         int idx;
-        if (!find_global_label_index(arg, &idx))
+        if (!find_global_label(arg, &prgm, &pc, &idx))
             return ERR_LABEL_NOT_FOUND;
-        if (!label_has_mvar(idx))
+        if (!label_has_mvar(prgm.dir, idx))
             return ERR_NO_MENU_VARIABLES;
         set_integ_prgm(arg->val.text, arg->length);
         config_varmenu_lbl(arg->val.text, arg->length);

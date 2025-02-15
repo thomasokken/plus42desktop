@@ -2890,7 +2890,12 @@ static void draw_catalog() {
         bool show_nonlocal = catsect == CATSECT_PGM_ONLY
                             && (incomplete_command == CMD_GTO
                              || incomplete_command == CMD_XEQ
-                             || incomplete_command == CMD_PRP);
+                             || incomplete_command == CMD_PRP
+                             || incomplete_command == CMD_PGMINT
+                             || incomplete_command == CMD_PGMSLV)
+                            || catsect == CATSECT_PGM_SOLVE
+                            || catsect == CATSECT_PGM_INTEG
+                            || catsect == CATSECT_PGM_MENU;
 
         try {
             directory *dir = cwd;
@@ -2932,7 +2937,7 @@ static void draw_catalog() {
                     directory *saved_cwd = cwd;
                     cwd = dir;
                     for (int i = dir->labels_count - 1; i >= 0; i--)
-                        if (label_has_mvar(i)) {
+                        if (label_has_mvar(dir->id, i)) {
                             names.push_back(std::string(dir->labels[i].name, dir->labels[i].length));
                             dirs.push_back(dir->id);
                             items.push_back(i);
