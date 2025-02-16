@@ -2848,10 +2848,21 @@ static int keydown_list(int key, bool shift, int *repeat) {
             return 1;
         }
         case KEY_RUN: {
-            if (error_eqn_id == -1) {
+            if (shift || error_eqn_id == -1) {
                 no_eqn:
                 squeak();
                 return 1;
+            }
+            if (error_eqn_id >= eq_dir->prgms_count) {
+                // stale eqn id
+                error_eqn_id = -1;
+                goto no_eqn;
+            }
+            equation_data *eqd = eq_dir->prgms[error_eqn_id].eq_data;
+            if (eqd == NULL || eqd->text == NULL || error_eqn_pos > eqd->length) {
+                // stale eqn id
+                error_eqn_id = -1;
+                goto no_eqn;
             }
             int4 idx = -1;
             for (int4 i = 0; i < num_eqns; i++) {
@@ -2866,11 +2877,6 @@ static int keydown_list(int key, bool shift, int *repeat) {
             }
             if (idx == -1) {
                 // The equation with the error is not in EQNS; add it at the end
-                equation_data *eqd = eq_dir->prgms[error_eqn_id].eq_data;
-                if (eqd == NULL) {
-                    error_eqn_id = -1;
-                    goto no_eqn;
-                }
                 vartype *eq = new_equation(eqd);
                 if (eq == NULL) {
                     error_eqn_id = -1;
