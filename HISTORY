@@ -1,7 +1,7 @@
 2025-02-16: release 1.2.5
 
 * SOLVER and ∫f(x) now allow selecting programs outside the current directory.
-* Equation lines were being truncated to a maximum 100 of characters when they
+* Equation lines were being truncated to a maximum of 100 characters when they
   were displayed or printed. Fixed.
 * iOS version: Implemented Swipe to Delete in the file selector dialog.
 
