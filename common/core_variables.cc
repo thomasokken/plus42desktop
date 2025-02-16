@@ -201,6 +201,16 @@ vartype *new_list(int4 size) {
 equation_data *new_equation_data(const char *text, int4 length, bool compat_mode, int *errpos, int eqn_index) {
     *errpos = -1;
     if (eqn_index == -1) {
+        for (int i = 0; i < eq_dir->prgms_count; i++) {
+            equation_data *eqd = eq_dir->prgms[i].eq_data;
+            if (eqd == NULL)
+                continue;
+            if (eqd->compatMode != compat_mode)
+                continue;
+            if (!string_equals(eqd->text, eqd->length, text, length))
+                continue;
+            return eqd;
+        }
         eqn_index = new_eqn_idx();
         if (eqn_index == -1)
             return NULL;

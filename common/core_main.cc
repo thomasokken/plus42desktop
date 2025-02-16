@@ -103,25 +103,13 @@ static void delete_pending_equations() {
 static void handle_pending_equations() {
     while (eq_queue != NULL) {
         pending_equation *peq = eq_queue;
-        equation_data *eqd;
-        for (int i = 0; i < eq_dir->prgms_count; i++) {
-            eqd = eq_dir->prgms[i].eq_data;
-            if (eqd == NULL)
-                continue;
-            if (eqd->compatMode != peq->compatMode)
-                continue;
-            if (!string_equals(eqd->text, eqd->length, peq->text, peq->length))
-                continue;
-            goto insert;
-        }
         int errpos;
-        eqd = new_equation_data(peq->text, peq->length, peq->compatMode, &errpos, -1);
+        equation_data *eqd = new_equation_data(peq->text, peq->length, peq->compatMode, &errpos, -1);
         if (eqd == NULL && errpos == -1) {
             /* TODO: Insufficient Memory message */
             delete_pending_equations();
             return;
         }
-        insert:
         pgm_index saved_prgm = current_prgm;
         current_prgm = peq->idx;
         arg_struct arg;
