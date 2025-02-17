@@ -82,6 +82,7 @@ static char *edit_buf = NULL;
 static int4 edit_len, edit_capacity;
 static bool cursor_on;
 static int current_error = ERR_NONE;
+static bool current_error_is_runtime = false;
 static vartype *current_result = NULL;
 
 static int timeout_action = 0;
@@ -475,6 +476,11 @@ bool unpersist_eqn(int4 ver) {
     if (fread(edit_buf, 1, edit_len, gfile) != edit_len) goto fail;
     if (!read_bool(&cursor_on)) goto fail;
     if (!read_int(&current_error)) return false;
+    if (ver >= 48) {
+        if (!read_bool(&current_error_is_runtime)) return false;
+    } else {
+        current_error_is_runtime = false;
+    }
     if (ver >= 20) {
         if (!unpersist_vartype(&current_result))
             return false;
@@ -533,6 +539,7 @@ bool persist_eqn() {
     if (fwrite(edit_buf, 1, edit_len, gfile) != edit_len) return false;
     if (!write_bool(cursor_on)) return false;
     if (!write_int(current_error)) return false;
+    if (!write_bool(current_error_is_runtime)) return false;
     if (!persist_vartype(current_result)) return false;
     if (!write_int(error_eqn_id)) return false;
     if (!write_int(error_eqn_pos)) return false;
@@ -553,6 +560,7 @@ void reset_eqn() {
     free(edit_buf);
     edit_buf = NULL;
     current_error = ERR_NONE;
+    current_error_is_runtime = false;
     free_vartype(current_result);
     current_result = NULL;
 
@@ -582,6 +590,7 @@ static void update_skin_mode() {
 
 static void show_error(int err) {
     current_error = err;
+    current_error_is_runtime = false;
     eqn_draw();
 }
 
@@ -1234,7 +1243,20 @@ bool eqn_draw() {
         return false;
     clear_display();
     if (current_error != ERR_NONE) {
-        draw_string(0, 0, errors[current_error].text, errors[current_error].length);
+        int err_len;
+        const char *err_text;
+        if (current_error == -1) {
+            // This never happens in eqn editor; it must
+            // have come from return_to_eqn_edit()
+            err_len = lasterr_length;
+            err_text = lasterr_text;
+        } else {
+            err_len = errors[current_error].length;
+            err_text = errors[current_error].text;
+        }
+        draw_string(0, 0, err_text, err_len);
+        if (current_error_is_runtime)
+            eqn_display_error(true);
         if (current_error == ERR_INVALID_EQUATION) {
             draw_eqn_menu:
             draw_key(0, 0, 0, "CALC", 4);
@@ -3995,12 +4017,17 @@ bool eqn_timeout() {
     return true;
 }
 
-int return_to_eqn_edit() {
+int return_to_eqn_edit(int error) {
     docmd_rtn(NULL);
     set_running(false);
-    if (current_result != NULL)
+    if (current_result != NULL) {
         free_vartype(current_result);
-    if (sp == -1)
+        current_result = NULL;
+    }
+    current_error = error;
+    if (error != ERR_NONE)
+        current_error_is_runtime = true;
+    else if (sp == -1)
         current_result = new_string("<Stack Empty>", 13);
     else
         current_result = dup_vartype(stack[sp]);
@@ -4010,4 +4037,36 @@ int return_to_eqn_edit() {
 void eqn_save_error_pos(int eqn_id, int pos) {
     error_eqn_id = eqn_id;
     error_eqn_pos = pos;
+}
+
+void eqn_display_error(bool temp) {
+    if (error_eqn_id == -1)
+        return;
+    if (error_eqn_id >= eq_dir->prgms_count) {
+        no_eq:
+        error_eqn_id = -1;
+        return;
+    }
+    equation_data *eqd = eq_dir->prgms[error_eqn_id].eq_data;
+    if (eqd == NULL || eqd->text == NULL || error_eqn_pos > eqd->length)
+        goto no_eq;
+
+    // Put arrow at 8, text before pos to the left
+    // of it, rest to the right...
+    char *line = (char *) malloc(disp_c);
+    freer f(line);
+    int apos = (disp_c + 2) / 3;
+    for (int i = 0; i < apos; i++) {
+        int n = i + error_eqn_pos - apos;
+        line[i] = n < 0 ? ' ' : eqd->text[n];
+    }
+    line[apos] = 6;
+    for (int i = apos + 1; i < disp_c; i++) {
+        int n = i + error_eqn_pos - apos - 1;
+        line[i] = n >= eqd->length ? ' ' : eqd->text[n];
+    }
+    if (temp)
+        draw_string(0, 1, line, disp_c);
+    else
+        draw_message(1, line, disp_c, false);
 }

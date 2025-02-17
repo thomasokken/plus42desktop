@@ -1122,8 +1122,9 @@ bool no_keystrokes_yet;
  * Version 45: 1.2.4  Added guillemets to ALPHA menu
  * Version 46: 1.2.4  No more lazy equation saving
  * Version 47: 1.2.5  Fixed EQN mode exit behavior
+ * Version 48: 1.2.6  EQN no-arg eval error reporting
  */
-#define PLUS42_VERSION 47
+#define PLUS42_VERSION 48
 
 
 /*******************/
@@ -4458,7 +4459,7 @@ void equation_deleted(int eqn_index) {
     math_equation_deleted(eqn_index);
 }
 
-void unwind_after_eqn_error() {
+bool unwind_after_eqn_error() {
     int4 saved_dir = rtn_after_last_rtn_dir;
     int4 saved_prgm = rtn_after_last_rtn_prgm;
     int4 saved_pc = rtn_after_last_rtn_pc;
@@ -4475,17 +4476,8 @@ void unwind_after_eqn_error() {
         pop_rtn_addr(&prgm, &dummy1, &dummy2);
         if (prgm.idx == -1)
             break;
-        /*
-            TODO: It would be nice to return to EQN mode here, but only if we
-            can keep the error message and the location within the equation on
-            the screen while doing so. Right now, return_to_eqn_edit() assumes
-            no error, and just says RES=<whatever is in X>, which is totally
-            inappropriate.
-        if (prgm.idx == -4) {
-            return_to_eqn_edit();
-            return;
-        }
-        */
+        if (prgm.idx == -4)
+            return true;
     }
     if (mode_plainmenu == MENU_PROGRAMMABLE)
         set_menu(MENULEVEL_PLAIN, MENU_NONE);
@@ -4496,6 +4488,7 @@ void unwind_after_eqn_error() {
         current_prgm.set(saved_dir, saved_prgm);
         pc = saved_pc;
     }
+    return false;
 }
 
 bool should_i_stop_at_this_level() {
@@ -4538,7 +4531,7 @@ int rtn(int err) {
                 return ERR_STOP;
             case -2: return return_to_solve(false, stop);
             case -3: return return_to_integ(stop);
-            case -4: return return_to_eqn_edit();
+            case -4: return return_to_eqn_edit(ERR_NONE);
             case -5: return return_to_plot(false, stop);
             default: return ERR_INTERNAL_ERROR;
         }
