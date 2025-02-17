@@ -4462,7 +4462,36 @@ void unwind_after_eqn_error() {
     int4 saved_dir = rtn_after_last_rtn_dir;
     int4 saved_prgm = rtn_after_last_rtn_prgm;
     int4 saved_pc = rtn_after_last_rtn_pc;
-    clear_all_rtns();
+    while (true) {
+        int err = pop_func_state(true);
+        if (err != ERR_NONE) {
+            // Fall back on just dropping stack contents
+            clear_all_rtns();
+            goto done;
+        }
+        pgm_index prgm;
+        int4 dummy1;
+        bool dummy2;
+        pop_rtn_addr(&prgm, &dummy1, &dummy2);
+        if (prgm.idx == -1)
+            break;
+        /*
+            TODO: It would be nice to return to EQN mode here, but only if we
+            can keep the error message and the location within the equation on
+            the screen while doing so. Right now, return_to_eqn_edit() assumes
+            no error, and just says RES=<whatever is in X>, which is totally
+            inappropriate.
+        if (prgm.idx == -4) {
+            return_to_eqn_edit();
+            return;
+        }
+        */
+    }
+    if (mode_plainmenu == MENU_PROGRAMMABLE)
+        set_menu(MENULEVEL_PLAIN, MENU_NONE);
+    if (varmenu_role == 3)
+        varmenu_role = 0;
+    done:
     if (saved_prgm != -1) {
         current_prgm.set(saved_dir, saved_prgm);
         pc = saved_pc;
