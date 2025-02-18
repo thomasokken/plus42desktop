@@ -1364,7 +1364,10 @@ bool eqn_draw() {
         }
         draw_menu(true);
     } else if (edit_pos == -1) {
-        headers = display_header();
+        if (pending_command > CMD_NONE)
+            headers = display_command(0, 1);
+        else
+            headers = display_header();
         int lines = disp_r - headers - 1;
         if (lines == 1 && selected_row < 0) {
             draw_string(0, 0, "<Top of List>", 13);

@@ -2342,7 +2342,7 @@ void display_error(int error) {
         print_text(err_text, err_len, true);
 }
 
-static int display_command(int row, int available_lines) {
+int display_command(int row, int available_lines) {
     try {
         std::string buf;
 
