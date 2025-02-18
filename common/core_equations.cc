@@ -32,6 +32,7 @@
 #include "shell_spool.h"
 
 static bool active = false;
+static bool saved_prgm_mode = false;
 static int menu_whence;
 static int calc_command;
 
@@ -411,6 +412,11 @@ bool unpersist_eqn(int4 ver) {
     } else {
         calc_command = CMD_EQNSLVi;
     }
+    if (ver >= 49) {
+        if (!read_bool(&saved_prgm_mode)) return false;
+    } else {
+        saved_prgm_mode = false;
+    }
     bool have_eqns;
     if (!read_bool(&have_eqns)) return false;
     eqns = NULL;
@@ -508,6 +514,7 @@ bool persist_eqn() {
     if (!write_bool(active)) return false;
     if (!write_int(menu_whence)) return false;
     if (!write_int(calc_command)) return false;
+    if (!write_bool(saved_prgm_mode)) return false;
     if (!write_bool(eqns != NULL)) return false;
     if (!write_int(selected_row)) return false;
     if (!write_int(edit_pos)) return false;
@@ -942,6 +949,8 @@ int eqn_start(int whence) {
         if (menu_whence == CATSECT_TOP)
             set_menu(MENULEVEL_APP, MENU_NONE);
     } else {
+        saved_prgm_mode = flags.f.prgm_mode;
+        flags.f.prgm_mode = 0;
         menu_whence = whence;
         if (menu_whence == CATSECT_PGM_SOLVE
             || menu_whence == CATSECT_EQN_NAMED
@@ -1009,6 +1018,7 @@ int eqn_start(int whence) {
 void eqn_end() {
     active = false;
     shell_set_skin_mode(0);
+    saved_prgm_mode = false;
 }
 
 bool eqn_active() {
@@ -2927,6 +2937,7 @@ static int keydown_list(int key, bool shift, int *repeat) {
                 return 1;
             }
             active = false;
+            flags.f.prgm_mode = saved_prgm_mode;
             if (menu_whence == CATSECT_TOP) {
                 set_menu(MENULEVEL_PLAIN, MENU_NONE);
             } else if (flags.f.prgm_mode || !mvar_prgms_exist()) {
