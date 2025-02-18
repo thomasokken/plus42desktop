@@ -2437,7 +2437,7 @@ int display_command(int row, int available_lines) {
         done:
         int maxlen = disp_c * available_lines;
         if (buf.length() > maxlen)
-            buf = std::string("\32", 1) + buf.substr(buf.length() - maxlen + 1);
+            buf = buf.substr(0, maxlen - 1) + std::string("\32", 1);
         int lines = (buf.length() + disp_c - 1) / disp_c;
         int pos = 0;
         const char *p = buf.c_str();
