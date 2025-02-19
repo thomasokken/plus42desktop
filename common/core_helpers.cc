@@ -1259,16 +1259,38 @@ static void print_command_2(const char *text, int len) {
 }
 
 void print_command(int cmd, const arg_struct *arg) {
-    char buf[100];
+    char cbuf[100];
     int bufptr = 0;
+    char *xbuf = NULL;
+
+    char *buf = cbuf;
+    int maxlen = 100;
 
     if (cmd == CMD_NULL && !deferred_print)
         return;
 
-    if (cmd != CMD_NULL)
-        bufptr += command2buf(buf, 100, cmd, arg);
+    if (cmd != CMD_NULL) {
+        int len = 0;
+        if (cmd == CMD_EMBED || arg->type == ARGTYPE_EQN) {
+            equation_data *eqd = eq_dir->prgms[arg->val.num].eq_data;
+            if (cmd != CMD_EMBED || arg->type != ARGTYPE_NUM)
+                len = cmd_array[cmd].name_length + 1;
+            len += 2 + eqd->length;
+        } else if (arg->type == ARGTYPE_XSTR) {
+            len = 7 + arg->length;
+        }
+        if (len > maxlen) {
+            xbuf = (char *) malloc(len);
+            if (xbuf != NULL) {
+                buf = xbuf;
+                maxlen = len;
+            }
+        }
+        bufptr += command2buf(buf, maxlen, cmd, arg);
+    }
 
     print_command_2(buf, bufptr);
+    free(xbuf);
 }
 
 void print_menu_trace(const char *name, int len) {
