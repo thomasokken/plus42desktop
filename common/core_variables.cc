@@ -263,7 +263,7 @@ vartype *new_equation(const char *text, int4 len, bool compat_mode, int *errpos)
     } else {
         eq->type = TYPE_EQUATION;
         eq->data = eqd;
-        eqd->refcount = 1;
+        eqd->refcount++;
         return (vartype *) eq;
     }
 }
