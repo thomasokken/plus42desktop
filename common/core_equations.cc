@@ -2306,7 +2306,6 @@ static int keydown_sto_overwrite(int key, bool shift, int *repeat) {
         case KEY_SIGMA: /* INSR */
         case KEY_SQRT: /* OVER */ {
             if (dialog != DIALOG_STO_OVERWRITE_X && !get_equation()) {
-                nomem:
                 show_error(ERR_INSUFFICIENT_MEMORY);
                 return 1;
             }
