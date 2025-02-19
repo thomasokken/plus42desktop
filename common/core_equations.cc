@@ -56,9 +56,11 @@ static int error_eqn_pos;
 #define DIALOG_STO_OVERWRITE_X 6
 #define DIALOG_STO_OVERWRITE_PRGM 7
 #define DIALOG_STO_OVERWRITE_ALPHA 8
-#define DIALOG_STO_INSERT_PLAIN_OR_EVAL 9
-#define DIALOG_STO_OVERWRITE_PLAIN_OR_EVAL 10
-#define DIALOG_MODES 11
+#define DIALOG_STO_INSERT_PRGM_EQN_EVAL_XSTR 9
+#define DIALOG_STO_OVERWRITE_PRGM_EQN_EVAL_XSTR 10
+#define DIALOG_STO_INSERT_X_EQN_XSTR 11
+#define DIALOG_STO_OVERWRITE_X_EQN_XSTR 12
+#define DIALOG_MODES 13
 static int dialog = DIALOG_NONE;
 static int dialog_min;
 static int dialog_max;
@@ -1309,11 +1311,17 @@ bool eqn_draw() {
         draw_key(0, 0, 0, "INSR", 4);
         draw_key(2, 0, 0, "OVER", 4);
         draw_key(4, 0, 0, "CNCL", 4);
-    } else if (dialog == DIALOG_STO_INSERT_PLAIN_OR_EVAL
-            || dialog == DIALOG_STO_OVERWRITE_PLAIN_OR_EVAL) {
+    } else if (dialog == DIALOG_STO_INSERT_PRGM_EQN_EVAL_XSTR
+            || dialog == DIALOG_STO_OVERWRITE_PRGM_EQN_EVAL_XSTR) {
         draw_string(0, 0, "Plain, EVAL, or XSTR?", 21);
         draw_key(0, 0, 0, "PLAIN", 5);
         draw_key(1, 0, 0, "EVAL", 4);
+        draw_key(2, 0, 0, "XSTR", 4);
+        draw_key(4, 0, 0, "CNCL", 4);
+    } else if (dialog == DIALOG_STO_INSERT_X_EQN_XSTR
+            || dialog == DIALOG_STO_OVERWRITE_X_EQN_XSTR) {
+        draw_string(0, 0, "Equation or XSTR?", 17);
+        draw_key(0, 0, 0, "EQN", 3);
         draw_key(2, 0, 0, "XSTR", 4);
         draw_key(4, 0, 0, "CNCL", 4);
     } else if (dialog == DIALOG_MODES) {
@@ -1548,7 +1556,8 @@ static int keydown_delete_both_confirmation(int key, bool shift, int *repeat);
 static int keydown_rcl(int key, bool shift, int *repeat);
 static int keydown_sto(int key, bool shift, int *repeat);
 static int keydown_sto_overwrite(int key, bool shift, int *repeat);
-static int keydown_sto_plain_or_eval(int key, bool shift, int *repeat);
+static int keydown_sto_x_eqn_xstr(int key, bool shift, int *repeat);
+static int keydown_sto_prgm_eqn_eval_xstr(int key, bool shift, int *repeat);
 
 /* eqn_keydown() return values:
  * 0: equation editor not active; caller should perform normal event processing
@@ -1623,9 +1632,12 @@ int eqn_keydown(int key, int *repeat) {
             || dialog == DIALOG_STO_OVERWRITE_PRGM
             || dialog == DIALOG_STO_OVERWRITE_ALPHA)
         return keydown_sto_overwrite(key, shift, repeat);
-    else if (dialog == DIALOG_STO_INSERT_PLAIN_OR_EVAL
-            || dialog == DIALOG_STO_OVERWRITE_PLAIN_OR_EVAL)
-        return keydown_sto_plain_or_eval(key, shift, repeat);
+    else if (dialog == DIALOG_STO_INSERT_PRGM_EQN_EVAL_XSTR
+            || dialog == DIALOG_STO_OVERWRITE_PRGM_EQN_EVAL_XSTR)
+        return keydown_sto_prgm_eqn_eval_xstr(key, shift, repeat);
+    else if (dialog == DIALOG_STO_INSERT_X_EQN_XSTR
+            || dialog == DIALOG_STO_OVERWRITE_X_EQN_XSTR)
+        return keydown_sto_x_eqn_xstr(key, shift, repeat);
     else if (dialog == DIALOG_MODES)
         return keydown_modes_number(key, shift, repeat);
     else if (edit.id == MENU_PRINT1)
@@ -2241,7 +2253,7 @@ static int keydown_sto(int key, bool shift, int *repeat) {
         case KEY_SIGMA: {
             /* X */
             dialog = DIALOG_STO_OVERWRITE_X;
-            if (sp != -1 && stack[sp]->type == TYPE_STRING)
+            if (sp != -1 && (stack[sp]->type == TYPE_STRING || stack[sp]->type == TYPE_EQUATION))
                 goto done;
             else
                 return keydown_sto_overwrite(KEY_SIGMA, false, NULL);
@@ -2300,32 +2312,24 @@ static int keydown_sto_overwrite(int key, bool shift, int *repeat) {
             }
             switch (dialog) {
                 case DIALOG_STO_OVERWRITE_X: {
-                    vartype *v = dup_vartype(eqns->array->data[selected_row]);
-                    if (v == NULL)
-                        goto nomem;
-                    bool sld = flags.f.stack_lift_disable;
-                    flags.f.stack_lift_disable = 0;
-                    if (key == KEY_SIGMA) {
-                        int err = recall_result_silently(v);
-                        if (err != ERR_NONE) {
-                            flags.f.stack_lift_disable = sld;
-                            free_vartype(v);
-                            goto nomem;
-                        }
-                    } else {
-                        free_vartype(stack[sp]);
-                        stack[sp] = v;
-                    }
-                    break;
+                    if (key == KEY_SIGMA)
+                        dialog = DIALOG_STO_INSERT_X_EQN_XSTR;
+                    else
+                        dialog = DIALOG_STO_OVERWRITE_X_EQN_XSTR;
+                    vartype *v = eqns->array->data[selected_row];
+                    if (v->type == TYPE_STRING)
+                        return keydown_sto_x_eqn_xstr(KEY_SQRT, false, NULL);
+                    eqn_draw();
+                    return 1;
                 }
                 case DIALOG_STO_OVERWRITE_PRGM: {
                     if (key == KEY_SIGMA)
-                        dialog = DIALOG_STO_INSERT_PLAIN_OR_EVAL;
+                        dialog = DIALOG_STO_INSERT_PRGM_EQN_EVAL_XSTR;
                     else
-                        dialog = DIALOG_STO_OVERWRITE_PLAIN_OR_EVAL;
+                        dialog = DIALOG_STO_OVERWRITE_PRGM_EQN_EVAL_XSTR;
                     vartype *v = eqns->array->data[selected_row];
                     if (v->type == TYPE_STRING)
-                        return keydown_sto_plain_or_eval(KEY_SIGMA, false, NULL);
+                        return keydown_sto_prgm_eqn_eval_xstr(KEY_SQRT, false, NULL);
                     eqn_draw();
                     return 1;
                 }
@@ -2367,7 +2371,50 @@ static int keydown_sto_overwrite(int key, bool shift, int *repeat) {
     return 1;
 }
 
-static int keydown_sto_plain_or_eval(int key, bool shift, int *repeat) {
+static int keydown_sto_x_eqn_xstr(int key, bool shift, int *repeat) {
+    switch (key) {
+        case KEY_SIGMA: /* EQN */
+        case KEY_SQRT: /* XSTR */ {
+            vartype *v = eqns->array->data[selected_row];
+            if (key == KEY_SIGMA || v->type == TYPE_STRING)
+                v = dup_vartype(v);
+            else {
+                equation_data *eqd = ((vartype_equation *) v)->data;
+                v = new_string(eqd->text, eqd->length);
+            }
+            if (v == NULL) {
+                nomem:
+                show_error(ERR_INSUFFICIENT_MEMORY);
+                return 1;
+            }
+            bool sld = flags.f.stack_lift_disable;
+            flags.f.stack_lift_disable = 0;
+            if (dialog == DIALOG_STO_INSERT_X_EQN_XSTR) {
+                int err = recall_result_silently(v);
+                if (err != ERR_NONE) {
+                    flags.f.stack_lift_disable = sld;
+                    free_vartype(v);
+                    goto nomem;
+                }
+            } else {
+                free_vartype(stack[sp]);
+                stack[sp] = v;
+            }
+            goto done;
+        }
+        case KEY_LN:
+        case KEY_EXIT: {
+            /* CNCL */
+            done:
+            dialog = DIALOG_NONE;
+            eqn_draw();
+            break;
+        }
+    }
+    return 1;
+}
+
+static int keydown_sto_prgm_eqn_eval_xstr(int key, bool shift, int *repeat) {
     switch (key) {
         case KEY_SIGMA: /* PLAIN */
         case KEY_INV: /* EVAL */
@@ -2385,7 +2432,7 @@ static int keydown_sto_plain_or_eval(int key, bool shift, int *repeat) {
                 arg.val.num = ((vartype_equation *) v)->data->eqn_index;
                 cmd = CMD_EMBED;
             }
-            if (dialog == DIALOG_STO_INSERT_PLAIN_OR_EVAL) {
+            if (dialog == DIALOG_STO_INSERT_PRGM_EQN_EVAL_XSTR) {
                 store_command_after(&pc, cmd, &arg, NULL);
             } else {
                 delete_command(pc);
