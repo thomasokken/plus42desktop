@@ -1311,9 +1311,10 @@ bool eqn_draw() {
         draw_key(4, 0, 0, "CNCL", 4);
     } else if (dialog == DIALOG_STO_INSERT_PLAIN_OR_EVAL
             || dialog == DIALOG_STO_OVERWRITE_PLAIN_OR_EVAL) {
-        draw_string(0, 0, "Plain eqn or EVAL?", 18);
+        draw_string(0, 0, "Plain, EVAL, or XSTR?", 21);
         draw_key(0, 0, 0, "PLAIN", 5);
-        draw_key(2, 0, 0, "EVAL", 4);
+        draw_key(1, 0, 0, "EVAL", 4);
+        draw_key(2, 0, 0, "XSTR", 4);
         draw_key(4, 0, 0, "CNCL", 4);
     } else if (dialog == DIALOG_MODES) {
         const command_spec *cs = cmd_array + dialog_cmd;
@@ -2369,11 +2370,12 @@ static int keydown_sto_overwrite(int key, bool shift, int *repeat) {
 static int keydown_sto_plain_or_eval(int key, bool shift, int *repeat) {
     switch (key) {
         case KEY_SIGMA: /* PLAIN */
-        case KEY_SQRT: /* EVAL */ {
+        case KEY_INV: /* EVAL */
+        case KEY_SQRT: /* XSTR */ {
             vartype *v = eqns->array->data[selected_row];
             arg_struct arg;
             int cmd;
-            if (v->type == TYPE_STRING) {
+            if (v->type == TYPE_STRING || key == KEY_SQRT) {
                 arg.type = ARGTYPE_XSTR;
                 arg.length = edit_len > 65535 ? 65535 : edit_len;
                 arg.val.xstr = edit_buf;
