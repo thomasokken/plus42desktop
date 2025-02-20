@@ -205,7 +205,7 @@ equation_data *new_equation_data(const char *text, int4 length, bool compat_mode
             equation_data *eqd = eq_dir->prgms[i].eq_data;
             if (eqd == NULL)
                 continue;
-            if (eqd->compatMode != compat_mode)
+            if (!eqd->compatModeEmbedded && eqd->compatMode != compat_mode)
                 continue;
             if (!string_equals(eqd->text, eqd->length, text, length))
                 continue;
