@@ -430,10 +430,6 @@ int docmd_input(arg_struct *arg) {
 
 int view_helper(arg_struct *arg, bool print) {
     int err;
-    char *buf = (char *) malloc(disp_c);
-    freer f(buf);
-    int bufptr = 0, part2;
-    vartype *v;
     if (arg->type == ARGTYPE_IND_NUM
             || arg->type == ARGTYPE_IND_STK
             || arg->type == ARGTYPE_IND_STR) {
@@ -441,41 +437,88 @@ int view_helper(arg_struct *arg, bool print) {
         if (err != ERR_NONE)
             return err;
     }
-    switch (arg->type) {
-        case ARGTYPE_NUM: {
-            int num = arg->val.num;
-            char2buf(buf, disp_c, &bufptr, 'R');
-            if (num < 10)
-                char2buf(buf, disp_c, &bufptr, '0');
-            bufptr += int2string(num, buf + bufptr, disp_c - bufptr);
-            break;
-        }
-        case ARGTYPE_STK:
-            string2buf(buf, disp_c, &bufptr, "ST ", 3);
-            char2buf(buf, disp_c, &bufptr, arg->val.stk);
-            break;
-        case ARGTYPE_STR:
-            string2buf(buf, disp_c, &bufptr, arg->val.text, arg->length);
-            break;
-    }
-    char2buf(buf, disp_c, &bufptr, '=');
-    part2 = bufptr;
+    vartype *v;
     err = generic_rcl(arg, &v);
     if (err != ERR_NONE)
         return err;
-    bufptr += vartype2string(v, buf + bufptr, disp_c - bufptr);
-    free_vartype(v);
-    draw_message(0, buf, bufptr);
 
+    char buf[64];
+    int bufptr = 0;
+    switch (arg->type) {
+        case ARGTYPE_NUM: {
+            int num = arg->val.num;
+            char2buf(buf, 64, &bufptr, 'R');
+            if (num < 10)
+                char2buf(buf, 64, &bufptr, '0');
+            bufptr += int2string(num, buf + bufptr, 64 - bufptr);
+            break;
+        }
+        case ARGTYPE_STK:
+            string2buf(buf, 64, &bufptr, "ST ", 3);
+            char2buf(buf, 64, &bufptr, arg->val.stk);
+            break;
+        case ARGTYPE_STR:
+            string2buf(buf, 64, &bufptr, arg->val.text, arg->length);
+            break;
+    }
+    char2buf(buf, 64, &bufptr, '=');
+    int part2 = bufptr;
+
+    int vlength;
+    if (v->type == TYPE_STRING) {
+        vartype_string *s = (vartype_string *) v;
+        vlength = s->length + 2;
+    } else if (v->type == TYPE_EQUATION) {
+        vartype_equation *eq = (vartype_equation *) v;
+        vlength = eq->data->length + 2;
+    } else {
+        vlength = 42; // max length of complex number
+    }
+    char *sbuf = NULL;
+    char *pbuf = buf;
+    int maxlen = disp_r * disp_c;
+    int slen = bufptr + vlength;
+    if (slen > maxlen)
+        slen = maxlen;
+    if (slen > 64) {
+        sbuf = (char *) malloc(slen);
+        if (sbuf == NULL) {
+            slen = 64;
+        } else {
+            memcpy(sbuf, buf, bufptr);
+            pbuf = sbuf;
+        }
+    }
+    bufptr += vartype2string(v, pbuf + bufptr, slen - bufptr);
+    draw_long_message(0, pbuf, bufptr);
+    free(sbuf);
+    bufptr = part2;
+
+    err = ERR_NONE;
     if (print && (flags.f.printer_enable || !program_running())) {
         if (flags.f.printer_exists) {
             set_annunciators(-1, -1, 1, -1, -1, -1);
-            print_wide(buf, part2, buf + part2, bufptr - part2);
+            sbuf = NULL;
+            pbuf = buf;
+            slen = bufptr + vlength;
+            if (slen > 64) {
+                sbuf = (char *) malloc(slen);
+                if (sbuf == NULL) {
+                    slen = 64;
+                } else {
+                    memcpy(sbuf, buf, bufptr);
+                    pbuf = sbuf;
+                }
+            }
+            bufptr += vartype2string(v, pbuf + bufptr, slen - bufptr);
+            print_lines(pbuf, bufptr, true);
+            free(sbuf);
             set_annunciators(-1, -1, 0, -1, -1, -1);
         } else
-            return ERR_STOP;
+            err = ERR_STOP;
     }
-    return ERR_NONE;
+    free_vartype(v);
+    return err;
 }
 
 int docmd_view(arg_struct *arg) {

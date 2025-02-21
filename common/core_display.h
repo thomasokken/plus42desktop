@@ -48,6 +48,7 @@ void draw_block(int x, int y);
 const char *get_char(char c);
 void draw_string(int x, int y, const char *s, int length);
 void draw_message(int y, const char *s, int length, bool flush = true);
+void draw_long_message(int y, const char *s, int length, bool flush = true);
 void clear_message();
 void fill_rect(int x, int y, int width, int height, int color);
 int draw_small_string(int x, int y, const char *s, int length, int max_width,

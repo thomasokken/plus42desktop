@@ -1329,6 +1329,18 @@ void draw_message(int y, const char *s, int length, bool flush) {
         flush_display();
 }
 
+void draw_long_message(int y, const char *s, int length, bool flush) {
+    while (length > 0 && y < disp_r) {
+        int w = length > disp_c ? disp_c : length;
+        draw_message(y, s, w, false);
+        y++;
+        s += w;
+        length -= w;
+    }
+    if (flush)
+        flush_display();
+}
+
 void clear_message() {
     messages.clear();
     mode_message_lines = 0;
