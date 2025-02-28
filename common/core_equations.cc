@@ -2750,7 +2750,6 @@ static int keydown_list(int key, bool shift, int *repeat) {
              * that case, we should stay here. Thus, setting active = false
              * is accomplished by EVALNi, PGMSLVi, PGMINTi, and PMEXEC.
              */
-            redisplay();
             return 2;
 
         }
