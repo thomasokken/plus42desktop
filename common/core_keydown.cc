@@ -3643,8 +3643,14 @@ void keydown_normal_mode(int shift, int key) {
                 send_it_off:
                 if (flags.f.prgm_mode &&
                         (cmd_array[pending_command].flags & FLAG_IMMED) == 0) {
-                    if (pending_command == CMD_EVAL && eqn_flip(pc))
-                        goto done;
+                    if (pending_command == CMD_EVAL) {
+                        int err = eqn_flip(pc);
+                        if (err != ERR_NONE) {
+                            if (err != ERR_YES)
+                                display_error(err);
+                            goto done;
+                        }
+                    }
                     store_command_after(&pc, pending_command,
                                             &pending_command_arg, NULL);
                     if (pending_command == CMD_END)

@@ -688,7 +688,7 @@ void get_next_command(int4 *pc, int *command, arg_struct *arg, int find_target, 
 void rebuild_label_table();
 void count_embed_references(directory *dir, int prgm, bool up);
 void delete_command(int4 pc);
-bool eqn_flip(int4 pc);
+int eqn_flip(int4 pc);
 bool store_command(int4 pc, int command, arg_struct *arg, const char *num_str);
 void store_command_after(int4 *pc, int command, arg_struct *arg, const char *num_str);
 int x2line();

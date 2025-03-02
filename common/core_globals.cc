@@ -3209,7 +3209,11 @@ void delete_command(int4 pc) {
     draw_varmenu();
 }
 
-bool eqn_flip(int4 pc) {
+int eqn_flip(int4 pc) {
+    if (!current_prgm.is_editable())
+        return ERR_RESTRICTED_OPERATION;
+    if (current_prgm.is_locked())
+        return ERR_PROGRAM_LOCKED;
     int4 pc2 = pc;
     int cmd;
     arg_struct arg;
@@ -3218,9 +3222,9 @@ bool eqn_flip(int4 pc) {
         directory *dir = dir_list[current_prgm.dir];
         prgm_struct *prgm = dir->prgms + current_prgm.idx;
         prgm->text[pc + 1] ^= 4;
-        return true;
+        return ERR_YES;
     } else
-        return false;
+        return ERR_NONE;
 }
 
 bool store_command(int4 pc, int command, arg_struct *arg, const char *num_str) {

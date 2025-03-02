@@ -5402,9 +5402,14 @@ void do_interactive(int command) {
         if (cmd_array[command].argtype == ARG_NONE) {
             arg_struct arg;
             arg.type = ARGTYPE_NONE;
-            if (command == CMD_EVAL && eqn_flip(pc)) {
-                redisplay();
-                return;
+            if (command == CMD_EVAL) {
+                int err = eqn_flip(pc);
+                if (err != ERR_NONE) {
+                    if (err != ERR_YES)
+                        display_error(err);
+                    redisplay();
+                    return;
+                }
             }
             store_command_after(&pc, command, &arg, NULL);
             if (command == CMD_END)
@@ -5797,12 +5802,17 @@ void finish_command_entry(bool refresh) {
                 prgm_highlight_row = incomplete_saved_highlight_row;
                 goto do_it_now;
             }
-            if (pending_command == CMD_EVAL && eqn_flip(incomplete_saved_pc)) {
-                pending_command = CMD_NONE;
-                pc = incomplete_saved_pc;
-                prgm_highlight_row = incomplete_saved_highlight_row;
-                redisplay();
-                return;
+            if (pending_command == CMD_EVAL) {
+                int err = eqn_flip(incomplete_saved_pc);
+                if (err != ERR_NONE) {
+                    if (err != ERR_YES)
+                        display_error(err);
+                    pending_command = CMD_NONE;
+                    pc = incomplete_saved_pc;
+                    prgm_highlight_row = incomplete_saved_highlight_row;
+                    redisplay();
+                    return;
+                }
             }
             store_command(pc, pending_command, &pending_command_arg, NULL);
             if (inserting_an_end)
