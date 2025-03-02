@@ -5807,14 +5807,17 @@ void finish_command_entry(bool refresh) {
                 if (err != ERR_NONE) {
                     if (err != ERR_YES)
                         display_error(err);
-                    pending_command = CMD_NONE;
-                    pc = incomplete_saved_pc;
-                    prgm_highlight_row = incomplete_saved_highlight_row;
-                    redisplay();
-                    return;
+                    goto fail;
                 }
             }
-            store_command(pc, pending_command, &pending_command_arg, NULL);
+            if (!store_command(pc, pending_command, &pending_command_arg, NULL)) {
+                fail:
+                pending_command = CMD_NONE;
+                pc = incomplete_saved_pc;
+                prgm_highlight_row = incomplete_saved_highlight_row;
+                redisplay();
+                return;
+            }
             if (inserting_an_end)
                 /* current_prgm was already incremented by store_command() */
                 pc = 0;
