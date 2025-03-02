@@ -2916,10 +2916,10 @@ static int keydown_list(int key, bool shift, int *repeat) {
             if (shift && (calc_command == CMD_EQNSLVi || calc_command == CMD_EQNINTi)) {
                 clear_row(0);
                 if (key == KEY_7) {
-                    draw_string(0, 0, "SOLVER Menu Selected", 20);
+                    draw_string(0, 0, "SOLVER Mode Selected", 20);
                     calc_command = CMD_EQNSLVi;
                 } else {
-                    draw_string(0, 0, "\3f(x) Menu Selected", 19);
+                    draw_string(0, 0, "\3f(x) Mode Selected", 19);
                     calc_command = CMD_EQNINTi;
                 }
                 flush_display();
