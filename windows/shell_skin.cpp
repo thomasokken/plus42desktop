@@ -1182,7 +1182,7 @@ void skin_repaint(bool shortcuts) {
     bool only_disp = need_to_paint_only_display(&ps.rcPaint);
     if (!only_disp) {
         g.SetInterpolationMode(InterpolationModeBilinear);
-        g.DrawImage(skin_bitmap, 0, 0, 0, 0, skin.width, skin.height, Gdiplus::UnitPixel);
+        g.DrawImage(skin_bitmap, 0, 0, skin.x, skin.y, skin.width, skin.height, Gdiplus::UnitPixel);
         if (skin_mode != 0)
             for (AltBackground *ab = alt_bak; ab != NULL; ab = ab->next)
                 if (ab->mode == skin_mode)
