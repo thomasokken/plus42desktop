@@ -907,8 +907,8 @@ void skin_repaint(cairo_t *cr) {
             if (ab->mode == skin_mode) {
                 cairo_save(cr);
                 gdk_cairo_set_source_pixbuf(cr, skin_image,
-                        ab->dst.x - ab->src_rect.x - skin.x,
-                        ab->dst.y - ab->src_rect.y - skin.y);
+                        ab->dst.x - ab->src_rect.x,
+                        ab->dst.y - ab->src_rect.y);
                 cairo_rectangle(cr, ab->dst.x, ab->dst.y, ab->src_rect.width, ab->src_rect.height);
                 cairo_clip(cr);
                 cairo_paint(cr);
@@ -920,8 +920,8 @@ void skin_repaint_annunciator(cairo_t *cr, int which) {
     SkinAnnunciator *ann = annunciators + (which - 1);
     cairo_save(cr);
     gdk_cairo_set_source_pixbuf(cr, skin_image,
-            ann->disp_rect.x - ann->src.x - skin.x,
-            ann->disp_rect.y - ann->src.y - skin.y);
+            ann->disp_rect.x - ann->src.x,
+            ann->disp_rect.y - ann->src.y);
     cairo_rectangle(cr, ann->disp_rect.x, ann->disp_rect.y, ann->disp_rect.width, ann->disp_rect.height);
     cairo_clip(cr);
     cairo_paint(cr);
@@ -1298,8 +1298,8 @@ void skin_repaint_key(cairo_t *cr, int key, bool state) {
                     break;
                 }
         gdk_cairo_set_source_pixbuf(cr, skin_image,
-                k->disp_rect.x - sx - skin.x,
-                k->disp_rect.y - sy - skin.y);
+                k->disp_rect.x - sx,
+                k->disp_rect.y - sy);
         cairo_paint(cr);
     } else {
         gdk_cairo_set_source_pixbuf(cr, skin_image, -skin.x, -skin.y);
@@ -1310,8 +1310,8 @@ void skin_repaint_key(cairo_t *cr, int key, bool state) {
                         && k->disp_rect.x >= ab->dst.x && k->disp_rect.x < ab->dst.x + ab->src_rect.width
                         && k->disp_rect.y >= ab->dst.y && k->disp_rect.y < ab->dst.y + ab->src_rect.height) {
                     gdk_cairo_set_source_pixbuf(cr, skin_image,
-                            k->disp_rect.x - ab->dst.x + ab->src_rect.x - skin.x,
-                            k->disp_rect.y - ab->dst.y + ab->src_rect.y - skin.y);
+                            k->disp_rect.x - ab->dst.x + ab->src_rect.x,
+                            k->disp_rect.y - ab->dst.y + ab->src_rect.y);
                     cairo_paint(cr);
                 }
     }
