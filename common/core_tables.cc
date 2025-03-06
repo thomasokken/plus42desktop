@@ -585,6 +585,8 @@ const command_spec cmd_array[] =
     { /* DIRECT */      docmd_direct,      "D\311R\305CT",        0x00, 0x00, 0xa2, 0x7e,  6, ARG_NONE,   0, NA_T },
     { /* NUMERIC */     docmd_numeric,     "NUM\305\322\311\303", 0x00, 0x00, 0xa2, 0x7f,  7, ARG_NONE,   0, NA_T },
     { /* EMBED */       docmd_embed,       "",                    0x24, 0x00, 0x00, 0x00,  0, ARG_OTHER,  0, NA_T },
+    { /* NEWEQN */      docmd_neweqn,      "NEW\305\321\316",     0x42, 0x00, 0x00, 0x00,  6, ARG_NONE,   0, NA_T },
+    { /* EDITEQN */     docmd_editeqn,     "EDIT\305\321\316",    0x42, 0x00, 0x00, 0x00,  7, ARG_NONE,   0, NA_T },
 
     /* Units */
     { /* CONVERT */     docmd_convert,     "CONV\305\322\324",    0x00, 0x00, 0xa6, 0xf1,  7, ARG_NONE,   2, 0x81 },

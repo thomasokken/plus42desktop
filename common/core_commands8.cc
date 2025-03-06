@@ -566,6 +566,14 @@ int docmd_embed(arg_struct *arg) {
     return ERR_NONE;
 }
 
+int docmd_neweqn(arg_struct *arg) {
+    return ERR_NOT_YET_IMPLEMENTED;
+}
+
+int docmd_editeqn(arg_struct *arg) {
+    return ERR_NOT_YET_IMPLEMENTED;
+}
+
 static int get_sum(int n) {
     vartype *v = recall_var("REGS", 4);
     if (v == NULL)
