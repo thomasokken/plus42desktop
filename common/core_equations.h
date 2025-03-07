@@ -27,6 +27,8 @@ void reset_eqn();
 
 int eqn_start(int whence);
 void eqn_end();
+int eqn_new();
+int eqn_edit();
 
 bool eqn_active();
 bool eqn_alt_keys();

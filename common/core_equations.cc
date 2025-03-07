@@ -83,6 +83,7 @@ static int menu_item[6];
 static bool new_eq;
 static char *edit_buf = NULL;
 static int4 edit_len, edit_capacity;
+static char edit_mode;
 static bool cursor_on;
 static int current_error = ERR_NONE;
 static bool current_error_is_runtime = false;
@@ -482,6 +483,11 @@ bool unpersist_eqn(int4 ver) {
         return false;
     }
     if (fread(edit_buf, 1, edit_len, gfile) != edit_len) goto fail;
+    if (ver >= 50) {
+        if (!read_char(&edit_mode)) return false;
+    } else {
+        edit_mode = 0;
+    }
     if (!read_bool(&cursor_on)) goto fail;
     if (!read_int(&current_error)) return false;
     if (ver >= 48) {
@@ -546,6 +552,7 @@ bool persist_eqn() {
     if (!write_bool(new_eq)) return false;
     if (!write_int(edit_len)) return false;
     if (fwrite(edit_buf, 1, edit_len, gfile) != edit_len) return false;
+    if (!write_char(edit_mode)) return false;
     if (!write_bool(cursor_on)) return false;
     if (!write_int(current_error)) return false;
     if (!write_bool(current_error_is_runtime)) return false;
@@ -1021,6 +1028,82 @@ void eqn_end() {
     active = false;
     shell_set_skin_mode(0);
     saved_prgm_mode = false;
+}
+
+static int start_standalone_edit(const char *text, int length) {
+    edit_buf = (char *) malloc(length);
+    if (edit_buf == NULL && length != 0) {
+        edit_capacity = edit_len = 0;
+        return ERR_INSUFFICIENT_MEMORY;
+    }
+
+    edit_len = edit_capacity = length;
+    memcpy(edit_buf, text, length);
+
+    new_eq = false;
+    edit_pos = 0;
+    display_pos = 0;
+    edit_mode = text == NULL ? 1 : 2;
+    active = true;
+    update_skin_mode();
+    update_menu(MENU_NONE);
+    restart_cursor();
+    eqn_draw();
+    return ERR_NONE;
+}
+
+int eqn_new() {
+    if (flags.f.prgm_mode) {
+        if (!current_prgm.is_editable())
+            return ERR_RESTRICTED_OPERATION;
+        if (current_prgm.is_locked())
+            return ERR_PROGRAM_LOCKED;
+    }
+
+    return start_standalone_edit(NULL, 0);
+}
+
+int eqn_edit() {
+    const char *text;
+    int length;
+    if (flags.f.prgm_mode) {
+        if (!current_prgm.is_editable())
+            return ERR_RESTRICTED_OPERATION;
+        if (current_prgm.is_locked())
+            return ERR_PROGRAM_LOCKED;
+        int cmd;
+        arg_struct arg;
+        int4 pc2 = pc;
+        get_next_command(&pc2, &cmd, &arg, 0, NULL);
+        if (cmd == CMD_XSTR) {
+            text = arg.val.xstr;
+            length = arg.length;
+        } else if (cmd == CMD_EMBED) {
+            equation_data *eqd = eq_dir->prgms[arg.val.num].eq_data;
+            text = eqd->text;
+            length = eqd->length;
+        } else {
+            return ERR_INVALID_TYPE;
+        }
+    } else {
+        if (sp == -1)
+            return ERR_TOO_FEW_ARGUMENTS;
+        vartype *v = stack[sp];
+        if (v->type == TYPE_STRING) {
+            vartype_string *s = (vartype_string *) v;
+            text = s->txt();
+            length = s->length;
+        } else if (v->type == TYPE_EQUATION) {
+            vartype_equation *eq = (vartype_equation *) v;
+            equation_data *eqd = eq->data;
+            text = eqd->text;
+            length = eqd->length;
+        } else {
+            return ERR_INVALID_TYPE;
+        }
+    }
+
+    return start_standalone_edit(text, length);
 }
 
 bool eqn_active() {
@@ -2615,6 +2698,7 @@ static void start_edit(int pos) {
     } else {
         new_eq = false;
         edit_pos = pos;
+        edit_mode = 0;
         update_skin_mode();
         display_pos = 0;
         if (disp_r == 2) {

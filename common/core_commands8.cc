@@ -567,11 +567,11 @@ int docmd_embed(arg_struct *arg) {
 }
 
 int docmd_neweqn(arg_struct *arg) {
-    return ERR_NOT_YET_IMPLEMENTED;
+    return eqn_new();
 }
 
 int docmd_editeqn(arg_struct *arg) {
-    return ERR_NOT_YET_IMPLEMENTED;
+    return eqn_edit();
 }
 
 static int get_sum(int n) {

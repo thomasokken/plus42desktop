@@ -1124,8 +1124,9 @@ bool no_keystrokes_yet;
  * Version 47: 1.2.5  Fixed EQN mode exit behavior
  * Version 48: 1.2.6  EQN no-arg eval error reporting
  * Version 49: 1.2.6  EQN PRGM mode handling
+ * Version 50: 1.2.7  Stand-alone equation editing
  */
-#define PLUS42_VERSION 49
+#define PLUS42_VERSION 50
 
 
 /*******************/
