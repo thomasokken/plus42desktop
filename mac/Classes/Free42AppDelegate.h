@@ -148,6 +148,7 @@ void get_keymap(keymap_entry **map, int *length);
 - (IBAction) showDocumentation:(id)sender;
 - (IBAction) showWebSite:(id)sender;
 - (IBAction) showFree42WebSite:(id)sender;
+- (IBAction) editKeymap:(id)sender;
 - (IBAction) showPreferences:(id)sender;
 - (void) getPreferences;
 - (IBAction) browsePrintTextFile:(id)sender;
