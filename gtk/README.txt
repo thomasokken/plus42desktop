@@ -165,6 +165,21 @@ argument, if a command with an alphanumeric argument is being entered). These
 mappings override any other mappings that may be defined for those keys.
 
 
+Customizing the Keyboard Map
+
+The standard keyboard map is designed to work well with U.S. English keyboards.
+If you use a different keyboard layout, or if you have specific preferences for
+how the keys should be mapped, you can customize the keyboard map to better fit
+your needs.
+
+The keyboard map is $XDG_DATA_HOME/plus42/keymap.txt, or
+$HOME/.local/share/plus42/keymap.txt is XDG_DATA_HOME is unset or empty. You
+can edit this file using any text editor. For convenience, you can use the
+"Edit Keyboard Map" command in the Help menu to open the keyboard map in the
+default text editor. Note that after making changes to the keyboard map, you
+have to exit and restart Plus42 for the changes to take effect.
+
+
 What's the deal with the "Decimal" and "Binary" (plus42dec/plus42bin)?
 
 Plus42 comes in decimal and binary versions. The two look and behave
