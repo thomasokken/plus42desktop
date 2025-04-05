@@ -45,7 +45,7 @@ void squeak();
 void tone(int n);
 void draw_char(int x, int y, char c);
 void draw_block(int x, int y);
-const char *get_char(char c);
+const unsigned char *get_char(char c);
 void draw_string(int x, int y, const char *s, int length);
 void draw_message(int y, const char *s, int length, bool flush = true);
 void draw_long_message(int y, const char *s, int length, bool flush = true);
