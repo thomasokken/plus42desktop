@@ -1668,8 +1668,8 @@ static int prgmline2buf(char *buf, int len, int4 line, int highlight,
             char2buf(buf, len, &bufptr, '0');
         bufptr += int2string(line, buf + bufptr, len - bufptr);
         char h = highlight == 0 ? ' '
-                : highlight == 2 && !current_prgm.is_editable() ? 134
-                : highlight == 2 && current_prgm.is_locked() ? 135
+                : highlight == 2 && !current_prgm.is_editable() ? (char) 134
+                : highlight == 2 && current_prgm.is_locked() ? (char) 135
                 : 6;
         char2buf(buf, len, &bufptr, h);
     }
@@ -1881,7 +1881,7 @@ static int display_prgm_line(int offset, int headers = 0, int footers = 0) {
             buf += std::string(cmdline, cmdline_length);
             buf += '_';
         } else {
-            int cmd;
+            int cmd = CMD_NONE;
             arg_struct arg;
             const char *orig_num;
             if (line > 0) {

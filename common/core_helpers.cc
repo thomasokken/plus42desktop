@@ -164,7 +164,7 @@ int get_arg_equation(arg_struct *arg, vartype_equation **eq) {
         v = recall_var(arg->val.text, arg->length);
         if (v == NULL)
             return ERR_NONEXISTENT;
-    } else if (arg->type == ARGTYPE_STK) {
+    } else { // arg->type == ARGTYPE_STK
         int idx;
         switch (arg->val.stk) {
             case 'X': idx = 0; break;

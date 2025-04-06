@@ -2598,7 +2598,7 @@ int clear_prgm(const arg_struct *arg) {
     if (arg->type == ARGTYPE_LBLINDEX) {
         directory *dir = get_dir(arg->target);
         prgm.set(dir->id, dir->labels[arg->val.num].prgm);
-    } else if (arg->type == ARGTYPE_STR) {
+    } else { // arg->type == ARGTYPE_STR
         if (arg->length == 0) {
             if (current_prgm.idx < 0)
                 return ERR_INTERNAL_ERROR;
