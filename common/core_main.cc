@@ -1144,8 +1144,8 @@ static void export_hp42s(int index) {
                     cmdbuf[cmdlen++] = 0x00;
                     cmdbuf[cmdlen++] = 0x0d;
                 } else if (cmd == CMD_N_PLUS_U) {
-                    cmdbuf[cmdlen++] = 0xa6;
-                    cmdbuf[cmdlen++] = 0xf7;
+                    cmdbuf[cmdlen++] = (char) 0xa6;
+                    cmdbuf[cmdlen++] = (char) 0xf7;
                     if (arg.type != ARGTYPE_NONE)
                         goto do_number;
                 } else if (cmd == CMD_NUMBER) {
@@ -1264,7 +1264,7 @@ static void export_hp42s(int index) {
                     int i;
                     if ((code_name & 0x80) == 0) {
                         cmdbuf[cmdlen++] = 0xf0 + arg.length + 2;
-                        cmdbuf[cmdlen++] = 0xa7;
+                        cmdbuf[cmdlen++] = (char) 0xa7;
                     } else {
                         cmdbuf[cmdlen++] = 0xf0 + arg.length + 1;
                     }
@@ -1276,8 +1276,8 @@ static void export_hp42s(int index) {
                     unsigned char suffix;
                     if (code_std_1 != 0) {
                         if (code_std_1 == 0xf2 && (code_std_2 & 0x80) == 0) {
-                            cmdbuf[cmdlen++] = 0xf3;
-                            cmdbuf[cmdlen++] = 0xa7;
+                            cmdbuf[cmdlen++] = (char) 0xf3;
+                            cmdbuf[cmdlen++] = (char) 0xa7;
                         } else {
                             cmdbuf[cmdlen++] = code_std_1;
                         }
@@ -2288,7 +2288,7 @@ static void decode_string(unsigned char *buf, int *cmd, arg_struct *arg, char **
             arg->val.text[i] = buf[pos++];
         if (extra_extension) {
             memmove(arg->val.text + 1, arg->val.text, str_len);
-            arg->val.text[0] = 0xa7;
+            arg->val.text[0] = (char) 0xa7;
             str_len++;
         }
         arg->length = str_len;
