@@ -1030,6 +1030,43 @@ void eqn_end() {
     saved_prgm_mode = false;
 }
 
+static bool get_object_text(const char **text, int *length) {
+    if (flags.f.prgm_mode) {
+        int cmd;
+        arg_struct arg;
+        int4 pc2 = pc;
+        get_next_command(&pc2, &cmd, &arg, 0, NULL);
+        if (cmd == CMD_XSTR) {
+            *text = arg.val.xstr;
+            *length = arg.length;
+            return true;
+        } else if (cmd == CMD_EMBED) {
+            equation_data *eqd = eq_dir->prgms[arg.val.num].eq_data;
+            *text = eqd->text;
+            *length = eqd->length;
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        vartype *v = stack[sp];
+        if (v->type == TYPE_STRING) {
+            vartype_string *s = (vartype_string *) v;
+            *text = s->txt();
+            *length = s->length;
+            return true;
+        } else if (v->type == TYPE_EQUATION) {
+            vartype_equation *eq = (vartype_equation *) v;
+            equation_data *eqd = eq->data;
+            *text = eqd->text;
+            *length = eqd->length;
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
 static int start_standalone_edit(const char *text, int length) {
     edit_buf = (char *) malloc(length);
     if (edit_buf == NULL && length != 0) {
@@ -1064,44 +1101,20 @@ int eqn_new() {
 }
 
 int eqn_edit() {
-    const char *text;
-    int length;
     if (flags.f.prgm_mode) {
         if (!current_prgm.is_editable())
             return ERR_RESTRICTED_OPERATION;
         if (current_prgm.is_locked())
             return ERR_PROGRAM_LOCKED;
-        int cmd;
-        arg_struct arg;
-        int4 pc2 = pc;
-        get_next_command(&pc2, &cmd, &arg, 0, NULL);
-        if (cmd == CMD_XSTR) {
-            text = arg.val.xstr;
-            length = arg.length;
-        } else if (cmd == CMD_EMBED) {
-            equation_data *eqd = eq_dir->prgms[arg.val.num].eq_data;
-            text = eqd->text;
-            length = eqd->length;
-        } else {
-            return ERR_INVALID_TYPE;
-        }
     } else {
         if (sp == -1)
             return ERR_TOO_FEW_ARGUMENTS;
-        vartype *v = stack[sp];
-        if (v->type == TYPE_STRING) {
-            vartype_string *s = (vartype_string *) v;
-            text = s->txt();
-            length = s->length;
-        } else if (v->type == TYPE_EQUATION) {
-            vartype_equation *eq = (vartype_equation *) v;
-            equation_data *eqd = eq->data;
-            text = eqd->text;
-            length = eqd->length;
-        } else {
-            return ERR_INVALID_TYPE;
-        }
     }
+
+    const char *text;
+    int length;
+    if (!get_object_text(&text, &length))
+        return ERR_INVALID_TYPE;
 
     return start_standalone_edit(text, length);
 }
@@ -4002,34 +4015,64 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
                 }
                 if (edit.id == MENU_NONE) {
                     if (!new_eq) {
-                        vartype *v = eqns->array->data[selected_row];
                         const char *orig_text;
                         int orig_len;
-                        if (v->type == TYPE_STRING) {
-                            vartype_string *s = (vartype_string *) v;
-                            orig_text = s->txt();
-                            orig_len = s->length;
-                        } else if (v->type == TYPE_EQUATION) {
-                            vartype_equation *eq = (vartype_equation *) v;
-                            equation_data *eqd = eq->data;
-                            orig_text = eqd->text;
-                            orig_len = eqd->length;
+                        if (edit_mode == 0) {
+                            /* EQN mode editing */
+                            vartype *v = eqns->array->data[selected_row];
+                            if (v->type == TYPE_STRING) {
+                                vartype_string *s = (vartype_string *) v;
+                                orig_text = s->txt();
+                                orig_len = s->length;
+                            } else if (v->type == TYPE_EQUATION) {
+                                vartype_equation *eq = (vartype_equation *) v;
+                                equation_data *eqd = eq->data;
+                                orig_text = eqd->text;
+                                orig_len = eqd->length;
+                            } else {
+                                orig_text = "<Invalid>";
+                                orig_len = 9;
+                            }
+                        } else if (edit_mode == 1) {
+                            /* NEWEQN */
+                            orig_text = NULL;
+                            orig_len = 0;
                         } else {
-                            orig_text = "<Invalid>";
-                            orig_len = 9;
+                            /* EDITEQN */
+                            if (!get_object_text(&orig_text, &orig_len))
+                                /* should never happen */
+                                goto abort_edit;
                         }
                         if (string_equals(edit_buf, edit_len, orig_text, orig_len)) {
+                            abort_edit:
                             edit_pos = -1;
                             update_skin_mode();
                             edit.id = MENU_NONE;
                             free(edit_buf);
                             edit_buf = NULL;
                             edit_capacity = edit_len = 0;
+                            if (edit_mode != 0) {
+                                /* NEWEQN / EDITEQN */
+                                active = false;
+                                redisplay();
+                                return 1;
+                            }
                             eqn_draw();
                             break;
                         }
                     }
-                    dialog = DIALOG_SAVE_CONFIRM;
+                    if (edit_mode == 0) {
+                        /* EQN mode editing */
+                        dialog = DIALOG_SAVE_CONFIRM;
+                    } else if (edit_mode == 1) {
+                        /* NEQEQN */
+                        // TODO
+                        goto abort_edit;
+                    } else {
+                        /* EDITEQN */
+                        // TODO
+                        goto abort_edit;
+                    }
                 } else if (edit.id == MENU_CATALOG) {
                     if (edit.catsect == CATSECT_LIST
                             || edit.catsect == CATSECT_EQN
