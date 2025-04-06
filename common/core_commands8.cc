@@ -828,7 +828,7 @@ static const unitdef *find_unit(std::string s, int *exponent, vartype **user, st
             idx++;
         }
         // Not in units table; look for user-defined unit...
-        vartype *v = recall_var(s.c_str(), s.length());
+        vartype *v = recall_var(s.c_str(), (int) s.length());
         if (v != NULL && (v->type == TYPE_REAL || v->type == TYPE_UNIT)) {
             *user = v;
             *un = s;
@@ -1004,7 +1004,7 @@ class UnitLexer {
     }
 
     bool isIdentifier(std::string s) {
-        int len = s.length();
+        int len = (int) s.length();
         if (len == 0 || !isIdentifierStartChar(s[0]))
             return false;
         for (int i = 1; i < len; i++)
@@ -1509,7 +1509,7 @@ int docmd_ubase(arg_struct *arg) {
         else
             return ERR_OUT_OF_RANGE;
     }
-    vartype *res = new_unit(r, bu.c_str(), bu.length());
+    vartype *res = new_unit(r, bu.c_str(), (int) bu.length());
     if (res == NULL)
         return ERR_INSUFFICIENT_MEMORY;
     unary_result(res);
@@ -1581,7 +1581,7 @@ int docmd_ufact(arg_struct *arg) {
         else
             return ERR_OUT_OF_RANGE;
     }
-    vartype *res = new_unit(r, newUnit.c_str(), newUnit.length());
+    vartype *res = new_unit(r, newUnit.c_str(), (int) newUnit.length());
     if (res == NULL)
         return ERR_INSUFFICIENT_MEMORY;
     return binary_result(res);
@@ -1737,7 +1737,7 @@ static int unit_mul_div(const vartype *x, const vartype *y, vartype **r, int mod
         else
             return ERR_OUT_OF_RANGE;
     }
-    *r = new_unit(res, nru.c_str(), nru.length());
+    *r = new_unit(res, nru.c_str(), (int) nru.length());
     if (*r == NULL)
         return ERR_INSUFFICIENT_MEMORY;
     return ERR_NONE;
@@ -1794,7 +1794,7 @@ int unit_pow(vartype *x, phloat e, vartype **r) {
             else
                 return ERR_OUT_OF_RANGE;
         }
-        *r = new_unit(res, nu.c_str(), nu.length());
+        *r = new_unit(res, nu.c_str(), (int) nu.length());
         return *r == NULL ? ERR_INSUFFICIENT_MEMORY : ERR_NONE;
     }
 }

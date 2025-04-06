@@ -349,7 +349,7 @@ static void validate_axes(PlotData *data) {
         bool found = false;
         for (int j = 0; j < params.size(); j++) {
             std::string s = params[j];
-            if (string_equals(data->axes[i].name, data->axes[i].len, s.c_str(), s.length())) {
+            if (string_equals(data->axes[i].name, data->axes[i].len, s.c_str(), (int) s.length())) {
                 found = true;
                 break;
             }
@@ -723,12 +723,12 @@ static int prepare_plot(PlotData *data) {
         bool x_found = false, y_found = data->axes[1].len == 0;
         for (int i = 0; i < params.size(); i++) {
             std::string s = params[i];
-            if (!x_found && string_equals(data->axes[0].name, data->axes[0].len, s.c_str(), s.length())) {
+            if (!x_found && string_equals(data->axes[0].name, data->axes[0].len, s.c_str(), (int) s.length())) {
                 x_found = true;
                 if (y_found)
                     break;
             }
-            if (!y_found && string_equals(data->axes[1].name, data->axes[1].len, s.c_str(), s.length())) {
+            if (!y_found && string_equals(data->axes[1].name, data->axes[1].len, s.c_str(), (int) s.length())) {
                 y_found = true;
                 if (x_found)
                     break;
@@ -925,7 +925,7 @@ static vartype *integ_result_unit(PlotData *data) {
             std::string r;
             if (!normalize_unit(std::string(ux->text, ux->length) + "*" + std::string(uy->text, uy->length), &r))
                 return NULL;
-            return new_unit(0, r.c_str(), r.length());
+            return new_unit(0, r.c_str(), (int) r.length());
         } else {
             return dup_vartype((vartype *) ux);
         }

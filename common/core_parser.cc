@@ -54,7 +54,7 @@ struct Line {
     }
     Line(int pos, int cmd, std::string s, bool ind) : pos(pos), cmd(cmd), buf(NULL) {
         if (cmd == CMD_XSTR) {
-            int len = s.length();
+            int len = (int) s.length();
             if (len > 65535)
                 len = 65535;
             buf = (char *) malloc(len);
@@ -63,7 +63,7 @@ struct Line {
             arg.val.xstr = buf;
             arg.length = len;
         } else {
-            int len = s.length();
+            int len = (int) s.length();
             if (len > 7)
                 len = 7;
             arg.type = ind ? ARGTYPE_IND_STR : ARGTYPE_STR;
@@ -753,10 +753,10 @@ public:
     }
 
     void generateCode(GeneratorContext *ctx) {
-        int rows = data.size();
+        int rows = (int) data.size();
         int cols = 0;
         for (int i = 0; i < data.size(); i++) {
-            int c = data[i].size();
+            int c = (int) data[i].size();
             if (cols < c)
                 cols = c;
         }
@@ -771,7 +771,7 @@ public:
         ctx->addLine(tpos, CMD_DROP);
         ctx->addLine(tpos, CMD_INDEX, std::string("_TMPMAT"));
         for (int i = 0; i < rows; i++) {
-            int c = data[i].size();
+            int c = (int) data[i].size();
             for (int j = 0; j < c; j++) {
                 data[i][j]->generateCode(ctx);
                 ctx->addLine(data[i][j]->pos(), CMD_STOEL);
@@ -2827,7 +2827,7 @@ class Seq : public Evaluator {
     }
 
     void generateCode(GeneratorContext *ctx) {
-        int sz = evs->size();
+        int sz = (int) evs->size();
         for (int i = 0; i < sz; i++) {
             Evaluator *ev = (*evs)[i];
             bool isLast = i == sz - 1;
@@ -4497,12 +4497,12 @@ static bool get_phloat(std::string tok, phloat *d) {
             tok[i] = 24;
         else if (tok[i] == d1)
             tok[i] = d2;
-    return string2phloat(tok.c_str(), tok.length(), d) == 0;
+    return string2phloat(tok.c_str(), (int) tok.length(), d) == 0;
 }
 
 static std::string get_string(std::string tok) {
     std::string res;
-    int n = tok.length() - 1;
+    int n = (int) tok.length() - 1;
     for (int i = 1; i < n; i++) {
         char c = tok[i];
         if (c == '\\') {
@@ -4600,7 +4600,7 @@ Evaluator *Parser::parseThing() {
                 goto array_fail;
             if (t == "]") {
                 end_row:
-                int w = row.size();
+                int w = (int) row.size();
                 if (w == 0)
                     goto array_fail;
                 if (width < w)
@@ -5449,7 +5449,7 @@ void num_parameters(vartype *v, int *black, int *total) {
     equation_data *eqd = ((vartype_equation *) v)->data;
     std::vector<std::string> names, locals;
     eqd->ev->collectVariables(&names, &locals);
-    *total = names.size();
+    *total = (int) names.size();
     std::vector<std::string> *paramNames = eqd->ev->eqnParamNames();
-    *black = paramNames == NULL || paramNames->size() == 0 ? *total : paramNames->size();
+    *black = paramNames == NULL || paramNames->size() == 0 ? *total : (int) paramNames->size();
 }

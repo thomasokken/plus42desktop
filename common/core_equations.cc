@@ -1465,7 +1465,7 @@ bool eqn_draw() {
                      + (flags.f.digits_bit0 ? 1 : 0);
             }
             snprintf(buf, 16, "(Curr: %02d)", curr);
-            draw_string(p, 0, buf, strlen(buf));
+            draw_string(p, 0, buf, (int) strlen(buf));
         }
         draw_menu(true);
     } else if (edit_pos == -1) {
@@ -1947,7 +1947,7 @@ static int keydown_modes(int key, bool shift, int *repeat) {
                         break;
                 }
                 clear_row(0);
-                draw_string(0, 0, buf, strlen(buf));
+                draw_string(0, 0, buf, (int) strlen(buf));
                 flush_display();
                 timeout_action = 1;
                 shell_request_timeout3(2000);
@@ -2159,7 +2159,7 @@ static void delete_vars() {
     std::vector<std::string> params = get_parameters(eqd);
     for (int i = 0; i < params.size(); i++) {
         std::string s = params[i];
-        purge_var(s.c_str(), s.length());
+        purge_var(s.c_str(), (int) s.length());
     }
 }
 
@@ -2876,7 +2876,7 @@ static int keydown_list(int key, bool shift, int *repeat) {
                     else
                         for (int i = 0; i < params.size(); i++) {
                             std::string s = params[i];
-                            if (recall_var(s.c_str(), s.length()) == NULL) {
+                            if (recall_var(s.c_str(), (int) s.length()) == NULL) {
                                 all_vars_exist = false;
                                 break;
                             }
@@ -3384,7 +3384,7 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
                 std::string s("XEQ(");
                 s += std::string(label, len);
                 s += ":";
-                if (insert_text(s.c_str(), s.length())) {
+                if (insert_text(s.c_str(), (int) s.length())) {
                     goto_prev_menu();
                     eqn_draw();
                 } else
@@ -3400,7 +3400,7 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
                     std::string s("EVALN(");
                     s += std::string(label, len);
                     s += ":";
-                    if (insert_text(s.c_str(), s.length())) {
+                    if (insert_text(s.c_str(), (int) s.length())) {
                         goto_prev_menu();
                         eqn_draw();
                     } else
@@ -3617,7 +3617,7 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
                     return 1;
                 }
                 std::string s = names[index] + "(";
-                insert_text(s.c_str(), s.length());
+                insert_text(s.c_str(), (int) s.length());
             } else if (edit.catsect == CATSECT_PGM) {
                 int index = menu_item[key - 1];
                 if (index == -1 || cwd->labels[index].length == 0) {
@@ -3626,7 +3626,7 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
                 }
                 std::string s(cwd->labels[index].name, cwd->labels[index].length);
                 s = "XEQ(" + s + ":";
-                insert_text(s.c_str(), s.length());
+                insert_text(s.c_str(), (int) s.length());
             } else if (edit.catsect >= CATSECT_UNITS_LENG
                        && edit.catsect <= CATSECT_UNITS_VISC) {
                 if (true) {
@@ -3696,7 +3696,7 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
                 edit_pos = upos;
                 if (us != "") {
                     us = std::string("_\"", 2) + us + "\"";
-                    insert_text(us.c_str(), us.length());
+                    insert_text(us.c_str(), (int) us.length());
                 }
             } else {
                 int index = menu_item[key - 1];
@@ -3707,7 +3707,7 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
                 std::string s(cwd->vars[index].name, cwd->vars[index].length);
                 if (edit.catsect == CATSECT_EQN)
                     s = "EVALN(" + s + ":";
-                insert_text(s.c_str(), s.length());
+                insert_text(s.c_str(), (int) s.length());
             }
             goto_prev_menu();
             eqn_draw();

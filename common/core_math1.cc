@@ -1644,8 +1644,8 @@ static int finish_integ() {
         normalize_unit(pu + "*" + ru, &ru);
         if (ru == "")
             goto real_result;
-        x = new_unit(integ.sum * integ.b * 0.75, ru.c_str(), ru.length());
-        y = new_unit(integ.eps, ru.c_str(), ru.length());
+        x = new_unit(integ.sum * integ.b * 0.75, ru.c_str(), (int) ru.length());
+        y = new_unit(integ.eps, ru.c_str(), (int) ru.length());
     }
     if (x == NULL || y == NULL) {
         free_vartype(x);

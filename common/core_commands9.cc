@@ -153,7 +153,7 @@ int docmd_path(arg_struct *arg) {
             dir = parent;
         }
         path = std::string("HOME", 4) + path;
-        vartype *v = new_string(path.c_str(), path.length());
+        vartype *v = new_string(path.c_str(), (int) path.length());
         if (v == NULL)
             return ERR_INSUFFICIENT_MEMORY;
         return recall_result(v);

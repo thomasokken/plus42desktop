@@ -1426,7 +1426,7 @@ int4 core_program_size(int prgm_index) {
                         p = orig_num;
                     else
                         p = phloat2program(arg.val_d);
-                    size += strlen(p) + 1;
+                    size += (int) strlen(p) + 1;
                 } else if (cmd == CMD_STRING) {
                     size += arg.length + 1;
                 } else if (cmd >= CMD_ASGN01 && cmd <= CMD_ASGN18) {
@@ -1446,7 +1446,7 @@ int4 core_program_size(int prgm_index) {
                             p = orig_num;
                         else
                             p = phloat2program(arg.val_d);
-                        size += strlen(p) + 1;
+                        size += (int) strlen(p) + 1;
                         int n = (arg.length + 12) / 13;
                         if (n == 0)
                             n = 1;
