@@ -38,14 +38,6 @@
 /* HP-42S font data */
 /********************/
 
-#if defined(WINDOWS) && !defined(__GNUC__)
-/* Disable warnings:
- * C4838: conversion from 'int' to 'const char' requires a narrowing conversion
- */
-#pragma warning(push)
-#pragma warning(disable:4838)
-#endif
-
 
 static const unsigned char bigchars[138][5] =
     {
@@ -611,11 +603,6 @@ static const unsigned char smallchars_map[138] =
         /* 136 */ 134,
         /* 137 */ 135,
     };
-
-#if defined(WINDOWS) && !defined(__GNUC__)
-#pragma warning(pop)
-#endif
-
 
 
 static char *display = NULL;
