@@ -1452,7 +1452,7 @@ int docmd_eqn(arg_struct *arg) {
 }
 
 int docmd_eqn_fcn(arg_struct *arg) {
-    set_plainmenu(MENU_EQN_FCN, NULL, 0);
+    set_plainmenu(MENU_EQN_FCN1, NULL, 0);
     return ERR_NONE;
 }
 

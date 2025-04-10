@@ -232,10 +232,11 @@ extern const error_spec errors[];
 #define MENU_TVM_PARAMS    83
 #define MENU_TVM_PRGM1     84
 #define MENU_TVM_PRGM2     85
-#define MENU_EQN_FCN       86
-#define MENU_GRAPH         87
-#define MENU_GRAPH_AXES    88
-#define MENU_GRAPH_VIEW    89
+#define MENU_EQN_FCN1      86
+#define MENU_EQN_FCN2      87
+#define MENU_GRAPH         88
+#define MENU_GRAPH_AXES    89
+#define MENU_GRAPH_VIEW    90
 
 
 struct menu_item_spec {

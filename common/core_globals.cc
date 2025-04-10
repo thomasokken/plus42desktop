@@ -296,12 +296,12 @@ const menu_spec menus[] = {
                         { 0x2000 + CMD_CLK12,   0, "" },
                         { 0x2000 + CMD_CLK24,   0, "" } } },
     { /* MENU_MODES4 */ MENU_NONE, MENU_MODES1, MENU_MODES3,
-                      { { 0x2000 + CMD_4STK,    0, "" },
-                        { 0x2000 + CMD_NSTK,    0, "" },
-                        { 0x2000 + CMD_STD,     0, "" },
-                        { 0x2000 + CMD_COMP,    0, "" },
-                        { 0x2000 + CMD_DIRECT,  0, "" },
-                        { 0x2000 + CMD_NUMERIC, 0, "" } } },
+                      { { 0x2000 + CMD_4STK, 0, "" },
+                        { 0x2000 + CMD_NSTK, 0, "" },
+                        { 0x1000 + CMD_NULL, 0, "" },
+                        { 0x1000 + CMD_NULL, 0, "" },
+                        { 0x1000 + CMD_NULL, 0, "" },
+                        { 0x1000 + CMD_NULL, 0, "" } } },
     { /* MENU_DISP1 */ MENU_NONE, MENU_DISP2, MENU_DISP4,
                       { { 0x2000 + CMD_FIX,      0, "" },
                         { 0x2000 + CMD_SCI,      0, "" },
@@ -708,13 +708,20 @@ const menu_spec menus[] = {
                         { 0x1000 + CMD_USFV, 0, "" },
                         { 0x1000 + CMD_NULL, 0, "" },
                         { 0x1000 + CMD_NULL, 0, "" } } },
-    { /* MENU_EQN_FCN */ MENU_NONE, MENU_NONE, MENU_NONE,
+    { /* MENU_EQN_FCN1 */ MENU_NONE, MENU_EQN_FCN2, MENU_EQN_FCN2,
                       { { 0x1000 + CMD_NEWEQN,  0, "" },
                         { 0x1000 + CMD_EDITEQN, 0, "" },
                         { 0x1000 + CMD_PARSE,   0, "" },
                         { 0x1000 + CMD_UNPARSE, 0, "" },
                         { 0x1000 + CMD_EVAL,    0, "" },
                         { 0x1000 + CMD_EVALN,   0, "" } } },
+    { /* MENU_EQN_FCN2 */ MENU_NONE, MENU_EQN_FCN1, MENU_EQN_FCN1,
+                      { { 0x2000 + CMD_STD,     0, "" },
+                        { 0x2000 + CMD_COMP,    0, "" },
+                        { 0x2000 + CMD_DIRECT,  0, "" },
+                        { 0x2000 + CMD_NUMERIC, 0, "" },
+                        { 0x1000 + CMD_NULL,    0, "" },
+                        { 0x1000 + CMD_NULL,    0, "" } } },
     { /* MENU_GRAPH */ MENU_NONE, MENU_NONE, MENU_NONE,
                       { { 0x1000 + CMD_PGMPLOT, 0, "" },
                         { 0x1000 + CMD_EQNPLOT, 0, "" },
@@ -5175,30 +5182,37 @@ static bool load_state2(bool *clear, bool *too_new) {
     }
     if (ver < 51) {
         // moved MENU_MODES3 to MENU_BASE2
-        if (mode_appmenu == MENU_MODES3)
-            mode_appmenu = MENU_BASE2;
-        else if (mode_appmenu > MENU_MODES3 && mode_appmenu <= MENU_BASE2)
+        if (mode_appmenu == 26)
+            mode_appmenu = 69;
+        else if (mode_appmenu > 26 && mode_appmenu <= 69)
             mode_appmenu--;
-        if (mode_auxmenu == MENU_MODES3)
-            mode_auxmenu = MENU_BASE2;
-        else if (mode_auxmenu > MENU_MODES3 && mode_auxmenu <= MENU_BASE2)
+        if (mode_auxmenu == 26)
+            mode_auxmenu = 69;
+        else if (mode_auxmenu > 26 && mode_auxmenu <= 69)
             mode_auxmenu--;
-        if (mode_plainmenu == MENU_MODES3)
-            mode_plainmenu = MENU_BASE2;
-        else if (mode_plainmenu > MENU_MODES3 && mode_plainmenu <= MENU_BASE2)
+        if (mode_plainmenu == 26)
+            mode_plainmenu = 69;
+        else if (mode_plainmenu > 26 && mode_plainmenu <= 69)
             mode_plainmenu--;
-        if (mode_transientmenu == MENU_MODES3)
-            mode_transientmenu = MENU_BASE2;
-        else if (mode_transientmenu > MENU_MODES3 && mode_transientmenu <= MENU_BASE2)
+        if (mode_transientmenu == 26)
+            mode_transientmenu = 69;
+        else if (mode_transientmenu > 26 && mode_transientmenu <= 69)
             mode_transientmenu--;
-        if (mode_alphamenu == MENU_MODES3)
-            mode_alphamenu = MENU_BASE2;
-        else if (mode_alphamenu > MENU_MODES3 && mode_alphamenu <= MENU_BASE2)
+        if (mode_alphamenu == 26)
+            mode_alphamenu = 69;
+        else if (mode_alphamenu > 26 && mode_alphamenu <= 69)
             mode_alphamenu--;
-        if (mode_commandmenu == MENU_MODES3)
-            mode_commandmenu = MENU_BASE2;
-        else if (mode_commandmenu > MENU_MODES3 && mode_commandmenu <= MENU_BASE2)
+        if (mode_commandmenu == 26)
+            mode_commandmenu = 69;
+        else if (mode_commandmenu > 26 && mode_commandmenu <= 69)
             mode_commandmenu--;
+        // inserted MENU_EQN_FCN2
+        if (mode_appmenu >= 87) mode_appmenu++;
+        if (mode_auxmenu >= 87) mode_auxmenu++;
+        if (mode_plainmenu >= 87) mode_plainmenu++;
+        if (mode_transientmenu >= 87) mode_transientmenu++;
+        if (mode_alphamenu >= 87) mode_alphamenu++;
+        if (mode_commandmenu >= 87) mode_commandmenu++;
     }
     if (!read_bool(&mode_running)) return false;
     if (ver < 28)
