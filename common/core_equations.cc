@@ -1526,7 +1526,7 @@ bool eqn_draw() {
             draw_print1_menu();
         } else if (edit.id == MENU_PRINT2) {
             draw_print2_menu();
-        } else if (edit.id >= MENU_MODES1 && edit.id <= MENU_MODES5
+        } else if (edit.id >= MENU_MODES1 && edit.id <= MENU_MODES4
                 || edit.id >= MENU_DISP1 && edit.id <= MENU_DISP4) {
             draw_menu(true);
         } else {
@@ -1740,7 +1740,7 @@ int eqn_keydown(int key, int *repeat) {
         return keydown_print1(key, shift, repeat);
     else if (edit.id == MENU_PRINT2)
         return keydown_print2(key, shift, repeat);
-    else if (edit.id >= MENU_MODES1 && edit.id <= MENU_MODES5
+    else if (edit.id >= MENU_MODES1 && edit.id <= MENU_MODES4
             || edit.id >= MENU_DISP1 && edit.id <= MENU_DISP4)
         return keydown_modes(key, shift, repeat);
     else if (edit_pos == -1)
@@ -2015,7 +2015,7 @@ static int keydown_modes(int key, bool shift, int *repeat) {
         case KEY_E: {
             if (shift)
                 // TODO: stickiness
-                if (edit.id >= MENU_MODES1 && edit.id <= MENU_MODES5) {
+                if (edit.id >= MENU_MODES1 && edit.id <= MENU_MODES4) {
                     edit.id = MENU_DISP1;
                     eqn_draw();
                 }

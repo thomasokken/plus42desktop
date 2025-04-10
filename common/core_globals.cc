@@ -274,7 +274,7 @@ const menu_spec menus[] = {
                         { MENU_NONE, 0, "" },
                         { MENU_NONE, 0, "" },
                         { MENU_NONE, 0, "" } } },
-    { /* MENU_MODES1 */ MENU_NONE, MENU_MODES2, MENU_MODES5,
+    { /* MENU_MODES1 */ MENU_NONE, MENU_MODES2, MENU_MODES4,
                       { { 0x2000 + CMD_DEG,   0, "" },
                         { 0x2000 + CMD_RAD,   0, "" },
                         { 0x2000 + CMD_GRAD,  0, "" },
@@ -289,20 +289,13 @@ const menu_spec menus[] = {
                         { 0x2000 + CMD_KEYASN,  0, "" },
                         { 0x2000 + CMD_LCLBL,   0, "" } } },
     { /* MENU_MODES3 */ MENU_NONE, MENU_MODES4, MENU_MODES2,
-                      { { 0x1000 + CMD_WSIZE,   0, "" },
-                        { 0x1000 + CMD_WSIZE_T, 0, "" },
-                        { 0x2000 + CMD_BSIGNED, 0, "" },
-                        { 0x2000 + CMD_BWRAP,   0, "" },
-                        { 0x1000 + CMD_NULL,    0, "" },
-                        { 0x1000 + CMD_BRESET,  0, "" } } },
-    { /* MENU_MODES4 */ MENU_NONE, MENU_MODES5, MENU_MODES3,
                       { { 0x2000 + CMD_MDY,     0, "" },
                         { 0x2000 + CMD_DMY,     0, "" },
                         { 0x2000 + CMD_YMD,     0, "" },
                         { 0x1000 + CMD_NULL,    0, "" },
                         { 0x2000 + CMD_CLK12,   0, "" },
                         { 0x2000 + CMD_CLK24,   0, "" } } },
-    { /* MENU_MODES5 */ MENU_NONE, MENU_MODES1, MENU_MODES4,
+    { /* MENU_MODES4 */ MENU_NONE, MENU_MODES1, MENU_MODES3,
                       { { 0x2000 + CMD_4STK,    0, "" },
                         { 0x2000 + CMD_NSTK,    0, "" },
                         { 0x2000 + CMD_STD,     0, "" },
@@ -589,21 +582,28 @@ const menu_spec menus[] = {
                         { 0x2000 + CMD_STK,  0, "" },
                         { 0x2000 + CMD_WRAP, 0, "" },
                         { 0x2000 + CMD_GROW, 0, "" } } },
-    { /* MENU_BASE */ MENU_NONE, MENU_NONE, MENU_NONE,
+    { /* MENU_BASE1 */ MENU_NONE, MENU_BASE2, MENU_BASE2,
                       { { 0x1000 + CMD_A_THRU_F, 0, ""      },
                         { 0x2000 + CMD_HEXM,     0, ""      },
                         { 0x2000 + CMD_DECM,     0, ""      },
                         { 0x2000 + CMD_OCTM,     0, ""      },
                         { 0x2000 + CMD_BINM,     0, ""      },
                         { MENU_BASE_LOGIC,       5, "LOGIC" } } },
-    { /* MENU_BASE_A_THRU_F */ MENU_BASE, MENU_NONE, MENU_NONE,
+    { /* MENU_BASE2 */ MENU_NONE, MENU_BASE1, MENU_BASE1,
+                      { { 0x1000 + CMD_WSIZE,   0, "" },
+                        { 0x1000 + CMD_WSIZE_T, 0, "" },
+                        { 0x2000 + CMD_BSIGNED, 0, "" },
+                        { 0x2000 + CMD_BWRAP,   0, "" },
+                        { 0x1000 + CMD_NULL,    0, "" },
+                        { 0x1000 + CMD_BRESET,  0, "" } } },
+    { /* MENU_BASE_A_THRU_F */ MENU_BASE1, MENU_NONE, MENU_NONE,
                       { { 0, 1, "A" },
                         { 0, 1, "B" },
                         { 0, 1, "C" },
                         { 0, 1, "D" },
                         { 0, 1, "E" },
                         { 0, 1, "F" } } },
-    { /* MENU_BASE_LOGIC */ MENU_BASE, MENU_NONE, MENU_NONE,
+    { /* MENU_BASE_LOGIC */ MENU_BASE1, MENU_NONE, MENU_NONE,
                       { { 0x1000 + CMD_AND,   0, "" },
                         { 0x1000 + CMD_OR,    0, "" },
                         { 0x1000 + CMD_XOR,   0, "" },
@@ -1125,8 +1125,9 @@ bool no_keystrokes_yet;
  * Version 48: 1.2.6  EQN no-arg eval error reporting
  * Version 49: 1.2.6  EQN PRGM mode handling
  * Version 50: 1.2.7  Stand-alone equation editing
+ * Version 51: 1.2.8  Move BASE settings from MODES to BASE
  */
-#define PLUS42_VERSION 50
+#define PLUS42_VERSION 51
 
 
 /*******************/
@@ -5171,6 +5172,33 @@ static bool load_state2(bool *clear, bool *too_new) {
         if (mode_transientmenu >= 18 && mode_transientmenu <= 88) mode_transientmenu++;
         if (mode_alphamenu >= 18 && mode_alphamenu <= 88) mode_alphamenu++;
         if (mode_commandmenu >= 18 && mode_commandmenu <= 88) mode_commandmenu++;
+    }
+    if (ver < 51) {
+        // moved MENU_MODES3 to MENU_BASE2
+        if (mode_appmenu == MENU_MODES3)
+            mode_appmenu = MENU_BASE2;
+        else if (mode_appmenu > MENU_MODES3 && mode_appmenu <= MENU_BASE2)
+            mode_appmenu--;
+        if (mode_auxmenu == MENU_MODES3)
+            mode_auxmenu = MENU_BASE2;
+        else if (mode_auxmenu > MENU_MODES3 && mode_auxmenu <= MENU_BASE2)
+            mode_auxmenu--;
+        if (mode_plainmenu == MENU_MODES3)
+            mode_plainmenu = MENU_BASE2;
+        else if (mode_plainmenu > MENU_MODES3 && mode_plainmenu <= MENU_BASE2)
+            mode_plainmenu--;
+        if (mode_transientmenu == MENU_MODES3)
+            mode_transientmenu = MENU_BASE2;
+        else if (mode_transientmenu > MENU_MODES3 && mode_transientmenu <= MENU_BASE2)
+            mode_transientmenu--;
+        if (mode_alphamenu == MENU_MODES3)
+            mode_alphamenu = MENU_BASE2;
+        else if (mode_alphamenu > MENU_MODES3 && mode_alphamenu <= MENU_BASE2)
+            mode_alphamenu--;
+        if (mode_commandmenu == MENU_MODES3)
+            mode_commandmenu = MENU_BASE2;
+        else if (mode_commandmenu > MENU_MODES3 && mode_commandmenu <= MENU_BASE2)
+            mode_commandmenu--;
     }
     if (!read_bool(&mode_running)) return false;
     if (ver < 28)

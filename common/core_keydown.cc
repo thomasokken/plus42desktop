@@ -66,7 +66,7 @@ static int basekeys() {
     if (!baseapp)
         return 0;
     int menu = get_front_menu();
-    return menu >= MENU_BASE && menu <= MENU_BASE_LOGIC;
+    return menu >= MENU_BASE1 && menu <= MENU_BASE_LOGIC;
 }
 
 static void set_solve_integ(int solve) {
@@ -277,7 +277,7 @@ void keydown(int shift, int key) {
         mode_varmenu = false;
         if (flags.f.prgm_mode) {
             if (mode_appmenu == MENU_BASE_A_THRU_F)
-                set_menu(MENULEVEL_APP, MENU_BASE);
+                set_menu(MENULEVEL_APP, MENU_BASE1);
             else if (mode_plainmenu == MENU_PROGRAMMABLE)
                 set_menu(MENULEVEL_PLAIN, MENU_NONE);
             input_length = 0;
@@ -296,7 +296,7 @@ void keydown(int shift, int key) {
     clear_message();
 
     if (mode_number_entry && get_base() == 16 && key == KEY_SIGMA
-            && get_front_menu() == MENU_BASE) {
+            && get_front_menu() == MENU_BASE1) {
         /* Special case -- entering the A...F menu while in base 16
          * does *not* cancel number entry mode (unlike all other menu
          * keys)... So we intercept and handle it before all the other
@@ -2604,8 +2604,8 @@ void keydown_alpha_mode(int shift, int key) {
                           break;
             case KEY_DOWN: command = CMD_SST; break;
             case KEY_4: print_menu_trace("BASE", 4);
-                        set_menu(MENULEVEL_APP, MENU_BASE);
-                        if (mode_appmenu == MENU_BASE) {
+                        set_menu(MENULEVEL_APP, MENU_BASE1);
+                        if (mode_appmenu == MENU_BASE1) {
                             set_appmenu_exitcallback(2);
                             baseapp = 1;
                         }
@@ -4015,8 +4015,8 @@ void keydown_normal_mode(int shift, int key) {
             case KEY_DOWN: command = CMD_SST; break;
             case KEY_4:
                 print_menu_trace("BASE", 4);
-                set_menu(MENULEVEL_APP, MENU_BASE);
-                if (mode_appmenu == MENU_BASE) {
+                set_menu(MENULEVEL_APP, MENU_BASE1);
+                if (mode_appmenu == MENU_BASE1) {
                     set_appmenu_exitcallback(2);
                     baseapp = 1;
                     redisplay();
