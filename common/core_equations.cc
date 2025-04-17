@@ -796,6 +796,23 @@ static void deleting_row(int row) {
 }
 
 static void save() {
+    if (edit_mode == 1) {
+        /* NEWEQN */
+        if (flags.f.prgm_mode)
+            dialog = DIALOG_STO_INSERT_PRGM_EQN_EVAL_XSTR;
+        else
+            dialog = DIALOG_STO_INSERT_X_EQN_XSTR;
+        eqn_draw();
+        return;
+    } else if (edit_mode == 2) {
+        /* EDITEQN */
+        if (flags.f.prgm_mode)
+            dialog = DIALOG_STO_OVERWRITE_PRGM_EQN_EVAL_XSTR;
+        else
+            dialog = DIALOG_STO_OVERWRITE_X_EQN_XSTR;
+        eqn_draw();
+        return;
+    }
     if (eqns != NULL) {
         if (!disentangle((vartype *) eqns)) {
             nomem:
@@ -1087,6 +1104,17 @@ static int start_standalone_edit(const char *text, int length) {
     restart_cursor();
     eqn_draw();
     return ERR_NONE;
+}
+
+static void end_standalone_edit() {
+    edit_pos = -1;
+    update_skin_mode();
+    edit.id = MENU_NONE;
+    free(edit_buf);
+    edit_buf = NULL;
+    edit_capacity = edit_len = 0;
+    active = false;
+    redisplay();
 }
 
 int eqn_new() {
@@ -2470,12 +2498,31 @@ static int keydown_sto_x_eqn_xstr(int key, bool shift, int *repeat) {
     switch (key) {
         case KEY_SIGMA: /* EQN */
         case KEY_SQRT: /* XSTR */ {
-            vartype *v = eqns->array->data[selected_row];
-            if (key == KEY_SIGMA || v->type == TYPE_STRING)
-                v = dup_vartype(v);
-            else {
-                equation_data *eqd = ((vartype_equation *) v)->data;
-                v = new_string(eqd->text, eqd->length);
+            vartype *v;
+            if (edit_pos != -1) {
+                v = eqns->array->data[selected_row];
+                if (key == KEY_SIGMA || v->type == TYPE_STRING)
+                    v = dup_vartype(v);
+                else {
+                    equation_data *eqd = ((vartype_equation *) v)->data;
+                    v = new_string(eqd->text, eqd->length);
+                }
+            } else if (key == KEY_SQRT) {
+                /* NEWEQN/EDITEQN: XSTR */
+                v = new_string(edit_buf, edit_len);
+            } else {
+                /* NEWEQN/EDITEQN: EQN */
+                int errpos;
+                v = new_equation(edit_buf, edit_len, flags.f.eqn_compat, &errpos);
+                if (v == NULL && errpos != -1) {
+                    squeak();
+                    show_error(ERR_INVALID_EQUATION);
+                    current_error = ERR_NONE;
+                    timeout_action = 3;
+                    timeout_edit_pos = errpos;
+                    shell_request_timeout3(1000);
+                    return 1;
+                }
             }
             if (v == NULL) {
                 nomem:
@@ -2494,6 +2541,10 @@ static int keydown_sto_x_eqn_xstr(int key, bool shift, int *repeat) {
             } else {
                 free_vartype(stack[sp]);
                 stack[sp] = v;
+            }
+            if (edit_pos != -1) {
+                end_standalone_edit();
+                return 1;
             }
             goto done;
         }
@@ -2514,10 +2565,33 @@ static int keydown_sto_prgm_eqn_eval_xstr(int key, bool shift, int *repeat) {
         case KEY_SIGMA: /* PLAIN */
         case KEY_INV: /* EVAL */
         case KEY_SQRT: /* XSTR */ {
-            vartype *v = eqns->array->data[selected_row];
+            vartype *v;
+            if (edit_pos == -1) {
+                v = eqns->array->data[selected_row];
+            } else if (key == KEY_SQRT) {
+                /* NEWEQN/EDITEQN: XSTR */
+                v = NULL;
+            } else {
+                /* NEWEQN/EDITEQN: PLAIN/EVAL */
+                int errpos;
+                v = new_equation(edit_buf, edit_len, flags.f.eqn_compat, &errpos);
+                if (v == NULL) {
+                    if (errpos == -1) {
+                        show_error(ERR_INSUFFICIENT_MEMORY);
+                    } else {
+                        squeak();
+                        show_error(ERR_INVALID_EQUATION);
+                        current_error = ERR_NONE;
+                        timeout_action = 3;
+                        timeout_edit_pos = errpos;
+                        shell_request_timeout3(1000);
+                    }
+                    return 1;
+                }
+            }
             arg_struct arg;
             int cmd;
-            if (v->type == TYPE_STRING || key == KEY_SQRT) {
+            if (v == NULL || v->type == TYPE_STRING || key == KEY_SQRT) {
                 arg.type = ARGTYPE_XSTR;
                 arg.length = edit_len > 65535 ? 65535 : edit_len;
                 arg.val.xstr = edit_buf;
@@ -2532,6 +2606,11 @@ static int keydown_sto_prgm_eqn_eval_xstr(int key, bool shift, int *repeat) {
             } else {
                 delete_command(pc);
                 store_command(pc, cmd, &arg, NULL);
+            }
+            if (edit_pos != -1) {
+                free_vartype(v);
+                end_standalone_edit();
+                return 1;
             }
             goto done;
         }
@@ -4059,18 +4138,7 @@ static int keydown_edit_2(int key, bool shift, int *repeat) {
                         eqn_draw();
                         break;
                     }
-                    if (edit_mode == 0) {
-                        /* EQN mode editing */
-                        dialog = DIALOG_SAVE_CONFIRM;
-                    } else if (edit_mode == 1) {
-                        /* NEQEQN */
-                        // TODO
-                        goto abort_edit;
-                    } else {
-                        /* EDITEQN */
-                        // TODO
-                        goto abort_edit;
-                    }
+                    dialog = DIALOG_SAVE_CONFIRM;
                 } else if (edit.id == MENU_CATALOG) {
                     if (edit.catsect == CATSECT_LIST
                             || edit.catsect == CATSECT_EQN
