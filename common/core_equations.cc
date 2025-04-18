@@ -2628,9 +2628,10 @@ static int keydown_sto_prgm_eqn_eval_xstr(int key, bool shift, int *repeat) {
                         show_error(ERR_INSUFFICIENT_MEMORY);
                     } else {
                         squeak();
+                        dialog = DIALOG_NONE;
                         show_error(ERR_INVALID_EQUATION);
                         current_error = ERR_NONE;
-                        timeout_action = 3;
+                        timeout_action = 4;
                         timeout_edit_pos = errpos;
                         shell_request_timeout3(1000);
                     }
