@@ -2833,30 +2833,34 @@ static void select_function_menu(int menu) {
     }
 }
 
+static void set_edit_pos(int pos) {
+    display_pos = 0;
+    edit_pos = pos;
+    if (disp_r == 2) {
+        if (pos > 12) {
+            display_pos = pos - 12;
+            int slop = edit_len - display_pos - disp_c;
+            if (slop < 0)
+                display_pos = edit_len >= disp_c ? edit_len - disp_c : 0;
+        }
+    } else {
+        int lines = disp_r - headers - 1;
+        int maxlen = lines * disp_c;
+        while (pos - display_pos > maxlen / 2)
+            display_pos += disp_c;
+        while (display_pos > 0 && edit_len - display_pos < maxlen - disp_c + 1)
+            display_pos -= disp_c;
+    }
+}
+
 static void start_edit(int pos) {
     if (!get_equation()) {
         show_error(ERR_INSUFFICIENT_MEMORY);
     } else {
         new_eq = false;
-        edit_pos = pos;
         edit_mode = 0;
         update_skin_mode();
-        display_pos = 0;
-        if (disp_r == 2) {
-            if (pos > 12) {
-                display_pos = pos - 12;
-                int slop = edit_len - display_pos - disp_c;
-                if (slop < 0)
-                    display_pos = edit_len >= disp_c ? edit_len - disp_c : 0;
-            }
-        } else {
-            int lines = disp_r - headers - 1;
-            int maxlen = lines * disp_c;
-            while (pos - display_pos > maxlen / 2)
-                display_pos += disp_c;
-            while (display_pos > 0 && edit_len - display_pos < maxlen - disp_c + 1)
-                display_pos -= disp_c;
-        }
+        set_edit_pos(pos);
         update_menu(MENU_NONE);
         restart_cursor();
         eqn_draw();
@@ -4319,6 +4323,7 @@ bool eqn_timeout() {
     } else if (action == 4) {
         current_error = ERR_NONE;
         dialog = DIALOG_NONE;
+        set_edit_pos(timeout_edit_pos);
         cursor_on = true;
         eqn_draw();
         timeout_action = 2;
