@@ -1084,6 +1084,30 @@ static bool get_object_text(const char **text, int *length) {
     }
 }
 
+static int get_object_type() {
+    // 0: Invalid, 1: XSTR, 2: PLAIN, 3: EVAL
+    if (edit_mode == 0 ? saved_prgm_mode : flags.f.prgm_mode) {
+        int cmd;
+        arg_struct arg;
+        int4 pc2 = pc;
+        get_next_command(&pc2, &cmd, &arg, 0, NULL);
+        if (cmd == CMD_XSTR)
+            return 1;
+        else if (cmd == CMD_EMBED)
+            return arg.type == ARGTYPE_NUM ? 2 : 3;
+        else
+            return 0;
+    } else {
+        vartype *v = stack[sp];
+        if (v->type == TYPE_STRING)
+            return 1;
+        else if (v->type == TYPE_EQUATION)
+            return 2;
+        else
+            return 0;
+    }
+}
+
 static int start_standalone_edit(const char *text, int length) {
     edit_buf = (char *) malloc(length);
     if (edit_buf == NULL && length != 0) {
@@ -1113,6 +1137,7 @@ static void end_standalone_edit() {
     free(edit_buf);
     edit_buf = NULL;
     edit_capacity = edit_len = 0;
+    dialog = DIALOG_NONE;
     active = false;
     redisplay();
 }
@@ -1438,15 +1463,32 @@ bool eqn_draw() {
     } else if (dialog == DIALOG_STO_INSERT_PRGM_EQN_EVAL_XSTR
             || dialog == DIALOG_STO_OVERWRITE_PRGM_EQN_EVAL_XSTR) {
         draw_string(0, 0, "Plain, EVAL, or XSTR?", 21);
-        draw_key(0, 0, 0, "PLAIN", 5);
-        draw_key(1, 0, 0, "EVAL", 4);
-        draw_key(2, 0, 0, "XSTR", 4);
+        int type = dialog == DIALOG_STO_INSERT_PRGM_EQN_EVAL_XSTR ? 0 : get_object_type();
+        if (type == 2)
+            draw_key(0, 0, 1, "PLAI\316\37", 6);
+        else
+            draw_key(0, 0, 0, "PLAIN", 5);
+        if (type == 3)
+            draw_key(1, 0, 0, "EVAL\37", 5);
+        else
+            draw_key(1, 0, 0, "EVAL", 4);
+        if (type == 1)
+            draw_key(2, 0, 0, "XSTR\37", 5);
+        else
+            draw_key(2, 0, 0, "XSTR", 4);
         draw_key(4, 0, 0, "CNCL", 4);
     } else if (dialog == DIALOG_STO_INSERT_X_EQN_XSTR
             || dialog == DIALOG_STO_OVERWRITE_X_EQN_XSTR) {
         draw_string(0, 0, "Equation or XSTR?", 17);
-        draw_key(0, 0, 0, "EQN", 3);
-        draw_key(2, 0, 0, "XSTR", 4);
+        int type = dialog == DIALOG_STO_INSERT_X_EQN_XSTR ? 0 : get_object_type();
+        if (type == 2)
+            draw_key(0, 0, 0, "EQN\37", 4);
+        else
+            draw_key(0, 0, 0, "EQN", 3);
+        if (type == 1)
+            draw_key(2, 0, 0, "XSTR\37", 5);
+        else
+            draw_key(2, 0, 0, "XSTR", 4);
         draw_key(4, 0, 0, "CNCL", 4);
     } else if (dialog == DIALOG_MODES) {
         const command_spec *cs = cmd_array + dialog_cmd;
@@ -2499,7 +2541,7 @@ static int keydown_sto_x_eqn_xstr(int key, bool shift, int *repeat) {
         case KEY_SIGMA: /* EQN */
         case KEY_SQRT: /* XSTR */ {
             vartype *v;
-            if (edit_pos != -1) {
+            if (edit_pos == -1) {
                 v = eqns->array->data[selected_row];
                 if (key == KEY_SIGMA || v->type == TYPE_STRING)
                     v = dup_vartype(v);
