@@ -1,3 +1,11 @@
+2025-04-18: release 1.2.8
+
+* NEWEQN and EDITEQN functions (EQN.FCN menu). These create or edit equations
+  and strings in place, in the stack and in programs, without needing to go
+  through EQN mode.
+* Moved equation settings from MODES to EQN.FCN, and moved BASE settings from
+  MODES to BASE, to make them easier to find and to declutter the MODES menu.
+
 2025-04-10: release 1.2.7
 
 * Fixed crash in RCOMPLX/PCOMPLX when the stack is empty (NSTK mode).
