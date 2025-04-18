@@ -1418,7 +1418,9 @@ bool eqn_draw() {
         draw_string(0, 0, err_text, err_len);
         if (current_error_is_runtime)
             eqn_display_error(true);
-        if (current_error == ERR_INVALID_EQUATION) {
+        if (current_error != ERR_INVALID_EQUATION) {
+            draw_key(1, 0, 0, "OK", 2);
+        } else if (edit_mode == 0) {
             draw_eqn_menu:
             draw_key(0, 0, 0, "CALC", 4);
             draw_key(1, 0, 0, "EDIT", 4);
@@ -1426,8 +1428,7 @@ bool eqn_draw() {
             draw_key(3, 0, 0, "NEW", 3);
             draw_key(4, 0, 0, "^", 1, true);
             draw_key(5, 0, 0, "\16", 1, true);
-        } else
-            draw_key(1, 0, 0, "OK", 2);
+        }
     } else if (dialog == DIALOG_SAVE_CONFIRM) {
         draw_string(0, 0, "Save this equation?", 19);
         draw_key(0, 0, 0, "YES", 3);
@@ -2140,6 +2141,10 @@ static int keydown_save_confirmation(int key, bool shift, int *repeat) {
         }
         case KEY_SQRT: {
             /* NO */
+            if (edit_mode != 0) {
+                end_standalone_edit();
+                return 1;
+            }
             free(edit_buf);
             edit_buf = NULL;
             edit_capacity = edit_len = 0;
@@ -2558,9 +2563,10 @@ static int keydown_sto_x_eqn_xstr(int key, bool shift, int *repeat) {
                 v = new_equation(edit_buf, edit_len, flags.f.eqn_compat, &errpos);
                 if (v == NULL && errpos != -1) {
                     squeak();
+                    dialog = DIALOG_NONE;
                     show_error(ERR_INVALID_EQUATION);
                     current_error = ERR_NONE;
-                    timeout_action = 3;
+                    timeout_action = 4;
                     timeout_edit_pos = errpos;
                     shell_request_timeout3(1000);
                     return 1;
@@ -4309,6 +4315,13 @@ bool eqn_timeout() {
     } else if (action == 3) {
         /* Start editing after parse error message has timed out */
         start_edit(timeout_edit_pos);
+    } else if (action == 4) {
+        current_error = ERR_NONE;
+        dialog = DIALOG_NONE;
+        cursor_on = true;
+        eqn_draw();
+        timeout_action = 2;
+        shell_request_timeout3(500);
     }
     return true;
 }
