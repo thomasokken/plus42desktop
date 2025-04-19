@@ -1703,7 +1703,7 @@ bool eqn_draw() {
     }
 
 #if defined(ANDROID) || defined(IPHONE)
-    show_alpha_keyboard(edit_pos != -1);
+    show_alpha_keyboard(edit_pos != -1 && dialog == DIALOG_NONE);
 #endif
 
     flush_display();
