@@ -1,3 +1,7 @@
+2025-04-19: release 1.2.8a (Android and iOS)
+
+* Fixed pop-up keyboard behavior with dialogs in the equation editor.
+
 2025-04-18: release 1.2.8
 
 * NEWEQN and EDITEQN functions (EQN.FCN menu). These create or edit equations
