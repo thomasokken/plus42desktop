@@ -3753,7 +3753,7 @@ bool display_header() {
         char2buf(buf, 50, &pos, '\27');
     }
     int app_w = 0;
-    if (mode_appmenu >= MENU_BASE1 && mode_appmenu <= MENU_BASE_LOGIC) {
+    if (mode_appmenu >= MENU_BASE1 && mode_appmenu <= MENU_BASE_DISP) {
         if (pos != 0)
             char2buf(buf, 50, &pos, ' ');
         string2buf(buf, 50, &pos, "WS: ", 4);
