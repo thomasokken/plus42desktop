@@ -3756,6 +3756,8 @@ bool display_header() {
     if (mode_appmenu >= MENU_BASE1 && mode_appmenu <= MENU_BASE_DISP) {
         if (pos != 0)
             char2buf(buf, 50, &pos, ' ');
+        if (flags.f.f20)
+            string2buf(buf, 50, &pos, "C ", 2);
         string2buf(buf, 50, &pos, "WS: ", 4);
         pos += int2string(mode_wsize, buf + pos, 50 - pos);
         char2buf(buf, 50, &pos, ' ');
