@@ -1555,6 +1555,16 @@ bool should_highlight(int cmd) {
             return flags.f.base_signed;
         case CMD_BWRAP:
             return flags.f.base_wrap;
+        case CMD_DECINT:
+            return mode_dec_int;
+        case CMD_BINSEP:
+            return mode_bin_sep;
+        case CMD_OCTSEP:
+            return mode_oct_sep;
+        case CMD_DECSEP:
+            return mode_dec_sep;
+        case CMD_HEXSEP:
+            return mode_hex_sep;
         case CMD_MDY:
             return !flags.f.ymd && !flags.f.dmy;
         case CMD_DMY:
@@ -3756,7 +3766,7 @@ bool display_header() {
     if (mode_appmenu >= MENU_BASE1 && mode_appmenu <= MENU_BASE_DISP) {
         if (pos != 0)
             char2buf(buf, 50, &pos, ' ');
-        if (flags.f.f20)
+        if (mode_carry)
             string2buf(buf, 50, &pos, "C ", 2);
         string2buf(buf, 50, &pos, "WS: ", 4);
         pos += int2string(mode_wsize, buf + pos, 50 - pos);
