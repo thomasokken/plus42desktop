@@ -1534,6 +1534,13 @@ int docmd_n_to_bd(arg_struct *arg) {
     return bits2result(&r, 8);
 }
 
+int docmd_n_to_bq(arg_struct *arg) {
+    BID_UINT128 x = ((vartype_real *) stack[sp])->x.val;
+    BID_UINT128 r;
+    bid128_to_binary128(&r, &x);
+    return bits2result(&r, 16);
+}
+
 int docmd_n_to_ds(arg_struct *arg) {
     BID_UINT128 x = ((vartype_real *) stack[sp])->x.val;
     BID_UINT32 r;
@@ -1569,6 +1576,18 @@ int docmd_bd_to_n(arg_struct *arg) {
     if (!result2bits(&x, 8))
         return ERR_INVALID_DATA;
     vartype *v = new_real(x);
+    if (v == NULL)
+        return ERR_INSUFFICIENT_MEMORY;
+    unary_result(v);
+    return ERR_NONE;
+}
+
+int docmd_bq_to_n(arg_struct *arg) {
+    BID_UINT128 x, r;
+    if (!result2bits(&x, 16))
+        return ERR_INVALID_DATA;
+    binary128_to_bid128(&r, &x);
+    vartype *v = new_real(r);
     if (v == NULL)
         return ERR_INSUFFICIENT_MEMORY;
     unary_result(v);
@@ -1625,6 +1644,14 @@ int docmd_n_to_bd(arg_struct *arg) {
     return bits2result(&x, 8);
 }
 
+int docmd_n_to_bq(arg_struct *arg) {
+    double x = ((vartype_real *) stack[sp])->x;
+    BID_UINT128 r1, r2;
+    binary64_to_bid128(&r1, &x);
+    bid128_to_binary128(&r2, &r1);
+    return bits2result(&r2, 16);
+}
+
 int docmd_n_to_ds(arg_struct *arg) {
     double x = ((vartype_real *) stack[sp])->x;
     BID_UINT32 r;
@@ -1662,6 +1689,20 @@ int docmd_bd_to_n(arg_struct *arg) {
     if (!result2bits(&x, 8))
         return ERR_INVALID_DATA;
     vartype *v = new_real(x);
+    if (v == NULL)
+        return ERR_INSUFFICIENT_MEMORY;
+    unary_result(v);
+    return ERR_NONE;
+}
+
+int docmd_bq_to_n(arg_struct *arg) {
+    BID_UINT128 x, r1;
+    if (!result2bits(&x, 16))
+        return ERR_INVALID_DATA;
+    binary128_to_bid128(&r1, &x);
+    double r2;
+    bid128_to_binary64(&r2, &r1);
+    vartype *v = new_real(r2);
     if (v == NULL)
         return ERR_INSUFFICIENT_MEMORY;
     unary_result(v);
