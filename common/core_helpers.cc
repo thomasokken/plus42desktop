@@ -2238,7 +2238,21 @@ int easy_phloat2string(phloat d, char *buf, int buflen, int base_mode) {
 }
 
 int real2buf(char *buf, phloat x, const char *format, bool force_decimal) {
+    bool saved_binsep, saved_octsep, saved_decsep, saved_hexsep;
+    if (!force_decimal) {
+        saved_binsep = mode_bin_sep;
+        saved_octsep = mode_oct_sep;
+        saved_decsep = mode_dec_sep;
+        saved_hexsep = mode_hex_sep;
+        mode_bin_sep = mode_oct_sep = mode_dec_sep = mode_hex_sep = false;
+    }
     int bufptr = phloat2string(x, buf, 49, force_decimal ? 0 : 1, 0, 3, 0, MAX_MANT_DIGITS, format);
+    if (!force_decimal) {
+        mode_bin_sep = saved_binsep;
+        mode_oct_sep = saved_octsep;
+        mode_dec_sep = saved_decsep;
+        mode_hex_sep = saved_hexsep;
+    }
     /* Convert small-caps 'E' to regular 'e' */
     for (int i = 0; i < bufptr; i++)
         if (buf[i] == 24)
