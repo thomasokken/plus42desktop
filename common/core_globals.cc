@@ -1189,8 +1189,8 @@ bool no_keystrokes_yet;
  * Version 49: 1.2.6  EQN PRGM mode handling
  * Version 50: 1.2.7  Stand-alone equation editing
  * Version 51: 1.2.8  Move BASE settings from MODES to BASE
- * Version 52: 1.2.9  BASE enhancements (menu additions)
- * Version 53: 1.2.9  BASE enhancements (carry; display modes)
+ * Version 52: 1.3    BASE enhancements (menu additions)
+ * Version 53: 1.3    BASE enhancements (carry; display modes)
  */
 #define PLUS42_VERSION 53
 
