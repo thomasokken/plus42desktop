@@ -22,7 +22,7 @@
 * More accurate integer powers of complex numbers. Specifically: special cases
   for pure real, pure imaginary, and numbers of the form a+ai and a-ai.
 * Fixed VIEW for long values.
-* Added XSTR option for EQN→STO→X and EQN→STO→PRGM.
+* Added XSTR option for EQN->STO->X and EQN->STO->PRGM.
 * Windows, MacOS, and Linux versions: Added "Edit Keyboard Map" option to the
   Help menu. Also, added a section about keyboard map customization in the
   README.txt file.
@@ -45,7 +45,7 @@
 
 2025-02-14: release 1.2.4
 
-* Equations can now be embedded in programs, using X2LINE or EQN→STO→PRGM.
+* Equations can now be embedded in programs, using X2LINE or EQN->STO->PRGM.
   Equation lines can be plain, which means they push the equation object onto
   the stack, or they can be EVAL lines, which evaluate the equation in place.
   Equation lines can be toggled between plain and EVAL lines using the EVAL
@@ -258,10 +258,10 @@
 2023-11-29: release 1.1
 
 * Full-screen matrix and list editing (EDIT & EDITN)
-* Added option to show LASTX at the top of the stack display area: DISP→LTOP
-* Added option to show ALPHA at the top of the stack display area: DISP→ATOP
-* Added option to show the state of flags 0-10 in the header: DISP→HFLAGS
-* Added option to show an indicator for POLAR mode in the header: DISP→HPOLAR
+* Added option to show LASTX at the top of the stack display area: DISP->LTOP
+* Added option to show ALPHA at the top of the stack display area: DISP->ATOP
+* Added option to show the state of flags 0-10 in the header: DISP->HFLAGS
+* Added option to show an indicator for POLAR mode in the header: DISP->HPOLAR
 * EDIT, EDITN, and INDEX now support editing lists, nested lists, empty lists,
   and matrices within lists. See the Free42 web site for details.
 * FUNC now hides the caller's RPN stack, so user-defined functions can use
