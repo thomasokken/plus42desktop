@@ -1,3 +1,9 @@
+2025-04-23: release 1.3
+
+* BASE enhancements: shift and rotate functions, bit manipulation functions,
+  floating-point conversions, and optional digit grouping. See the Free42 web
+  site for all the details.
+
 2025-04-19: release 1.2.8a (Android and iOS)
 
 * Fixed pop-up keyboard behavior with dialogs in the equation editor.
