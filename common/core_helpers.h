@@ -59,6 +59,8 @@ int string_pos(const char *ntext, int nlen, const vartype *hs, int startpos);
 bool vartype_equals(const vartype *v1, const vartype *v2);
 int generic_comparison(const vartype *x, const vartype *y, char which);
 int anum(const char *text, int len, phloat *res);
+void fix_thousands_separators(char *buf, int *bufptr);
+void fix_base_separators(char *buf, int *bufptr);
 
 #define undefined_char(c) ((c) >= 139)
 
