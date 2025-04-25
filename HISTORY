@@ -1,3 +1,8 @@
+2025-04-25: release 1.3.2
+
+* RLN, RRN, RLCN, and RRCN did not drop the stack. Fixed.
+* Fixed a couple of bugs in the equation editor.
+
 2025-04-24: release 1.3.1
 
 * BASE: Fixed DECINT behavior for -2^(WSIZE-1).
