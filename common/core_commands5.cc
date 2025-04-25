@@ -1334,8 +1334,7 @@ static int rn(bool left, bool c) {
     vartype *v = new_real(base2phloat(xx));
     if (v == NULL)
         return ERR_INSUFFICIENT_MEMORY;
-    unary_result(v);
-    return ERR_NONE;
+    return binary_result(v);
 }
 
 int docmd_rln(arg_struct *arg) {
