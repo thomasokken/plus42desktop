@@ -1037,6 +1037,12 @@ int eqn_start(int whence) {
     update_skin_mode();
     edit.id = MENU_NONE;
     set_annunciators(0, -1, -1, -1, -1, -1);
+    /* Clearing pending_command here. It will still be set to CMD_EQN at
+     * this point, and that will cause eqn_draw() to think it shouldn't
+     * use the top row, and that may cause the list view to be offset one
+     * row downward.
+     */
+    pending_command = CMD_NONE;
     eqn_draw();
     return ERR_NONE;
 }
@@ -3029,6 +3035,7 @@ static int keydown_list(int key, bool shift, int *repeat) {
             edit_len = edit_capacity = 0;
             new_eq = true;
             edit_pos = 0;
+            edit_mode = 0;
             update_skin_mode();
             display_pos = 0;
             if (shell_alpha_keyboard_enabled())
