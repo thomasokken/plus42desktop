@@ -1053,6 +1053,26 @@ int docmd_pcomplx(arg_struct *arg) {
     return err;
 }
 
+int docmd_caps(arg_struct *arg) {
+    mode_menu_caps = true;
+    return ERR_NONE;
+}
+
+int docmd_mixed(arg_struct *arg) {
+    mode_menu_caps = false;
+    return ERR_NONE;
+}
+
+int docmd_static(arg_struct *arg) {
+    mode_menu_static = true;
+    return ERR_NONE;
+}
+
+int docmd_dynamic(arg_struct *arg) {
+    mode_menu_static = false;
+    return ERR_NONE;
+}
+
 int docmd_skip(arg_struct *arg) {
     return ERR_NO;
 }

@@ -1391,6 +1391,8 @@ void draw_key(int n, int highlight, int hide_meta,
                 continue;
             } else
                 c &= 127;
+        if (mode_menu_caps && c >= 'a' && c <= 'z')
+            c -= 32;
         int m = smallchars_map[c];
         int cw = smallchars_offset[m + 1] - smallchars_offset[m];
         if (swidth != 0)
@@ -1422,6 +1424,8 @@ void draw_key(int n, int highlight, int hide_meta,
             if (!undefined_char(c) && c != 138)
                 continue;
             c &= 127;
+            if (mode_menu_caps && c >= 'a' && c <= 'z')
+                c -= 32;
             int m = smallchars_map[c];
             int cw = smallchars_offset[m + 1] - smallchars_offset[m] + 1;
             if (swidth + cw > disp_c - 3)
@@ -1449,6 +1453,8 @@ void draw_key(int n, int highlight, int hide_meta,
             }
             c &= 127;
         }
+        if (mode_menu_caps && c >= 'a' && c <= 'z')
+            c -= 32;
         m = smallchars_map[c];
         o = smallchars_offset[m];
         cw = smallchars_offset[m + 1] - o;
@@ -1579,6 +1585,14 @@ bool should_highlight(int cmd) {
             return !flags.f.big_stack;
         case CMD_NSTK:
             return flags.f.big_stack;
+        case CMD_CAPS:
+            return mode_menu_caps;
+        case CMD_MIXED:
+            return !mode_menu_caps;
+        case CMD_STATIC:
+            return mode_menu_static;
+        case CMD_DYNAMIC:
+            return !mode_menu_static;
         case CMD_STD:
             return !flags.f.eqn_compat;
         case CMD_COMP:
@@ -2764,41 +2778,44 @@ static int ext_disp_cat[] = {
 #if defined(ANDROID) || defined(IPHONE)
 #ifdef FREE42_FPTEST
 static int ext_misc_cat[] = {
-    CMD_A2LINE, CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_FMA,     CMD_GETLI,
-    CMD_GETMI,  CMD_IDENT,   CMD_LINE,     CMD_LOCK,        CMD_PCOMPLX, CMD_PLOT_M,
-    CMD_PRREG,  CMD_PUTLI,   CMD_PUTMI,    CMD_RCOMPLX,     CMD_SPFV,    CMD_SPPV,
-    CMD_STRACE, CMD_TVM,     CMD_UNLOCK,   CMD_USFV,        CMD_USPV,    CMD_X2LINE,
-    CMD_ACCEL,  CMD_LOCAT,   CMD_HEADING,  CMD_FPTEST,      CMD_NULL,    CMD_NULL
+    CMD_A2LINE,  CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_CAPS,   CMD_DYNAMIC,
+    CMD_FMA,     CMD_GETLI,   CMD_GETMI,    CMD_IDENT,       CMD_LINE,   CMD_LOCK,
+    CMD_MIXED,   CMD_PCOMPLX, CMD_PLOT_M,   CMD_PRREG,       CMD_PUTLI,  CMD_PUTMI,
+    CMD_RCOMPLX, CMD_SPFV,    CMD_SPPV,     CMD_STATIC,      CMD_STRACE, CMD_TVM,
+    CMD_UNLOCK,  CMD_USFV,    CMD_USPV,     CMD_X2LINE,      CMD_ACCEL,  CMD_LOCAT,
+    CMD_HEADING, CMD_FPTEST,  CMD_NULL,     CMD_NULL,        CMD_NULL,   CMD_NULL
 };
-#define MISC_CAT_ROWS 5
+#define MISC_CAT_ROWS 6
 #else
 static int ext_misc_cat[] = {
-    CMD_A2LINE, CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_FMA,     CMD_GETLI,
-    CMD_GETMI,  CMD_IDENT,   CMD_LINE,     CMD_LOCK,        CMD_PCOMPLX, CMD_PLOT_M,
-    CMD_PRREG,  CMD_PUTLI,   CMD_PUTMI,    CMD_RCOMPLX,     CMD_SPFV,    CMD_SPPV,
-    CMD_STRACE, CMD_TVM,     CMD_UNLOCK,   CMD_USFV,        CMD_USPV,    CMD_X2LINE,
-    CMD_ACCEL,  CMD_LOCAT,   CMD_HEADING,  CMD_NULL,        CMD_NULL,    CMD_NULL
+    CMD_A2LINE,  CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_CAPS,   CMD_DYNAMIC,
+    CMD_FMA,     CMD_GETLI,   CMD_GETMI,    CMD_IDENT,       CMD_LINE,   CMD_LOCK,
+    CMD_MIXED,   CMD_PCOMPLX, CMD_PLOT_M,   CMD_PRREG,       CMD_PUTLI,  CMD_PUTMI,
+    CMD_RCOMPLX, CMD_SPFV,    CMD_SPPV,     CMD_STATIC,      CMD_STRACE, CMD_TVM,
+    CMD_UNLOCK,  CMD_USFV,    CMD_USPV,     CMD_X2LINE,      CMD_ACCEL,  CMD_LOCAT,
+    CMD_HEADING, CMD_NULL,    CMD_NULL,     CMD_NULL,        CMD_NULL,   CMD_NULL
 };
-#define MISC_CAT_ROWS 5
+#define MISC_CAT_ROWS 6
 #endif
 #else
 #ifdef FREE42_FPTEST
 static int ext_misc_cat[] = {
-    CMD_A2LINE, CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_FMA,     CMD_GETLI,
-    CMD_GETMI,  CMD_IDENT,   CMD_LINE,     CMD_LOCK,        CMD_PCOMPLX, CMD_PLOT_M,
-    CMD_PRREG,  CMD_PUTLI,   CMD_PUTMI,    CMD_RCOMPLX,     CMD_SPFV,    CMD_SPPV,
-    CMD_STRACE, CMD_TVM,     CMD_UNLOCK,   CMD_USFV,        CMD_USPV,    CMD_X2LINE,
-    CMD_FPTEST, CMD_NULL,    CMD_NULL,     CMD_NULL,        CMD_NULL,    CMD_NULL
+    CMD_A2LINE,  CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_CAPS,   CMD_DYNAMIC,
+    CMD_FMA,     CMD_GETLI,   CMD_GETMI,    CMD_IDENT,       CMD_LINE,   CMD_LOCK,
+    CMD_MIXED,   CMD_PCOMPLX, CMD_PLOT_M,   CMD_PRREG,       CMD_PUTLI,  CMD_PUTMI,
+    CMD_RCOMPLX, CMD_SPFV,    CMD_SPPV,     CMD_STATIC,      CMD_STRACE, CMD_TVM,
+    CMD_UNLOCK,  CMD_USFV,    CMD_USPV,     CMD_X2LINE,      CMD_FPTEST, CMD_NULL
 };
 #define MISC_CAT_ROWS 5
 #else
 static int ext_misc_cat[] = {
-    CMD_A2LINE, CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_FMA,     CMD_GETLI,
-    CMD_GETMI,  CMD_IDENT,   CMD_LINE,     CMD_LOCK,        CMD_PCOMPLX, CMD_PLOT_M,
-    CMD_PRREG,  CMD_PUTLI,   CMD_PUTMI,    CMD_RCOMPLX,     CMD_SPFV,    CMD_SPPV,
-    CMD_STRACE, CMD_TVM,     CMD_UNLOCK,   CMD_USFV,        CMD_USPV,    CMD_X2LINE
+    CMD_A2LINE,  CMD_A2PLINE, CMD_C_LN_1_X, CMD_C_E_POW_X_1, CMD_CAPS,   CMD_DYNAMIC,
+    CMD_FMA,     CMD_GETLI,   CMD_GETMI,    CMD_IDENT,       CMD_LINE,   CMD_LOCK,
+    CMD_MIXED,   CMD_PCOMPLX, CMD_PLOT_M,   CMD_PRREG,       CMD_PUTLI,  CMD_PUTMI,
+    CMD_RCOMPLX, CMD_SPFV,    CMD_SPPV,     CMD_STATIC,      CMD_STRACE, CMD_TVM,
+    CMD_UNLOCK,  CMD_USFV,    CMD_USPV,     CMD_X2LINE,      CMD_NULL,   CMD_NULL
 };
-#define MISC_CAT_ROWS 4
+#define MISC_CAT_ROWS 5
 #endif
 #endif
 
@@ -4009,10 +4026,10 @@ void redisplay(int mode) {
         if (flags.f.local_label
                 && !(mode_command_entry && incomplete_argtype == ARG_CKEY)) {
             for (int i = 0; i < 5; i++) {
-                char c = (r == 0 ? mode_shift ? 'a' : 'A' : 'F') + i;
+                char c = (r == 0 ? (mode_menu_caps || mode_menu_static || !mode_shift ? 'A' : 'a') : 'F') + i;
                 draw_key(i, 0, 0, &c, 1);
             }
-            draw_key(5, 0, 0, mode_shift ? "GTO" : "XEQ", 3);
+            draw_key(5, 0, 0, mode_menu_static || !mode_shift ? "XEQ" : "GTO", 3);
         } else {
             for (int i = 0; i < 6; i++) {
                 draw_key(i, 0, 1, custommenu_label[r][i],
@@ -4041,7 +4058,7 @@ void redisplay(int mode) {
                      */
                     is_flag = should_highlight(cmd_id);
                 int scmd = CMD_NONE;
-                if (mode_shift) {
+                if (!mode_menu_static && mode_shift) {
                     switch (menu_id) {
                         case MENU_TOP_FCN: {
                             switch (i) {

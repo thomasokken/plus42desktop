@@ -297,12 +297,19 @@ const menu_spec menus[] = {
                         { 0x2000 + CMD_CLK12,   0, "" },
                         { 0x2000 + CMD_CLK24,   0, "" } } },
     { /* MENU_MODES4 */ MENU_NONE, MENU_MODES1, MENU_MODES3,
-                      { { 0x2000 + CMD_4STK, 0, "" },
-                        { 0x2000 + CMD_NSTK, 0, "" },
-                        { 0x1000 + CMD_NULL, 0, "" },
-                        { 0x1000 + CMD_NULL, 0, "" },
-                        { 0x1000 + CMD_NULL, 0, "" },
-                        { 0x1000 + CMD_NULL, 0, "" } } },
+                      { { 0x2000 + CMD_4STK, 0, ""      },
+                        { 0x2000 + CMD_NSTK, 0, ""      },
+                        { 0x1000 + CMD_NULL, 0, ""      },
+                        { 0x1000 + CMD_NULL, 0, ""      },
+                        { 0x1000 + CMD_NULL, 0, ""      },
+                        { MENU_MODES_MENUS,  5, "MENUS" } } },
+    { /* MENU_MODES_MENUS */ MENU_MODES4, MENU_NONE, MENU_NONE,
+                      { { 0x2000 + CMD_CAPS,    0, "" },
+                        { 0x2000 + CMD_MIXED,   0, "" },
+                        { 0x2000 + CMD_STATIC,  0, "" },
+                        { 0x2000 + CMD_DYNAMIC, 0, "" },
+                        { 0x1000 + CMD_NULL,    0, "" },
+                        { 0x1000 + CMD_NULL,    0, "" } } },
     { /* MENU_DISP1 */ MENU_NONE, MENU_DISP2, MENU_DISP4,
                       { { 0x2000 + CMD_FIX,      0, "" },
                         { 0x2000 + CMD_SCI,      0, "" },
@@ -1034,6 +1041,8 @@ bool mode_bin_sep;
 bool mode_oct_sep;
 bool mode_dec_sep;
 bool mode_hex_sep;
+bool mode_menu_caps;
+bool mode_menu_static;
 #if defined(ANDROID) || defined(IPHONE)
 bool mode_popup_unknown = true;
 #endif
@@ -1191,8 +1200,9 @@ bool no_keystrokes_yet;
  * Version 51: 1.2.8  Move BASE settings from MODES to BASE
  * Version 52: 1.3    BASE enhancements (menu additions)
  * Version 53: 1.3    BASE enhancements (carry; display modes)
+ * Version 54: 1.3.3  CAPS/Mixed and STATIC/DYNAMIC for menus
  */
-#define PLUS42_VERSION 53
+#define PLUS42_VERSION 54
 
 
 /*******************/
@@ -2052,6 +2062,10 @@ static bool persist_globals() {
         goto done;
     if (!write_bool(mode_hex_sep))
         goto done;
+    if (!write_bool(mode_menu_caps))
+        goto done;
+    if (!write_bool(mode_menu_static))
+        goto done;
     if (!write_bool(mode_header))
         goto done;
     if (!write_int(mode_amort_seq))
@@ -2241,6 +2255,19 @@ static bool unpersist_globals() {
         if (!read_bool(&mode_oct_sep)) goto done;
         if (!read_bool(&mode_dec_sep)) goto done;
         if (!read_bool(&mode_hex_sep)) goto done;
+    }
+    if (ver >= 54) {
+        if (!read_bool(&mode_menu_caps)) {
+            mode_menu_caps = false;
+            goto done;
+        }
+        if (!read_bool(&mode_menu_static)) {
+            mode_menu_static = false;
+            goto done;
+        }
+    } else {
+        mode_menu_caps = false;
+        mode_menu_static = false;
     }
     if (ver >= 13) {
         if (!read_bool(&mode_header)) {
@@ -5257,7 +5284,11 @@ static bool load_state2(bool *clear, bool *too_new) {
         menu_adjust(87, INT_MAX, 1);
     }
     if (ver < 52)
+        // BASE enhancements
         menu_adjust(69, 69, 7, 70, 71, 3, 72, INT_MAX, 7);
+    if (ver < 54)
+        // inserted MENU_MODES_MENUS
+        menu_adjust(28, INT_MAX, 1);
     if (!read_bool(&mode_running)) return false;
     if (ver < 28)
         mode_caller_stack_lift_disabled = false;
@@ -5746,6 +5777,8 @@ void hard_reset(int reason) {
     mode_oct_sep = false;
     mode_dec_sep = false;
     mode_hex_sep = false;
+    mode_menu_caps = false;
+    mode_menu_static = false;
     mode_header = true;
     mode_amort_seq = 0;
     mode_plot_viewer = false;
