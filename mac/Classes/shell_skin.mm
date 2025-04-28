@@ -810,8 +810,8 @@ void skin_load(long *width, long *height, int *rows, int *cols, int *flags) {
     *rows = disp_rows;
 }
 
-int skin_init_image(int type, int ncolors, const SkinColor *colors,
-                    int width, int height) {
+bool skin_init_image(int type, int ncolors, const SkinColor *colors,
+                     int width, int height) {
     if (skin_image != NULL) {
         CGImageRelease(skin_image);
         skin_image = NULL;
@@ -834,7 +834,7 @@ int skin_init_image(int type, int ncolors, const SkinColor *colors,
             skin_bytesperline = width * 3;
             break;
         default:
-            return 0;
+            return false;
     }
     
     skin_bitmap = (unsigned char *) malloc(skin_bytesperline * height);

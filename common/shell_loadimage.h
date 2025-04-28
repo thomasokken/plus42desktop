@@ -26,6 +26,6 @@
  * set to the number of extra pixels needed, and dup_first_y and dup_last_y
  * specify the strip that has to be tiled to fill up the extra pixels.
  */
-int shell_loadimage(int extra, int dup_first_y, int dup_last_y);
+bool shell_loadimage(int extra, int dup_first_y, int dup_last_y);
 
 #endif

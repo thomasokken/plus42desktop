@@ -45,28 +45,28 @@ struct GifColorMap {
     }
 };
 
-static int read_byte(int *n) {
+static bool read_byte(int *n) {
     int c = skin_getchar();
     if (c == EOF)
-        return 0;
+        return false;
     *n = c;
-    return 1;
+    return true;
 }
 
-static int read_short(int *n) {
+static bool read_short(int *n) {
     int c1, c2;
     c1 = skin_getchar();
     if (c1 == EOF)
-        return 0;
+        return false;
     c2 = skin_getchar();
     if (c2 == EOF)
-        return 0;
+        return false;
     *n = c1 + (c2 << 8);
-    return 1;
+    return true;
 }
 
 
-int shell_loadimage(int extra, int dup_first_y, int dup_last_y) {
+bool shell_loadimage(int extra, int dup_first_y, int dup_last_y) {
     SkinPixmap *pm = &pixmap;
     GifColorMap *lcmap = NULL;
     GifColorMap gcmap;
@@ -87,7 +87,8 @@ int shell_loadimage(int extra, int dup_first_y, int dup_last_y) {
     bool black_used = false;
     bool white_used = false;
 
-    int i, j, type, res;
+    int i, j, type;
+    bool res;
     unsigned char *ptr;
 
     if (!read_byte(&sig) || sig != 'G'
@@ -97,7 +98,7 @@ int shell_loadimage(int extra, int dup_first_y, int dup_last_y) {
             || !read_byte(&sig) || (sig != '7' && sig != '9')
             || !read_byte(&sig) || sig != 'a') {
         fprintf(stderr, "GIF signature not found.\n");
-        return 0;
+        return false;
     }
 
     if (!read_short(&pm->width)
@@ -107,7 +108,7 @@ int shell_loadimage(int extra, int dup_first_y, int dup_last_y) {
             || !read_byte(&zero)
             || zero != 0) {
         fprintf(stderr, "Fatally premature EOF.\n");
-        return 0;
+        return false;
     }
 
     has_global_cmap = (info & 128) != 0;
@@ -665,5 +666,5 @@ int shell_loadimage(int extra, int dup_first_y, int dup_last_y) {
         free(pm->pixels);
         pm->pixels = NULL;
     }
-    return 0;
+    return false;
 }

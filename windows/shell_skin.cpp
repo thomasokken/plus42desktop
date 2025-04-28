@@ -788,8 +788,8 @@ void skin_load(wchar_t *skinname, const wchar_t *basedir, long *width, long *hei
     *flags = fl;
 }
 
-int skin_init_image(int type, int ncolors, const SkinColor *colors,
-                    int width, int height) {
+bool skin_init_image(int type, int ncolors, const SkinColor *colors,
+                     int width, int height) {
     if (skin_bitmap != NULL) {
         delete skin_bitmap;
         skin_bitmap = NULL;
@@ -819,7 +819,7 @@ int skin_init_image(int type, int ncolors, const SkinColor *colors,
             skin_bytesperline = (width * 3 + 3) & ~3;
             break;
         default:
-            return 0;
+            return false;
     }
 
     skin_data = (unsigned char *) malloc(skin_bytesperline * height);

@@ -65,7 +65,7 @@ void set_shift(bool state) {
 
 static void continue_running();
 static void stop_interruptible();
-static int handle_error(int error);
+static bool handle_error(int error);
 
 int repeating = 0;
 int repeating_shift;
@@ -393,12 +393,12 @@ static bool core_keydown_2(int key, bool *enqueued, int *repeat) {
 
     if (mode_pause) {
         if (key == 0)
-            return 0;
+            return false;
         mode_pause = false;
         set_running(false);
         if (!mode_shift && (key == KEY_RUN || key == KEY_EXIT)) {
             redisplay();
-            return 0;
+            return false;
         }
     }
 
@@ -407,7 +407,8 @@ static bool core_keydown_2(int key, bool *enqueued, int *repeat) {
          * (e.g., INVRT, PRP); queue up any keystrokes and invoke
          * the appropriate callback to keep the function moving along
          */
-        int error, keep_running;
+        int error;
+        bool keep_running;
         if (key != 0) {
             /* Enqueue... */
             *enqueued = 1;
@@ -415,7 +416,7 @@ static bool core_keydown_2(int key, bool *enqueued, int *repeat) {
                     (mode_stoppable && !mode_shift && key == KEY_RUN)) {
                 keybuf_tail = keybuf_head;
                 stop_interruptible();
-                return 0;
+                return false;
             } else {
                 if (((keybuf_head + 1) & 15) != keybuf_tail) {
                     if (mode_shift)
@@ -429,7 +430,7 @@ static bool core_keydown_2(int key, bool *enqueued, int *repeat) {
         error = mode_interruptible(false);
         if (error == ERR_INTERRUPTIBLE)
             /* Still not done */
-            return 1;
+            return true;
         mode_interruptible = NULL;
         keep_running = handle_error(error);
         if (mode_running) {
@@ -440,10 +441,10 @@ static bool core_keydown_2(int key, bool *enqueued, int *repeat) {
             pending_command = CMD_NONE;
         }
         if (mode_running || keybuf_tail != keybuf_head)
-            return 1;
+            return true;
         else {
             redisplay();
-            return 0;
+            return false;
         }
     }
 
@@ -457,7 +458,7 @@ static bool core_keydown_2(int key, bool *enqueued, int *repeat) {
                 set_shift(false);
                 set_running(false);
                 pending_command = CMD_CANCELLED;
-                return 0;
+                return false;
             }
             /* Enqueue... */
             *enqueued = 1;
@@ -465,7 +466,7 @@ static bool core_keydown_2(int key, bool *enqueued, int *repeat) {
                 keybuf_tail = keybuf_head;
                 set_running(false);
                 redisplay();
-                return 0;
+                return false;
             }
             if (((keybuf_head + 1) & 15) != keybuf_tail) {
                 if (mode_shift)
@@ -477,7 +478,7 @@ static bool core_keydown_2(int key, bool *enqueued, int *repeat) {
         }
         continue_running();
         if ((mode_running && !mode_getkey && !mode_pause) || keybuf_tail != keybuf_head)
-            return 1;
+            return true;
         else {
             if (mode_getkey)
                 /* Technically, the program is still running, but we turn
@@ -488,7 +489,7 @@ static bool core_keydown_2(int key, bool *enqueued, int *repeat) {
                 set_annunciators(-1, -1, -1, 0, -1, -1);
             else if (!mode_pause)
                 redisplay();
-            return 0;
+            return false;
         }
     }
 
@@ -549,7 +550,7 @@ static bool core_keydown_2(int key, bool *enqueued, int *repeat) {
     }
 
     /* Nothing going on at all! */
-    return 0;
+    return false;
 }
 
 int dequeue_key() {
@@ -5943,7 +5944,7 @@ static void set_last_err(int error) {
     }
 }
 
-static int handle_error(int error) {
+static bool handle_error(int error) {
     if (mode_running) {
         if (error == ERR_RUN)
             error = ERR_NONE;
@@ -5957,7 +5958,7 @@ static int handle_error(int error) {
             if (pc >= dir_list[current_prgm.dir]->prgms[current_prgm.idx].size)
                 pc = -1;
             set_running(false);
-            return 0;
+            return false;
         } else if (error == ERR_NUMBER_TOO_LARGE
                 || error == ERR_NUMBER_TOO_SMALL) {
             // Handling these separately because they shouldn't be
@@ -5967,7 +5968,7 @@ static int handle_error(int error) {
             if (flags.f.error_ignore && error != ERR_SUSPICIOUS_OFF) {
                 flags.f.error_ignore = 0;
                 set_last_err(error);
-                return 1;
+                return true;
             }
             if (solve_or_plot_active() && (error == ERR_OUT_OF_RANGE
                                         || error == ERR_DIVIDE_BY_0
@@ -5983,7 +5984,7 @@ static int handle_error(int error) {
                 if (error == ERR_STOP)
                     set_running(false);
                 if (error == ERR_NONE || error == ERR_RUN || error == ERR_STOP)
-                    return 0;
+                    return false;
             }
             handle_it:
             pc = oldpc;
@@ -6009,9 +6010,9 @@ static int handle_error(int error) {
             }
             flush_display();
             set_running(false);
-            return 0;
+            return false;
         }
-        return 1;
+        return true;
     } else if (pending_command == CMD_SST || pending_command == CMD_SST_RT) {
         if (error == ERR_RUN)
             error = ERR_NONE;
@@ -6056,7 +6057,7 @@ static int handle_error(int error) {
             pc = oldpc;
             display_error(error);
         }
-        return 0;
+        return false;
     } else {
         if (error == ERR_RUN) {
             set_running(true);
@@ -6072,7 +6073,7 @@ static int handle_error(int error) {
         }
         if (error != ERR_NONE && error != ERR_STOP)
             display_error(error);
-        return 0;
+        return false;
     }
 }
 
