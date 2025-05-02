@@ -3793,12 +3793,20 @@ bool display_header() {
             char2buf(buf, 50, &pos, ' ');
         if (mode_carry)
             string2buf(buf, 50, &pos, "C ", 2);
-        string2buf(buf, 50, &pos, "WS: ", 4);
+        const char *bn;
+        switch (get_base()) {
+            case  2: bn = "BIN"; break;
+            case  8: bn = "OCT"; break;
+            case 10: bn = "DEC"; break;
+            case 16: bn = "HEX"; break;
+        }
+        string2buf(buf, 50, &pos, bn, 3);
+        char2buf(buf, 50, &pos, ' ');
         pos += int2string(mode_wsize, buf + pos, 50 - pos);
         char2buf(buf, 50, &pos, ' ');
         char2buf(buf, 50, &pos, flags.f.base_signed ? 'S' : 'U');
         if (flags.f.base_wrap)
-            string2buf(buf, 50, &pos, " WRAP", 5);
+            char2buf(buf, 50, &pos, 'W');
     } else if (mode_appmenu >= MENU_TVM_APP1 && mode_appmenu <= MENU_TVM_TABLE) {
         if (pos != 0)
             char2buf(buf, 50, &pos, ' ');
