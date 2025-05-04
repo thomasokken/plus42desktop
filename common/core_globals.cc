@@ -2352,9 +2352,10 @@ static bool unpersist_globals() {
         }
     }
 
-    free_vartype(lastx);
-    if (!unpersist_vartype(&lastx))
+    if (!unpersist_vartype(&lastx)) {
+        lastx = NULL;
         goto done;
+    }
 
     int4 currdir, currprgm, currpc;
     if (ver >= 9) {
