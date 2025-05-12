@@ -2004,7 +2004,12 @@ static int keydown_modes(int key, bool shift, int *repeat) {
         case KEY_LN:
         case KEY_LOG:
         case KEY_XEQ: {
-            int cmd = menus[edit.id].child[key - 1].menuid & 0x0fff;
+            int menuid = menus[edit.id].child[key - 1].menuid;
+            if ((menuid & 0xf000) == 0) {
+                squeak();
+                return 1;
+            }
+            int cmd = menuid & 0x0fff;
             if (cmd == CMD_NULL) {
                 squeak();
             } else if (cmd == CMD_WSIZE_T || cmd == CMD_WIDTH || cmd == CMD_HEIGHT || cmd == CMD_GETDS) {
