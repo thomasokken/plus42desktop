@@ -2865,8 +2865,8 @@ static void start_edit(int pos) {
     } else {
         new_eq = false;
         edit_mode = 0;
-        update_skin_mode();
         set_edit_pos(pos);
+        update_skin_mode();
         update_menu(MENU_NONE);
         restart_cursor();
         eqn_draw();
