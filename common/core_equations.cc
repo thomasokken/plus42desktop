@@ -4347,6 +4347,7 @@ bool eqn_timeout() {
 int return_to_eqn_edit(int error) {
     docmd_rtn(NULL);
     set_running(false);
+    clear_message();
     if (current_result != NULL) {
         free_vartype(current_result);
         current_result = NULL;
