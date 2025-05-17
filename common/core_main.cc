@@ -139,20 +139,7 @@ void core_init(int *rows, int *cols, int read_saved_state, const char *state_fil
      * 2: state file present but not OK (State File Corrupt)
      */
 
-    static bool first_time = true;
-    if (first_time) {
-        phloat_init();
-        first_time = false;
-#ifdef ANDROID
-    } else {
-        /* On Android, when the app exits, the Unix process will typically be
-         * kept alive, being purged only when memory runs low. This allows for
-         * faster relaunch, but it means that when this happens, the native
-         * globals won't have been cleaned up, so we need to do that now.
-         */
-        core_cleanup();
-#endif
-    }
+    phloat_init();
 
     char *state_file_name_crash = NULL;
     if (read_saved_state == 1) {
