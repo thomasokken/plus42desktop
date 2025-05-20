@@ -1578,8 +1578,18 @@ int start_integ(int prev, const char *name, int length, vartype *solve_info) {
         return ERR_INVALID_TYPE;
     else
         integ.acc = ((vartype_real *) acc)->x;
-    if (integ.acc < 0)
-        integ.acc = 0;
+    if (integ.acc > 1)
+        integ.acc = 1;
+    else {
+        phloat eps = phloat(1) - nextafter(phloat(1), phloat(0));
+        #ifdef BCD_MATH
+            eps *= 10;
+        #else
+            eps *= 8;
+        #endif
+        if (integ.acc < eps)
+            integ.acc = eps;
+    }
     string_copy(integ.var_name, &integ.var_length, name, length);
     string_copy(integ.active_prgm_name, &integ.active_prgm_length,
                 integ.prgm_name, integ.prgm_length);
