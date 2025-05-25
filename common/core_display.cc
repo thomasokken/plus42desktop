@@ -2936,14 +2936,16 @@ static void draw_catalog() {
             vartype_list *path = show_nonlocal ? get_path() : NULL;
             int path_index = -1;
             std::vector<std::string> names;
+            std::set<std::string> all_names;
             std::vector<int4> dirs;
             std::vector<int> items;
             std::set<int4> past_dirs;
             int nlocal = 0;
 
-            if (catsect == CATSECT_PGM_SOLVE
+            bool is_mvar_menu = catsect == CATSECT_PGM_SOLVE
                     || catsect == CATSECT_PGM_INTEG
-                    || catsect == CATSECT_PGM_MENU) {
+                    || catsect == CATSECT_PGM_MENU;
+            if (is_mvar_menu) {
                 names.push_back(std::string("=", 1));
                 dirs.push_back(0);
                 items.push_back(-2);
@@ -2952,33 +2954,31 @@ static void draw_catalog() {
 
             do {
                 past_dirs.insert(dir->id);
-                if (catsect == CATSECT_PGM || catsect == CATSECT_PGM_ONLY) {
-                    for (int i = dir->labels_count - 1; i >= 0; i--) {
-                        if (dir->labels[i].length == 0 && i > 0 && dir->labels[i - 1].prgm == dir->labels[i].prgm)
+                for (int i = dir->labels_count - 1; i >= 0; i--) {
+                    if (dir->labels[i].length == 0) {
+                        if (is_mvar_menu)
                             continue;
-                        if (dir->labels[i].length > 0)
-                            names.push_back(std::string(dir->labels[i].name, dir->labels[i].length));
-                        else if (i == dir->labels_count - 1)
+                        if (i > 0 && dir->labels[i - 1].prgm == dir->labels[i].prgm)
+                            continue;
+                        if (i == dir->labels_count - 1)
                             names.push_back(std::string(".END.", 5));
                         else
                             names.push_back(std::string("END", 3));
-                        dirs.push_back(dir->id);
-                        items.push_back(i);
-                        if (dir == cwd)
-                            nlocal++;
-                    }
-                } else { /* CATSECT_PGM_SOLVE, CATSECT_PGM_INTEG, CATSECT_PGM_MENU */
-                    directory *saved_cwd = cwd;
-                    cwd = dir;
-                    for (int i = dir->labels_count - 1; i >= 0; i--)
-                        if (label_has_mvar(dir->id, i)) {
-                            names.push_back(std::string(dir->labels[i].name, dir->labels[i].length));
-                            dirs.push_back(dir->id);
-                            items.push_back(i);
-                            if (dir == saved_cwd)
-                                nlocal++;
+                    } else {
+                        std::string n(dir->labels[i].name, dir->labels[i].length);
+                        if (is_mvar_menu) {
+                            if (all_names.find(n) != all_names.end())
+                                continue;
+                            all_names.insert(n);
+                            if (!label_has_mvar(dir->id, i))
+                                continue;
                         }
-                    cwd = saved_cwd;
+                        names.push_back(n);
+                    }
+                    dirs.push_back(dir->id);
+                    items.push_back(i);
+                    if (dir == cwd)
+                        nlocal++;
                 }
                 if (!show_nonlocal)
                     break;
