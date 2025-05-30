@@ -1,3 +1,7 @@
+2025-05-30: release 1.3.7a (Android and iOS)
+
+* Fix for certain rare crashes.
+
 2025-05-29: release 1.3.7
 
 * Now hiding shadowed labels from MVAR catalogs.
