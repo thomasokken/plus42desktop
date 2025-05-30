@@ -63,6 +63,8 @@ void set_shift(bool state) {
     }
 }
 
+static bool initialized = false;
+
 static void continue_running();
 static void stop_interruptible();
 static bool handle_error(int error);
@@ -190,6 +192,8 @@ void core_init(int *rows, int *cols, int read_saved_state, const char *state_fil
         free(state_file_name_crash);
     }
 
+    initialized = true;
+
     *rows = requested_disp_r;
     *cols = requested_disp_c;
     shell_set_skin_mode(eqn_alt_keys() ? flags.f.decimal_point ? 1 : 2 : 0);
@@ -224,6 +228,10 @@ void core_save_state(const char *state_file_name) {
 }
 
 void core_cleanup() {
+    if (!initialized)
+        return;
+
+    initialized = false;
     reset_math();
     free_vartype(varmenu_eqn);
     varmenu_eqn = NULL;
@@ -248,6 +256,9 @@ void set_annunciators(int updn, int shf, int prt, int run, int g, int rad) {
 }
 
 void core_repaint_display(int rows, int cols, int sflags) {
+    if (!initialized)
+        return;
+
     if (ann_hold == 1) {
         /* This used to be at the end of core_init(), but now that we're
          * calling that function before loading the skin, the initial
@@ -362,6 +373,9 @@ static bool core_keydown_2(int key, bool *enqueued, int *repeat) {
 
     *enqueued = 0;
     *repeat = 0;
+
+    if (!initialized)
+        return false;
 
     if (key != 0)
         no_keystrokes_yet = false;
@@ -572,6 +586,9 @@ int dequeue_key() {
 }
 
 int core_repeat() {
+    if (!initialized)
+        return 0;
+
     int r = eqn_repeat();
     if (r != -1)
         return r;
@@ -587,6 +604,9 @@ int core_repeat() {
 }
 
 void core_keytimeout1() {
+    if (!initialized)
+        return;
+
     if (pending_command == CMD_LINGER1 || pending_command == CMD_LINGER2)
         return;
     if (pending_command == CMD_RUN || pending_command == CMD_SST
@@ -611,6 +631,9 @@ void core_keytimeout1() {
 }
 
 void core_keytimeout2() {
+    if (!initialized)
+        return;
+
     if (pending_command == CMD_LINGER1 || pending_command == CMD_LINGER2)
         return;
     remove_program_catalog = 0;
@@ -626,6 +649,9 @@ void core_keytimeout2() {
 }
 
 bool core_timeout3(bool repaint) {
+    if (!initialized)
+        return false;
+
     if (eqn_timeout())
         return false;
     if (mode_pause) {
@@ -680,6 +706,9 @@ static void print_equation_segment(int4 pc) {
 }
 
 bool core_keyup() {
+    if (!initialized)
+        return false;
+
     if (mode_pause) {
         /* The only way this can happen is if they key in question was Shift */
         return false;
